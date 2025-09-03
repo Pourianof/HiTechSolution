@@ -57,12 +57,21 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 
 // Set Identity
 builder.Services.AddIdentity<User, IdentityRole>()
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<HiTechStoreDbContext>()
     .AddDefaultTokenProviders();
 
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    foreach (var role in IdentityRoles.AllRoles)
+        if (!await roleManager.RoleExistsAsync(role))
+            await roleManager.CreateAsync(new IdentityRole(role));
+}
 
 app.UseAuthentication();
 app.UseAuthorization();
