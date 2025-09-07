@@ -1,5 +1,3 @@
-
-
 using HiTechStore.Core;
 using HiTechStore.Data;
 using HiTechStore.Data.Seeders;
@@ -10,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
+using System.Security.Claims;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,9 +37,20 @@ builder.Services.AddDbContext<HiTechStoreDbContext>(options =>
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
+// Set Identity
+builder.Services.AddIdentity<User, IdentityRole>()
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<HiTechStoreDbContext>()
+    .AddDefaultTokenProviders();
 
 // Set JWT
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+builder.Services.AddAuthentication(
+    (options) =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    }
+).AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
@@ -50,16 +60,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
             ValidAudience = builder.Configuration["Jwt:Audience"],
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
+            RoleClaimType = ClaimTypes.Role,
+            NameClaimType = ClaimTypes.Name,
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
         };
     });
 
-// Set Identity
-builder.Services.AddIdentity<User, IdentityRole>()
-    .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<HiTechStoreDbContext>()
-    .AddDefaultTokenProviders();
 
 builder.Services.AddAuthorization();
 
@@ -71,6 +78,8 @@ using (var scope = app.Services.CreateScope())
     foreach (var role in IdentityRoles.AllRoles)
         if (!await roleManager.RoleExistsAsync(role))
             await roleManager.CreateAsync(new IdentityRole(role));
+
+    await AdminSeeder.SeedAsync(scope.ServiceProvider);
 }
 
 app.UseAuthentication();

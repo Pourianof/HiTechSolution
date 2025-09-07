@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
+using HiTechStore.Models;
+
 namespace HiTechStore.Data.DTOs.Authorization
 {
     public class RegisterDto
@@ -23,5 +25,7 @@ namespace HiTechStore.Data.DTOs.Authorization
         [MinLength(2)]
         [MaxLength(20)]
         public string? LastName { get; set; }
+        [RegularExpression(@$"^(?i)({IdentityRoles.Admin}|{IdentityRoles.Manager}|{IdentityRoles.User})$", ErrorMessage = "Invalid role")]
+        public string? Role { get; set; }
     }
 }

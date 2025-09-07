@@ -42,19 +42,20 @@ namespace HiTechStore.Controllers.ActionFilters
                     return;
                 }
 
-                var token = CreateToken(user);
-                Console.WriteLine($"Toke: {token}");
+                var roles = _userManager.GetRolesAsync(user).Result;
+                var token = CreateToken(user, roles.FirstOrDefault(IdentityRoles.User));
                 context.HttpContext.Items["Token"] = token;
                 return;
             }
         }
 
-        private string CreateToken(User user)
+        private string CreateToken(User user, string role)
         {
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim(ClaimTypes.Name, user.UserName!),
+                new Claim(ClaimTypes.Role, role)
             };
 
 
@@ -67,7 +68,9 @@ namespace HiTechStore.Controllers.ActionFilters
             var jwt = new JwtSecurityToken(
                 claims: claims,
                 expires: expiration,
-                signingCredentials: creds
+                signingCredentials: creds,
+                audience: _configuration["Jwt:Audience"],
+                issuer: _configuration["Jwt:Issuer"]
             );
 
             return new JwtSecurityTokenHandler().WriteToken(jwt);
