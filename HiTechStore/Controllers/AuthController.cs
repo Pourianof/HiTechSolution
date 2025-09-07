@@ -44,10 +44,10 @@ public class AuthController : ControllerBase
 
         if (!string.IsNullOrEmpty(dto.Role))
         {
-            await _userManager.DeleteAsync(user);
             var roleResult = await _userManager.AddToRoleAsync(user, dto.Role);
             if (!roleResult.Succeeded)
             {
+                await _userManager.DeleteAsync(user);
                 foreach (var error in roleResult.Errors)
                 {
                     ModelState.AddModelError(error.Code, error.Description);
