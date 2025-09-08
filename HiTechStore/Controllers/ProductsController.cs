@@ -1,4 +1,6 @@
 
+using System.Security.Claims;
+
 using AutoMapper;
 
 using HiTechStore.Controllers.ActionFilters;
@@ -6,6 +8,7 @@ using HiTechStore.Core;
 using HiTechStore.DTOs.Product;
 using HiTechStore.Models;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HiTechStore.Controllers
@@ -43,6 +46,7 @@ namespace HiTechStore.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = $"{IdentityRoles.Admin},{IdentityRoles.Manager}")]
         public IActionResult CreateProduct([FromBody] ProductDTO product)
         {
             if (product == null)
@@ -50,7 +54,14 @@ namespace HiTechStore.Controllers
                 return BadRequest();
             }
 
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("You are not authorized to create a product.");
+            }
+
             var createdProduct = _mapper.Map<Product>(product);
+            createdProduct.AuthorId = userId;
 
             _unitOfWork.Products.AddAsync(createdProduct).Wait();
             _unitOfWork.Complete().Wait();
@@ -60,6 +71,7 @@ namespace HiTechStore.Controllers
 
         [HttpPatch("{id}")]
         [TypeFilter<HandleModelUpdateActionFilterAttribute<Product, ProductPatchDTO>>]
+        [TypeFilter<SameAuthorValidationActionFilterAttribute<Product>>]
         public IActionResult UpdateProduct(int id, [FromBody] ProductPatchDTO product)
         {
             var actualProduct = HttpContext.Items["model"] as Product;
@@ -71,11 +83,13 @@ namespace HiTechStore.Controllers
             _mapper.Map(product, actualProduct);
 
             _unitOfWork.Complete();
-            return Ok(actualProduct);
+            _mapper.Map(actualProduct, product);
+            return Ok(product);
         }
 
         [HttpPut("{id}")]
         [TypeFilter<HandleModelUpdateActionFilterAttribute<Product, ProductDTO>>]
+        [TypeFilter<SameAuthorValidationActionFilterAttribute<Product>>]
         public IActionResult ReplaceProduct([FromBody] ProductDTO product)
         {
             var actualProduct = HttpContext.Items["model"] as Product;
@@ -87,10 +101,11 @@ namespace HiTechStore.Controllers
             _mapper.Map(product, actualProduct);
 
             _unitOfWork.Complete();
-            return Ok(actualProduct);
+            return Ok(product);
         }
 
         [HttpDelete("{id}")]
+        [TypeFilter<SameAuthorValidationActionFilterAttribute<Product>>]
         public async Task<IActionResult> DeleteProduct(int id)
         {
             var product = await _unitOfWork.Products.GetByIdAsync(id);

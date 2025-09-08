@@ -1,6 +1,3 @@
-
-using System.ComponentModel.DataAnnotations;
-
 using HiTechStore.Core;
 
 namespace HiTechStore.Models
@@ -12,6 +9,8 @@ namespace HiTechStore.Models
         public string? Title { get; set; }
         public string? Description { get; set; }
         public string? Image { get; set; }
+        public string? AuthorId { get; set; }
+        public virtual User? Author { get; set; }
 
     }
 }

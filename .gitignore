@@ -44,3 +44,4 @@ TestResults/
 
 # npm packages
 node_modules/
+admin.conf

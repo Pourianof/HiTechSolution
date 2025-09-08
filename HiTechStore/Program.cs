@@ -1,9 +1,12 @@
+using Core.Authorization;
+
 using HiTechStore.Core;
 using HiTechStore.Data;
 using HiTechStore.Data.Seeders;
 using HiTechStore.Models;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -69,6 +72,9 @@ builder.Services.AddAuthentication(
 
 
 builder.Services.AddAuthorization();
+
+builder.Services.AddScoped<IAuthorizationHandler, SameAuthorAccessAuthorization>();
+builder.Services.AddScoped<IAuthorizationHandler, AdminIsAlwaysAuthorizedAuthorization>();
 
 var app = builder.Build();
 

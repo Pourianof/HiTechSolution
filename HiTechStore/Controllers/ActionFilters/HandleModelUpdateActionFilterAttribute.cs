@@ -2,34 +2,18 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using HiTechStore.Core;
-using HiTechStore.Core.Repositories;
-using HiTechStore.Controllers.ActionFilters.Exceptions;
-using HiTechStore.Helpers.Types;
 
 namespace HiTechStore.Controllers.ActionFilters
 {
-    public class HandleModelUpdateActionFilterAttribute<Type, DTO> : ActionFilterAttribute
+    public class HandleModelUpdateActionFilterAttribute<Type, DTO> : ModelAccessorBaseActionFilterAttribute<Type>
         where Type : class, IModel
         where DTO : class
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly System.Type _entityType;
-        private readonly IRepository<Type> _dbSet;
         private readonly System.Type _dtoType;
 
-        public HandleModelUpdateActionFilterAttribute(IUnitOfWork unitOfWork)
+        public HandleModelUpdateActionFilterAttribute(IUnitOfWork unitOfWork) : base(unitOfWork)
         {
-            _unitOfWork = unitOfWork;
-            _entityType = typeof(Type);
             _dtoType = typeof(DTO);
-            var dbSet = _unitOfWork.GetRepositoryOfType<Type>();
-
-            if (dbSet is null)
-            {
-                throw new NotExistedDbSetOfProvidedEntityTypeException(_entityType);
-            }
-
-            _dbSet = dbSet;
         }
 
         public override void OnActionExecuting(ActionExecutingContext context)
@@ -42,7 +26,7 @@ namespace HiTechStore.Controllers.ActionFilters
                 return;
             }
 
-            var modelName = _entityType.Name;
+            var modelName = EntityName;
             var model = context.ActionArguments.Values.FirstOrDefault(a => a?.GetType() == _dtoType);
 
             // Check if input model is defined
@@ -56,7 +40,7 @@ namespace HiTechStore.Controllers.ActionFilters
             // Check if route ID is valid
             if (int.TryParse(routeId, out var routeIdValue))
             {
-                var entity = _dbSet.GetByIdAsync(routeIdValue).Result;
+                var entity = DbSet.GetByIdAsync(routeIdValue).Result;
 
                 // Check if there is corresponding entity for that route ID
                 if (entity == null)
