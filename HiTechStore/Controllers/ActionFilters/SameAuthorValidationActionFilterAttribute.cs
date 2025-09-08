@@ -26,6 +26,11 @@ namespace HiTechStore.Controllers.ActionFilters
             if (int.TryParse(resourceId, out var resourceIdValue))
             {
                 var resource = DbSet.GetByIdAsync(resourceIdValue).Result as Product;
+                if (resource is null)
+                {
+                    context.Result = new NotFoundResult();
+                    return;
+                }
                 var isAuthorized = _authorizationService.AuthorizeAsync(user, resource?.Author?.Id, new SameAuthorAccessRequirement()).Result;
 
                 if (!isAuthorized.Succeeded)
