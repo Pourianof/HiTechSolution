@@ -11,6 +11,7 @@ namespace HiTechStore.Models
         public string? Image { get; set; }
         public string? AuthorId { get; set; }
         public virtual User? Author { get; set; }
+        public virtual IEnumerable<Category>? Categories { get; set; }
 
     }
 }
