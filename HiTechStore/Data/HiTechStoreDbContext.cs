@@ -24,6 +24,7 @@ namespace HiTechStore.Data
         {
             base.OnModelCreating(modelBuilder);
             ProductEntityBuilder.Build(modelBuilder);
+            modelBuilder.Entity<ProductCategory>().ToTable("ProductCategories").HasKey(pc => new { pc.ProductId, pc.CategoryId });
         }
 
         public DbSet<Product> Products { get; set; }

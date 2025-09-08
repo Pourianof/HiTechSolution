@@ -3,6 +3,7 @@ using System;
 using HiTechStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HiTechStore.Migrations
 {
     [DbContext(typeof(HiTechStoreDbContext))]
-    partial class HiTechStoreDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250908142456_MakeParentCategoryNullable")]
+    partial class MakeParentCategoryNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -42,9 +45,14 @@ namespace HiTechStore.Migrations
                     b.Property<int?>("ParentCategoryId")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("ProductId")
+                        .HasColumnType("integer");
+
                     b.HasKey("CategoryId");
 
                     b.HasIndex("ParentCategoryId");
+
+                    b.HasIndex("ProductId");
 
                     b.ToTable("Categories");
                 });
@@ -81,21 +89,6 @@ namespace HiTechStore.Migrations
                     b.HasIndex("AuthorId");
 
                     b.ToTable("Products", (string)null);
-                });
-
-            modelBuilder.Entity("HiTechStore.Models.ProductCategory", b =>
-                {
-                    b.Property<int>("ProductId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("ProductId", "CategoryId");
-
-                    b.HasIndex("CategoryId");
-
-                    b.ToTable("ProductCategories", (string)null);
                 });
 
             modelBuilder.Entity("HiTechStore.Models.User", b =>
@@ -306,6 +299,10 @@ namespace HiTechStore.Migrations
                         .WithMany()
                         .HasForeignKey("ParentCategoryId");
 
+                    b.HasOne("HiTechStore.Models.Product", null)
+                        .WithMany("Categories")
+                        .HasForeignKey("ProductId");
+
                     b.Navigation("ParentCategory");
                 });
 
@@ -316,23 +313,6 @@ namespace HiTechStore.Migrations
                         .HasForeignKey("AuthorId");
 
                     b.Navigation("Author");
-                });
-
-            modelBuilder.Entity("HiTechStore.Models.ProductCategory", b =>
-                {
-                    b.HasOne("HiTechStore.Models.Category", "category")
-                        .WithMany()
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("HiTechStore.Models.Product", null)
-                        .WithMany("Categories")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("category");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

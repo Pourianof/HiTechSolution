@@ -6,6 +6,7 @@ namespace HiTechStore.Core.Repositories
         Task<T?> GetByIdAsync(int id);
         Task AddAsync(T entity);
         Task Delete(T entity);
+        Task Delete(int id);
         Task<bool> IsExistsAsync(int id);
     }
 }

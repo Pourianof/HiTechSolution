@@ -4,6 +4,7 @@ using System.Security.Claims;
 using AutoMapper;
 
 using HiTechStore.Controllers.ActionFilters;
+using HiTechStore.Controllers.ExceptionFilters;
 using HiTechStore.Core;
 using HiTechStore.DTOs.Product;
 using HiTechStore.Models;
@@ -47,6 +48,7 @@ namespace HiTechStore.Controllers
 
         [HttpPost]
         [Authorize(Roles = $"{IdentityRoles.Admin},{IdentityRoles.Manager}")]
+        [ViolateForeignKeyExceptionFilter]
         public IActionResult CreateProduct([FromBody] ProductDTO product)
         {
             if (product == null)
@@ -61,6 +63,17 @@ namespace HiTechStore.Controllers
             }
 
             var createdProduct = _mapper.Map<Product>(product);
+
+            if (product.Categories is not null)
+            {
+
+                createdProduct.Categories = product.Categories.Select(c => new ProductCategory
+                {
+                    CategoryId = c
+                }).ToList();
+
+            }
+
             createdProduct.AuthorId = userId;
 
             _unitOfWork.Products.AddAsync(createdProduct).Wait();

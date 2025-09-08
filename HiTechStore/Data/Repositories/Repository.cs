@@ -37,6 +37,16 @@ namespace HiTechStore.Data.Repositories
             return Task.CompletedTask;
         }
 
+        public virtual Task Delete(int id)
+        {
+            var entity = _dbSet.Find(id);
+            if (entity != null)
+            {
+                _dbSet.Remove(entity);
+            }
+            return Task.CompletedTask;
+        }
+
         public virtual Task<bool> IsExistsAsync(int id)
         {
             var modelType = typeof(T);
