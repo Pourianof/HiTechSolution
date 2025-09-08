@@ -8,7 +8,7 @@ namespace HiTechStore.Data.Repositories
     public class Repository<T> : IRepository<T> where T : class, IModel
     {
         private readonly HiTechStoreDbContext _context;
-        private readonly DbSet<T> _dbSet;
+        protected readonly DbSet<T> _dbSet;
 
         public Repository(HiTechStoreDbContext context)
         {
@@ -16,28 +16,28 @@ namespace HiTechStore.Data.Repositories
             _dbSet = context.Set<T>();
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public virtual async Task<IEnumerable<T>> GetAllAsync()
         {
             return await _dbSet.ToListAsync();
         }
 
-        public async Task<T?> GetByIdAsync(int id)
+        public virtual async Task<T?> GetByIdAsync(int id)
         {
             return await _dbSet.FindAsync(id);
         }
 
-        public async Task AddAsync(T entity)
+        public virtual async Task AddAsync(T entity)
         {
             await _dbSet.AddAsync(entity);
         }
 
-        public Task Delete(T entity)
+        public virtual Task Delete(T entity)
         {
             _dbSet.Remove(entity);
             return Task.CompletedTask;
         }
 
-        public Task<bool> IsExistsAsync(int id)
+        public virtual Task<bool> IsExistsAsync(int id)
         {
             var modelType = typeof(T);
             var modelIdName = modelType.GetProperties().FirstOrDefault(p => p.Name.Contains("Id"))?.Name;
