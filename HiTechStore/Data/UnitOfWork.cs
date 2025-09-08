@@ -7,15 +7,15 @@ namespace HiTechStore.Data
     public class UnitOfWork : IUnitOfWork
     {
         private readonly HiTechStoreDbContext _context;
-        private readonly IProductRepository _productRepository;
+        public IProductRepository Products { get; }
+        public ICategoryRepository Categories { get; }
 
         public UnitOfWork(HiTechStoreDbContext context)
         {
             _context = context;
-            _productRepository = new ProductRepository(_context);
+            Products = new ProductRepository(_context);
+            Categories = new CategoryRepository(_context);
         }
-
-        public IProductRepository Products => _productRepository;
 
         public async Task<int> Complete()
         {
