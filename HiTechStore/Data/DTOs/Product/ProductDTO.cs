@@ -15,5 +15,6 @@ namespace HiTechStore.DTOs.Product
 
         [MaxLength(500)]
         public string? Description { get; set; }
+        public virtual IEnumerable<int>? Categories { get; set; }
     }
 }
