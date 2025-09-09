@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 using HiTechStore.Core;
 
 namespace HiTechStore.Models
@@ -12,7 +14,13 @@ namespace HiTechStore.Models
         public string? AuthorId { get; set; }
         public virtual User? Author { get; set; }
         public virtual List<ProductCategory>? Categories { get; set; }
-
+        public virtual ICollection<ProductScore> Scores { get; set; } = new List<ProductScore>();
+        [NotMapped]
+        public double? AverageScore { get; set; } = 0.0;
+        [NotMapped]
+        public int ScoreCounts { get; set; } = 0;
+        [NotMapped]
+        public int? MyScore { get; set; }
     }
 
     public class ProductCategory

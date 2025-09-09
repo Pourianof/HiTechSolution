@@ -6,6 +6,7 @@ using AutoMapper;
 using HiTechStore.Controllers.ActionFilters;
 using HiTechStore.Controllers.ExceptionFilters;
 using HiTechStore.Core;
+using HiTechStore.Data.DTOs.Product;
 using HiTechStore.DTOs.Product;
 using HiTechStore.Models;
 
@@ -36,7 +37,8 @@ namespace HiTechStore.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Product>> GetProduct(int id)
         {
-            var product = await _unitOfWork.Products.GetByIdAsync(id);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var product = await _unitOfWork.Products.GetByIdAsync(id, userId);
 
             if (product == null)
             {
@@ -131,6 +133,36 @@ namespace HiTechStore.Controllers
             await _unitOfWork.Complete();
 
             return NoContent();
+        }
+
+        [HttpPost("{productId}/score/me")]
+        [Authorize]
+        public async Task<IActionResult> ScoreProduct(int productId, [FromBody] ProductScoreDto score)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId is null)
+            {
+                return Unauthorized();
+            }
+            // check if is any score registered by this user for this product before
+            var existingScore = await _unitOfWork.ProductScores.GetUserScoreForProductAsync(userId, productId);
+            if (existingScore != null)
+            {
+                // if exist delete it
+                await _unitOfWork.ProductScores.Delete(existingScore);
+            }
+
+            // register new one
+            var newScore = new ProductScore
+            {
+                UserId = userId,
+                ProductId = productId,
+                Score = score.Score // default score
+            };
+            await _unitOfWork.ProductScores.AddAsync(newScore);
+            await _unitOfWork.Complete();
+
+            return Ok(newScore);
         }
 
     }

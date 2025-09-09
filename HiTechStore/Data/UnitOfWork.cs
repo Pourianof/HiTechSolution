@@ -9,12 +9,14 @@ namespace HiTechStore.Data
         private readonly HiTechStoreDbContext _context;
         public IProductRepository Products { get; }
         public ICategoryRepository Categories { get; }
+        public IProductScoresRepository ProductScores { get; }
 
         public UnitOfWork(HiTechStoreDbContext context)
         {
             _context = context;
             Products = new ProductRepository(_context);
             Categories = new CategoryRepository(_context);
+            ProductScores = new ProductScoresRepository(_context);
         }
 
         public async Task<int> Complete()
