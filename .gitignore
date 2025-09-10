@@ -42,6 +42,8 @@ appsettings.*.local.json
 # Test results
 TestResults/
 
+wwwroot/
+
 # npm packages
 node_modules/
 admin.conf

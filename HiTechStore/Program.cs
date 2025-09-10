@@ -1,5 +1,6 @@
 using Core.Authorization;
 
+using HiTechStore.Controllers.ExceptionFilters;
 using HiTechStore.Core;
 using HiTechStore.Data;
 using HiTechStore.Data.Seeders;
@@ -75,6 +76,11 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<IAuthorizationHandler, SameAuthorAccessAuthorization>();
 builder.Services.AddScoped<IAuthorizationHandler, AdminIsAlwaysAuthorizedAuthorization>();
+
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add(typeof(GlobalExceptionFilter));
+});
 
 var app = builder.Build();
 

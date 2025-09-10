@@ -12,5 +12,6 @@ namespace HiTechStore.DTOs.Category
         [MaxLength(500)]
         public string? Description { get; set; }
         public int? ParentCategoryId { get; set; }
+        public IFormFile? Image { get; set; }
     }
 }

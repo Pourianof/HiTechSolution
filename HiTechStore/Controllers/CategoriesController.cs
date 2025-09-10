@@ -1,9 +1,11 @@
 using AutoMapper;
 
 using HiTechStore.Core;
+using HiTechStore.Core.Exceptions;
 using HiTechStore.Data.DTOs;
 using HiTechStore.Data.DTOs.Category;
 using HiTechStore.DTOs.Category;
+using HiTechStore.Helpers.IO;
 using HiTechStore.Models;
 
 using Microsoft.AspNetCore.Authorization;
@@ -25,16 +27,58 @@ namespace HiTechStore.Controllers
             _mapper = mapper;
         }
 
+        private string ProvideCategoryImagePublicPath(int categoryId)
+        {
+            return Path.Combine("images", "category", $"{categoryId}.png");
+        }
+
         [HttpGet]
         [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategories()
         {
             var categories = await _unitOfWork.Categories.GetAllAsync();
-            return Ok(categories);
+            var categoryDtos = categories.Select(
+                (cat) =>
+                {
+                    var categoryDto = _mapper.Map<CategoryDTO>(cat);
+                    var pubPath = ProvideCategoryImagePublicPath(cat.CategoryId);
+                    categoryDto.Image = PublicAssetsHelper.IsExist(pubPath) ? pubPath : null;
+                    return categoryDto;
+                }
+            );
+            return Ok(categoryDtos);
+        }
+
+        private async Task<string> WriteCategoryImage(Category category, IFormFile image, bool deleteOnError = true)
+        {
+            var publicPath = ProvideCategoryImagePublicPath(category.CategoryId);
+            var filePath = Path.Combine("wwwroot", publicPath);
+            var dirPath = Path.GetDirectoryName(filePath);
+            try
+            {
+                if (!Directory.Exists(dirPath))
+                {
+                    Directory.CreateDirectory(dirPath!);
+                }
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await image.CopyToAsync(stream);
+                }
+            }
+            catch (Exception ex)
+            {
+                if (deleteOnError)
+                {
+                    await _unitOfWork.Categories.Delete(category);
+                }
+                throw new SavingFileException("Problem with saving file", ex);
+            }
+            return publicPath;
         }
 
         [HttpPost]
-        public async Task<ActionResult<CategoryDTO>> CreateCategory(CategoryCreationDto categoryDto)
+        public async Task<ActionResult<CategoryDTO>> CreateCategory([FromForm] CategoryCreationDto createCategoryDto)
         {
             if (!ModelState.IsValid)
             {
@@ -43,19 +87,28 @@ namespace HiTechStore.Controllers
 
             var category = new Category
             {
-                Name = categoryDto.Name,
-                Description = categoryDto.Description,
-                ParentCategoryId = categoryDto.ParentCategoryId
+                Name = createCategoryDto.Name,
+                Description = createCategoryDto.Description,
+                ParentCategoryId = createCategoryDto.ParentCategoryId
             };
 
             await _unitOfWork.Categories.AddAsync(category);
             await _unitOfWork.Complete();
 
-            return CreatedAtAction(nameof(GetCategories), new { id = category.CategoryId }, category);
+            var categoryDto = _mapper.Map<CategoryDTO>(category);
+
+            if (createCategoryDto.Image is not null)
+            {
+                var imagePath = await WriteCategoryImage(category, createCategoryDto.Image);
+                categoryDto.Image = imagePath;
+            }
+
+
+            return CreatedAtAction(nameof(GetCategories), new { id = category.CategoryId }, categoryDto);
         }
 
         [HttpPatch("{id}")]
-        public async Task<ActionResult<CategoryDTO>> UpdateCategory(int id, CategoryUpdateDto categoryDto)
+        public async Task<ActionResult<CategoryDTO>> UpdateCategory(int id, [FromForm] CategoryUpdateDto categoryUpdateDto)
         {
             if (!ModelState.IsValid)
             {
@@ -68,11 +121,19 @@ namespace HiTechStore.Controllers
                 return NotFound();
             }
 
-            _mapper.Map(categoryDto, category);
+            _mapper.Map(categoryUpdateDto, category);
+            var categoryDto = _mapper.Map<CategoryDTO>(category);
+
+            if (categoryUpdateDto.Image is not null)
+            {
+                var imagePath = await WriteCategoryImage(category, categoryUpdateDto.Image, false);
+                categoryDto.Image = imagePath;
+            }
+
 
             await _unitOfWork.Complete();
 
-            return Ok(_mapper.Map<CategoryDTO>(category));
+            return Ok(_mapper.Map<CategoryDTO>(categoryDto));
         }
 
         [HttpDelete("{id}")]
