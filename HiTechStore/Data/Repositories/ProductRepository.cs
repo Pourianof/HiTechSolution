@@ -24,7 +24,6 @@ namespace HiTechStore.Data.Repositories
                 AuthorId = p.AuthorId,
                 Description = p.Description,
                 Price = p.Price,
-                Image = p.Image,
             }).ToListAsync();
 
         }
@@ -42,7 +41,6 @@ namespace HiTechStore.Data.Repositories
                 AuthorId = p.AuthorId,
                 Description = p.Description,
                 Price = p.Price,
-                Image = p.Image,
             }).FirstOrDefaultAsync();
         }
 
@@ -59,7 +57,6 @@ namespace HiTechStore.Data.Repositories
                 AuthorId = p.AuthorId,
                 Description = p.Description,
                 Price = p.Price,
-                Image = p.Image,
                 MyScore = userId != null ? p.Scores.Where((s) => s.ProductId == id && s.UserId == userId).Select((s) => s.Score).Single() : null
             }).FirstOrDefaultAsync();
         }

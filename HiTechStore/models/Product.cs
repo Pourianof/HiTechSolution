@@ -10,9 +10,9 @@ namespace HiTechStore.Models
         public double Price { get; set; }
         public string? Title { get; set; }
         public string? Description { get; set; }
-        public string? Image { get; set; }
         public string? AuthorId { get; set; }
         public virtual User? Author { get; set; }
+        public virtual List<ProductMedia> Media { get; set; } = new();
         public virtual List<ProductCategory>? Categories { get; set; }
         public virtual ICollection<ProductScore> Scores { get; set; } = new List<ProductScore>();
         [NotMapped]
