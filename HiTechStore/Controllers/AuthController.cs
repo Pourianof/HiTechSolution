@@ -111,8 +111,8 @@ public class AuthController : ControllerBase
     [TypeFilter(typeof(LoginValidationAttribute))]
     public IActionResult Login([FromBody] LoginDto dto)
     {
-        var token = HttpContext.Items["Token"];
-        return Ok(new { Token = token });
+        var authData = HttpContext.Items["AuthData"];
+        return Ok(authData);
     }
 
 }

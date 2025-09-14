@@ -33,8 +33,33 @@ namespace HiTechStore.Controllers.ActionFilters
                     context.Result = new BadRequestObjectResult(context.ModelState);
                     return;
                 }
+                else if (loginDto.Email == null && loginDto.Username == null)
+                {
+                    context.ModelState.AddModelError(
+                        "Login",
+                        "Email or Username is required"
+                    );
 
-                var user = _userManager.FindByNameAsync(loginDto.Username!).Result;
+                    context.Result = new BadRequestObjectResult(new ValidationProblemDetails(context.ModelState)
+                    {
+                        Title = "Invalid Login",
+                        Status = StatusCodes.Status400BadRequest,
+                        Detail = "Email or Username is required"
+                    });
+
+                    return;
+                }
+
+                User? user;
+                if (loginDto.Email is null)
+                {
+                    user = _userManager.FindByNameAsync(loginDto.Username!).Result;
+                }
+                else
+                {
+                    user = _userManager.FindByEmailAsync(loginDto.Email!).Result;
+                }
+
                 if (user == null || !_userManager.CheckPasswordAsync(user, loginDto.Password!).Result)
                 {
                     var authorizationProblemDetail = new ProblemDetails() { Detail = "Invalid username or password", Title = "Unauthorized", Status = StatusCodes.Status401Unauthorized };
@@ -43,13 +68,16 @@ namespace HiTechStore.Controllers.ActionFilters
                 }
 
                 var roles = _userManager.GetRolesAsync(user).Result;
-                var token = CreateToken(user, roles.FirstOrDefault(IdentityRoles.User));
-                context.HttpContext.Items["Token"] = token;
+
+                var expiration = DateTime.UtcNow.AddHours(1);
+                var role = roles.FirstOrDefault() ?? IdentityRoles.User;
+                var token = CreateToken(user, expiration, role);
+                context.HttpContext.Items["AuthData"] = new { Token = token, expires_at = expiration, User = new { user.UserName, user.FirstName, user.LastName, user.Email, role } };
                 return;
             }
         }
 
-        private string CreateToken(User user, string role)
+        private string CreateToken(User user, DateTime expiration, string role)
         {
             var claims = new[]
             {
@@ -61,9 +89,6 @@ namespace HiTechStore.Controllers.ActionFilters
 
             var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
             var creds = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256Signature);
-
-
-            var expiration = DateTime.UtcNow.AddHours(1);
 
             var jwt = new JwtSecurityToken(
                 claims: claims,
