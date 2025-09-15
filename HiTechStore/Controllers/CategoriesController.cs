@@ -52,27 +52,17 @@ namespace HiTechStore.Controllers
         private async Task<string> WriteCategoryImage(Category category, IFormFile image, bool deleteOnError = true)
         {
             var publicPath = ProvideCategoryImagePublicPath(category.CategoryId);
-            var filePath = Path.Combine("wwwroot", publicPath);
-            var dirPath = Path.GetDirectoryName(filePath);
             try
             {
-                if (!Directory.Exists(dirPath))
-                {
-                    Directory.CreateDirectory(dirPath!);
-                }
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await image.CopyToAsync(stream);
-                }
+                await PublicAssetsHelper.WriteIFormFile(image, publicPath);
             }
-            catch (Exception ex)
+            catch (SavingFileException)
             {
                 if (deleteOnError)
                 {
                     await _unitOfWork.Categories.Delete(category);
                 }
-                throw new SavingFileException("Problem with saving file", ex);
+                throw;
             }
             return publicPath;
         }

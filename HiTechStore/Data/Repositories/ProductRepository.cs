@@ -30,7 +30,7 @@ namespace HiTechStore.Data.Repositories
 
         public override async Task<Product?> GetByIdAsync(int id)
         {
-            return await _dbSet.Where(p => p.ProductId == id).Select(p => new Product
+            return await _dbSet.Include((p) => p.Media).Where(p => p.ProductId == id).Select(p => new Product
             {
                 ProductId = p.ProductId,
                 Title = p.Title,
@@ -41,12 +41,13 @@ namespace HiTechStore.Data.Repositories
                 AuthorId = p.AuthorId,
                 Description = p.Description,
                 Price = p.Price,
+                Media = p.Media
             }).FirstOrDefaultAsync();
         }
 
         public async Task<Product?> GetByIdAsync(int id, string? userId)
         {
-            return await _dbSet.Where(p => p.ProductId == id).Select(p => new Product
+            return await _dbSet.Include((p) => p.Media).Where(p => p.ProductId == id).Select(p => new Product
             {
                 ProductId = p.ProductId,
                 Title = p.Title,
@@ -57,7 +58,8 @@ namespace HiTechStore.Data.Repositories
                 AuthorId = p.AuthorId,
                 Description = p.Description,
                 Price = p.Price,
-                MyScore = userId != null ? p.Scores.Where((s) => s.ProductId == id && s.UserId == userId).Select((s) => s.Score).Single() : null
+                MyScore = userId != null ? p.Scores.Where((s) => s.ProductId == id && s.UserId == userId).Select((s) => s.Score).Single() : null,
+                Media = p.Media
             }).FirstOrDefaultAsync();
         }
     }

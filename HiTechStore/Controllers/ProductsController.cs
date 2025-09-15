@@ -1,5 +1,6 @@
 
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 using AutoMapper;
 
@@ -8,9 +9,11 @@ using HiTechStore.Controllers.ExceptionFilters;
 using HiTechStore.Core;
 using HiTechStore.Data.DTOs.Product;
 using HiTechStore.DTOs.Product;
+using HiTechStore.Helpers.IO;
 using HiTechStore.Models;
 
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HiTechStore.Controllers
@@ -35,7 +38,7 @@ namespace HiTechStore.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Product>> GetProduct(int id)
+        public async Task<ActionResult<ProductDto>> GetProduct(int id)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var product = await _unitOfWork.Products.GetByIdAsync(id, userId);
@@ -45,43 +48,26 @@ namespace HiTechStore.Controllers
                 return NotFound();
             }
 
-            return product;
+            return _mapper.Map<ProductDto>(product);
         }
+
 
         [HttpPost]
         [Authorize(Roles = $"{IdentityRoles.Admin},{IdentityRoles.Manager}")]
         [ViolateForeignKeyExceptionFilter]
-        public IActionResult CreateProduct([FromBody] ProductDTO product)
+        [TypeFilter<ProductCreationActionFilterAttribute>]
+        public IActionResult CreateProduct([FromForm] ProductCreationDto product)
         {
-            if (product == null)
+            var createdProductDto = HttpContext.Items["createdProductDto"] as ProductDto;
+            if (createdProductDto?.ProductId is null)
             {
-                return BadRequest();
+                return Problem(
+                    title: "Product creation failed",
+                    detail: "Something went wrong. product not created."
+                );
             }
 
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized("You are not authorized to create a product.");
-            }
-
-            var createdProduct = _mapper.Map<Product>(product);
-
-            if (product.Categories is not null)
-            {
-
-                createdProduct.Categories = product.Categories.Select(c => new ProductCategory
-                {
-                    CategoryId = c
-                }).ToList();
-
-            }
-
-            createdProduct.AuthorId = userId;
-
-            _unitOfWork.Products.AddAsync(createdProduct).Wait();
-            _unitOfWork.Complete().Wait();
-
-            return CreatedAtAction(nameof(GetProduct), new { id = createdProduct.ProductId }, createdProduct);
+            return CreatedAtAction(nameof(GetProduct), new { id = createdProductDto.ProductId }, createdProductDto);
         }
 
         [HttpPatch("{id}")]
@@ -103,9 +89,9 @@ namespace HiTechStore.Controllers
         }
 
         [HttpPut("{id}")]
-        [TypeFilter<HandleModelUpdateActionFilterAttribute<Product, ProductDTO>>]
+        [TypeFilter<HandleModelUpdateActionFilterAttribute<Product, ProductCreationDto>>]
         [TypeFilter<SameAuthorValidationActionFilterAttribute<Product>>]
-        public IActionResult ReplaceProduct([FromBody] ProductDTO product)
+        public IActionResult ReplaceProduct([FromBody] ProductCreationDto product)
         {
             var actualProduct = HttpContext.Items["model"] as Product;
             if (actualProduct == null)

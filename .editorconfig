@@ -8,6 +8,8 @@ charset = utf-8
 end_of_line = crlf
 
 # C# code style rules
+max_line_length = 120
+
 dotnet_sort_system_directives_first = true
 dotnet_separate_import_directive_groups = true
 

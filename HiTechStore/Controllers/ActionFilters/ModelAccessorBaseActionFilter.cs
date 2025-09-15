@@ -31,5 +31,10 @@ namespace HiTechStore.Controllers.ActionFilters
 
         protected string EntityName => _entityType.Name;
 
+        protected async Task CompleteDbWork()
+        {
+            await _unitOfWork.Complete();
+        }
+
     }
 }
