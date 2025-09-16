@@ -9,6 +9,7 @@ using HiTechStore.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -56,6 +57,41 @@ builder.Services.AddAuthentication(
     }
 ).AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
     {
+        options.Events = new JwtBearerEvents()
+        {
+            OnChallenge = async (context) =>
+            {
+                context.HandleResponse();
+
+                var problem = new ProblemDetails
+                {
+                    Status = StatusCodes.Status401Unauthorized,
+                    Title = "Unauthorized",
+                    Detail = "Authorization failed. Try to login again.",
+                    Instance = context.Request.Path
+                };
+
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                context.Response.ContentType = "application/problem+json";
+
+                await context.Response.WriteAsJsonAsync(problem);
+            },
+            OnForbidden = async (context) =>
+            {
+                var problem = new ProblemDetails
+                {
+                    Status = StatusCodes.Status403Forbidden,
+                    Title = "Forbidden",
+                    Detail = "You don't have access to this route.",
+                    Instance = context.Request.Path
+                };
+
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                context.Response.ContentType = "application/problem+json";
+
+                await context.Response.WriteAsJsonAsync(problem);
+            }
+        };
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -73,6 +109,7 @@ builder.Services.AddAuthentication(
 
 
 builder.Services.AddAuthorization();
+builder.Services.AddProblemDetails();
 
 builder.Services.AddScoped<IAuthorizationHandler, SameAuthorAccessAuthorization>();
 builder.Services.AddScoped<IAuthorizationHandler, AdminIsAlwaysAuthorizedAuthorization>();
