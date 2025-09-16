@@ -11,21 +11,21 @@ namespace HiTechStore.Data.Repositories
         {
 
         }
-        public override async Task<IEnumerable<Product>> GetAllAsync()
+        public override async Task<IEnumerable<Product>> GetAllAsync(int? Limit = 10)
         {
             return await _dbSet.Select(p => new Product
             {
                 ProductId = p.ProductId,
                 Title = p.Title,
                 AverageScore = p.Scores.Any()
-                                ? p.Scores.Average(s => (double?)s.Score)
-                                : 0.0,
+                                 ? p.Scores.Average(s => (double?)s.Score)
+                                 : 0.0,
                 ScoreCounts = p.Scores.Count(),
                 AuthorId = p.AuthorId,
                 Description = p.Description,
                 Price = p.Price,
-            }).ToListAsync();
-
+                Media = p.Media
+            }).Take(Limit!.Value).ToListAsync();
         }
 
         public override async Task<Product?> GetByIdAsync(int id)

@@ -16,9 +16,9 @@ namespace HiTechStore.Data.Repositories
             _dbSet = context.Set<T>();
         }
 
-        public virtual async Task<IEnumerable<T>> GetAllAsync()
+        public virtual async Task<IEnumerable<T>> GetAllAsync(int? Limit = 10)
         {
-            return await _dbSet.ToListAsync();
+            return await _dbSet.Take(Limit!.Value).ToListAsync();
         }
 
         public virtual async Task<T?> GetByIdAsync(int id)
