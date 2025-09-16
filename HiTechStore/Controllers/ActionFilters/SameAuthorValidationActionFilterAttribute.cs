@@ -31,7 +31,7 @@ namespace HiTechStore.Controllers.ActionFilters
                     context.Result = new NotFoundResult();
                     return;
                 }
-                var isAuthorized = _authorizationService.AuthorizeAsync(user, resource?.Author?.Id, new SameAuthorAccessRequirement()).Result;
+                var isAuthorized = _authorizationService.AuthorizeAsync(user, resource?.AuthorId, new SameAuthorAccessRequirement()).Result;
 
                 if (!isAuthorized.Succeeded)
                 {

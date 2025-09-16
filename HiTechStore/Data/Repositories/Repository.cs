@@ -7,7 +7,7 @@ namespace HiTechStore.Data.Repositories
 {
     public class Repository<T> : IRepository<T> where T : class, IModel
     {
-        private readonly HiTechStoreDbContext _context;
+        protected readonly HiTechStoreDbContext _context;
         protected readonly DbSet<T> _dbSet;
 
         public Repository(HiTechStoreDbContext context)
