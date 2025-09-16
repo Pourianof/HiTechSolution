@@ -41,6 +41,10 @@ namespace HiTechStore.Data
                     entity.HasIndex(ps => new { ps.ProductId, ps.UserId }).IsUnique();
                 });
 
+            modelBuilder.Entity<Product>()
+                .Property(e => e.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP"); // For Postgress
+
         }
 
         public DbSet<Product> Products { get; set; }

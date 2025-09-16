@@ -12,6 +12,8 @@ namespace HiTechStore.Models
         public string? Description { get; set; }
         public string? AuthorId { get; set; }
         public virtual User? Author { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public bool? IsDeleled { get; set; } = false;
         public virtual List<ProductMedia> Media { get; set; } = new();
         public virtual List<ProductCategory>? Categories { get; set; }
         public virtual ICollection<ProductScore> Scores { get; set; } = new List<ProductScore>();

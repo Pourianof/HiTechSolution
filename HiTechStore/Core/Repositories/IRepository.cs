@@ -2,7 +2,7 @@ namespace HiTechStore.Core.Repositories
 {
     public interface IRepository<T> where T : class, IModel
     {
-        Task<IEnumerable<T>> GetAllAsync(int? Limit);
+        Task<IEnumerable<T>> GetAllAsync(int? Limit = 10);
         Task<T?> GetByIdAsync(int id);
         Task AddAsync(T entity);
         Task Delete(T entity);
