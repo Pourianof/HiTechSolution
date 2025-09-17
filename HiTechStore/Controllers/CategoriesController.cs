@@ -32,6 +32,12 @@ namespace HiTechStore.Controllers
             return Path.Combine("images", "category", $"{categoryId}.png");
         }
 
+        private string? GetCategoryImagePathIfExist(int categoryId)
+        {
+            var pubPath = ProvideCategoryImagePublicPath(categoryId);
+            return PublicAssetsHelper.IsExist(pubPath) ? pubPath : null;
+        }
+
         [HttpGet]
         [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategories()
@@ -41,8 +47,7 @@ namespace HiTechStore.Controllers
                 (cat) =>
                 {
                     var categoryDto = _mapper.Map<CategoryDTO>(cat);
-                    var pubPath = ProvideCategoryImagePublicPath(cat.CategoryId);
-                    categoryDto.Image = PublicAssetsHelper.IsExist(pubPath) ? pubPath : null;
+                    categoryDto.Image = GetCategoryImagePathIfExist(cat.CategoryId);
                     return categoryDto;
                 }
             );
@@ -118,6 +123,10 @@ namespace HiTechStore.Controllers
             {
                 var imagePath = await WriteCategoryImage(category, categoryUpdateDto.Image, false);
                 categoryDto.Image = imagePath;
+            }
+            else
+            {
+                categoryDto.Image = GetCategoryImagePathIfExist(id);
             }
 
 
