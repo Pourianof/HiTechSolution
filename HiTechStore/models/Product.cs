@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 using HiTechStore.Core;
@@ -15,7 +16,7 @@ namespace HiTechStore.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public bool? IsDeleled { get; set; } = false;
         public virtual List<ProductMedia> Media { get; set; } = new();
-        public virtual List<ProductCategory>? Categories { get; set; }
+        public virtual Category? Category { get; set; }
         public virtual ICollection<ProductScore> Scores { get; set; } = new List<ProductScore>();
         [NotMapped]
         public double? AverageScore { get; set; } = 0.0;
@@ -23,12 +24,18 @@ namespace HiTechStore.Models
         public int ScoreCounts { get; set; } = 0;
         [NotMapped]
         public int? MyScore { get; set; }
+        public virtual List<ProductPropertyValue> Properties { get; set; } = new();
     }
 
-    public class ProductCategory
+
+    public class ProductPropertyValue
     {
-        public int ProductId { get; set; }
-        public int CategoryId { get; set; }
-        public virtual Category? category { get; set; }
+        public string? Value { get; set; }
+        [Key]
+        public int PropertyId;
+        public virtual CategoryProperty? Property { get; set; }
+        [Key]
+        public int ProductId;
+        public virtual Product? Product { get; set; }
     }
 }

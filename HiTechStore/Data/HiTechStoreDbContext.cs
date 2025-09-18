@@ -24,7 +24,6 @@ namespace HiTechStore.Data
         {
             base.OnModelCreating(modelBuilder);
             ProductEntityBuilder.Build(modelBuilder);
-            modelBuilder.Entity<ProductCategory>().ToTable("ProductCategories").HasKey(pc => new { pc.ProductId, pc.CategoryId });
 
             modelBuilder.Entity<ProductScore>(entity =>
                 {
@@ -50,6 +49,23 @@ namespace HiTechStore.Data
                 }
             );
 
+            modelBuilder.Entity<Category>(
+                (entity) =>
+                {
+                    entity.HasMany(c => c.CategoryProperties)
+                        .WithOne((cp) => cp.Category);
+                }
+            );
+
+            modelBuilder.Entity<ProductPropertyValue>(
+                entity =>
+                {
+                    entity.HasKey(p => new { p.ProductId, p.PropertyId });
+                    entity.HasOne(ppv => ppv.Product)
+                        .WithMany(p => p.Properties);
+                    entity.HasOne(ppv => ppv.Property);
+                }
+            );
 
         }
 
