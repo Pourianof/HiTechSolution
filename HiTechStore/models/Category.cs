@@ -8,7 +8,7 @@ namespace HiTechStore.Models
         public int? ParentCategoryId { get; set; }
         public string? Name { get; set; }
         public string? Description { get; set; }
-        public virtual IEnumerable<CategoryProperty>? CategoryProperties { get; set; }
+        public virtual List<CategoryProperty>? CategoryProperties { get; set; }
     }
 
     public class CategoryProperty : IModel

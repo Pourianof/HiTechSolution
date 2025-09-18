@@ -20,8 +20,23 @@ namespace HiTechStore.DTOs.Product
         public string? Description { get; set; }
         [ProductMediaValidation]
         public IEnumerable<IFormFile>? Media { get; set; }
-        public virtual IEnumerable<int>? Categories { get; set; }
+        [Required]
+        public ProductCategoryPropertyValuesDto? PropertiesValues { get; set; }
         public MediaMetaDataDto? MediaMetaData;
     }
+}
+
+public class ProductCategoryPropertyValuesDto
+{
+    [Required]
+    public int CategoryId;
+    [Required]
+    public IEnumerable<ProductPropertyValueEntryDto>? Properties;
+}
+
+public class ProductPropertyValueEntryDto
+{
+    public int PropertyId;
+    public string? PropertyValue;
 }
 

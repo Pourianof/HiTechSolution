@@ -84,8 +84,14 @@ namespace HiTechStore.Controllers
             {
                 Name = createCategoryDto.Name,
                 Description = createCategoryDto.Description,
-                ParentCategoryId = createCategoryDto.ParentCategoryId
             };
+
+            category.CategoryProperties = createCategoryDto.Properties!.Select(
+                (prop) =>
+                {
+                    return new CategoryProperty { Description = prop.Description, Name = prop.Name };
+                }
+            ).ToList();
 
             await _unitOfWork.Categories.AddAsync(category);
             await _unitOfWork.Complete();

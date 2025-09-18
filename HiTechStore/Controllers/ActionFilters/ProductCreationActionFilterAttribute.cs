@@ -46,12 +46,18 @@ public class ProductCreationActionFilterAttribute : ModelAccessorBaseActionFilte
 
         var createdProduct = _mapper.Map<Product>(product);
 
-        if (product.Categories is not null)
+        if (product.PropertiesValues is not null)
         {
-            createdProduct.Categories = product.Categories.Select(c => new ProductCategory
-            {
-                CategoryId = c
-            }).ToList();
+
+            var categoryId = product.PropertiesValues.CategoryId;
+            createdProduct.CategoryId = categoryId;
+
+            createdProduct.Properties = product.PropertiesValues.Properties!.Select(
+                (prop) =>
+                {
+                    return new ProductPropertyValue { ProductId = prop.PropertyId, Value = prop.PropertyValue };
+                }
+            ).ToList();
         }
 
         createdProduct.AuthorId = userId;

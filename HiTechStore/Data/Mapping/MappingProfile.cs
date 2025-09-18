@@ -21,7 +21,8 @@ public class MappingProfile : Profile
         CreateMap<Product, ProductDto>();
         CreateMap<ProductMedia, ProductMediaDto>().ForMember((dest) => dest.Url, (opt) => opt.MapFrom(src => src.FilePath));
         CreateMap<CategoryUpdateDto, Category>().MapOnlyNonNull();
-        CreateMap<Category, CategoryDTO>();
+        CreateMap<Category, CategoryDTO>().ForMember((dest) => dest.Properties, (opt) => opt.MapFrom(src => src.CategoryProperties));
+        CreateMap<CategoryProperty, CategoryPropertyDto>().ForMember((dest) => dest.PropertyId, (opt) => opt.MapFrom(src => src.CategoryPropertyId));
         CreateMap<RegisterDto, User>();
         CreateMap<User, RegisterDto>();
     }

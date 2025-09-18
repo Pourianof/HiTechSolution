@@ -1,4 +1,7 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+
+using HiTechStore.Data.DTOs.Binders;
 
 namespace HiTechStore.DTOs.Category
 {
@@ -11,7 +14,22 @@ namespace HiTechStore.DTOs.Category
 
         [MaxLength(500)]
         public string? Description { get; set; }
-        public int? ParentCategoryId { get; set; }
+        [Required]
         public IFormFile? Image { get; set; }
+        [Required]
+        [FromJson]
+        public IEnumerable<CategoryPropertyEntriesDto>? Properties { get; set; }
+    }
+
+    public class CategoryPropertyEntriesDto
+    {
+        [Required]
+        [MinLength(2)]
+        [JsonPropertyName("name")]
+        public string? Name { get; set; }
+        [Required]
+        [MinLength(10)]
+        [JsonPropertyName("description")]
+        public string? Description { get; set; }
     }
 }

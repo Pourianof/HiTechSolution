@@ -16,6 +16,7 @@ namespace HiTechStore.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public bool? IsDeleled { get; set; } = false;
         public virtual List<ProductMedia> Media { get; set; } = new();
+        public virtual int CategoryId { get; set; }
         public virtual Category? Category { get; set; }
         public virtual ICollection<ProductScore> Scores { get; set; } = new List<ProductScore>();
         [NotMapped]
