@@ -13,9 +13,10 @@ namespace HiTechStore.Data.Repositories
         {
 
         }
-        public override async Task<IEnumerable<Product>> GetAllAsync(int? Limit = 10)
+
+        protected override IQueryable<Product> GetAllQueryBuilder(IQueryable<Product> queryBuilder)
         {
-            return await _dbSet.Select(p => new Product
+            return queryBuilder.Select(p => new Product
             {
                 ProductId = p.ProductId,
                 Title = p.Title,
@@ -27,12 +28,12 @@ namespace HiTechStore.Data.Repositories
                 Description = p.Description,
                 Price = p.Price,
                 Media = p.Media
-            }).Take(Limit!.Value).ToListAsync();
+            });
         }
 
-        public override async Task<Product?> GetByIdAsync(int id)
+        protected override IQueryable<Product> GetByIdAsyncQueryBuilder(IQueryable<Product> queryBuilder)
         {
-            return await _dbSet.Include((p) => p.Media).Where(p => p.ProductId == id).Select(p => new Product
+            return queryBuilder.Select(p => new Product
             {
                 ProductId = p.ProductId,
                 Title = p.Title,
@@ -44,7 +45,7 @@ namespace HiTechStore.Data.Repositories
                 Description = p.Description,
                 Price = p.Price,
                 Media = p.Media,
-            }).FirstOrDefaultAsync();
+            });
         }
 
         public async Task<Product?> GetByIdAsync(int id, string? userId)

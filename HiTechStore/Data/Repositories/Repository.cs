@@ -1,5 +1,6 @@
 using HiTechStore.Core;
 using HiTechStore.Core.Repositories;
+using HiTechStore.Helpers.Types;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -16,14 +17,23 @@ namespace HiTechStore.Data.Repositories
             _dbSet = context.Set<T>();
         }
 
-        public virtual async Task<IEnumerable<T>> GetAllAsync(int? Limit = 10)
+        protected virtual IQueryable<T> GetAllQueryBuilder(IQueryable<T> queryBuilder)
         {
-            return await _dbSet.Take(Limit!.Value).ToListAsync();
+            return queryBuilder;
         }
 
+        public virtual async Task<IEnumerable<T>> GetAllAsync(int? Limit = 10)
+        {
+            return await GetAllQueryBuilder(_dbSet.AsQueryable()).Take(Limit!.Value).ToListAsync();
+        }
+
+        protected virtual IQueryable<T> GetByIdAsyncQueryBuilder(IQueryable<T> queryBuilder)
+        {
+            return queryBuilder;
+        }
         public virtual async Task<T?> GetByIdAsync(int id)
         {
-            return await _dbSet.FindAsync(id);
+            return await GetByIdAsyncQueryBuilder(_dbSet).Where((entity) => entity.GetId() == id).FirstAsync();
         }
 
         public virtual async Task AddAsync(T entity)
