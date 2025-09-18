@@ -29,14 +29,6 @@ var fullConnStr = $"{baseConnStr}Username={username};Password={password}";
 
 builder.Services.AddDbContext<HiTechStoreDbContext>(options =>
     options.UseNpgsql(fullConnStr)
-        .UseSeeding((context, _) =>
-        {
-            ProductsSeeder.SeedAsync((HiTechStoreDbContext)context).Wait();
-        })
-        .UseAsyncSeeding(async (context, _, _) =>
-        {
-            await ProductsSeeder.SeedAsync((HiTechStoreDbContext)context);
-        })
     );
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();

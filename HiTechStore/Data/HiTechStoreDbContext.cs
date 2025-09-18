@@ -53,7 +53,8 @@ namespace HiTechStore.Data
                 (entity) =>
                 {
                     entity.HasMany(c => c.CategoryProperties)
-                        .WithOne((cp) => cp.Category);
+                        .WithOne((cp) => cp.Category)
+                        .OnDelete(DeleteBehavior.Cascade);
                 }
             );
 
