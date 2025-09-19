@@ -50,12 +50,12 @@ public class ProductCreationActionFilterAttribute : ModelAccessorBaseActionFilte
         {
 
             var categoryId = product.PropertiesValues.CategoryId;
-            createdProduct.CategoryId = categoryId;
+            createdProduct.CategoryId = categoryId!.Value;
 
             createdProduct.Properties = product.PropertiesValues.Properties!.Select(
                 (prop) =>
                 {
-                    return new ProductPropertyValue { ProductId = prop.PropertyId, Value = prop.PropertyValue };
+                    return new ProductPropertyValue { PropertyId = prop.PropertyId!.Value, Value = prop.PropertyValue };
                 }
             ).ToList();
         }

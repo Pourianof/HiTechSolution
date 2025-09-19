@@ -32,9 +32,10 @@ namespace HiTechStore.Controllers
         }
 
         [HttpGet]
-        public Task<IEnumerable<Product>> GetProducts()
+        public async Task<IEnumerable<ProductDto>> GetProducts()
         {
-            return _unitOfWork.Products.GetAllAsync();
+            var products = await _unitOfWork.Products.GetAllAsync();
+            return products.Select(_mapper.Map<ProductDto>);
         }
 
         [HttpGet("{id}")]

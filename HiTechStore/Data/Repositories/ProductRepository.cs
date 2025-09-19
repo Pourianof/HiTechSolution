@@ -14,56 +14,39 @@ namespace HiTechStore.Data.Repositories
 
         }
 
-        protected override IQueryable<Product> GetAllQueryBuilder(IQueryable<Product> queryBuilder)
+        private IQueryable<Product> BaseGettingQuery(IQueryable<Product> queryBuilder)
         {
-            return queryBuilder.Select(p => new Product
-            {
-                ProductId = p.ProductId,
-                Title = p.Title,
-                AverageScore = p.Scores.Any()
+            return queryBuilder
+                .Include((p) => p.Media).Include(p => p.Properties).ThenInclude(pp => pp.Property)
+                .Select(p => new Product
+                {
+                    ProductId = p.ProductId,
+                    Title = p.Title,
+                    AverageScore = p.Scores.Any()
                                  ? p.Scores.Average(s => (double?)s.Score)
                                  : 0.0,
-                ScoreCounts = p.Scores.Count(),
-                AuthorId = p.AuthorId,
-                Description = p.Description,
-                Price = p.Price,
-                Media = p.Media
-            });
+                    ScoreCounts = p.Scores.Count(),
+                    AuthorId = p.AuthorId,
+                    Description = p.Description,
+                    Price = p.Price,
+                    Media = p.Media,
+                    Properties = p.Properties
+                });
+        }
+
+        protected override IQueryable<Product> GetAllQueryBuilder(IQueryable<Product> queryBuilder)
+        {
+            return BaseGettingQuery(queryBuilder);
         }
 
         protected override IQueryable<Product> GetByIdAsyncQueryBuilder(IQueryable<Product> queryBuilder)
         {
-            return queryBuilder.Select(p => new Product
-            {
-                ProductId = p.ProductId,
-                Title = p.Title,
-                AverageScore = p.Scores.Any()
-                        ? p.Scores.Average(s => (double?)s.Score)
-                        : 0.0,
-                ScoreCounts = p.Scores.Count(),
-                AuthorId = p.AuthorId,
-                Description = p.Description,
-                Price = p.Price,
-                Media = p.Media,
-            });
+            return BaseGettingQuery(queryBuilder);
         }
 
         public async Task<Product?> GetByIdAsync(int id, string? userId)
         {
-            return await _dbSet.Include((p) => p.Media).Where(p => p.ProductId == id).Select(p => new Product
-            {
-                ProductId = p.ProductId,
-                Title = p.Title,
-                AverageScore = p.Scores.Any()
-                       ? p.Scores.Average(s => (double?)s.Score)
-                       : 0.0,
-                ScoreCounts = p.Scores.Count(),
-                AuthorId = p.AuthorId,
-                Description = p.Description,
-                Price = p.Price,
-                MyScore = userId != null ? p.Scores.Where((s) => s.ProductId == id && s.UserId == userId).Select((s) => s.Score).Single() : null,
-                Media = p.Media,
-            }).FirstOrDefaultAsync();
+            return await BaseGettingQuery(_dbSet).FirstOrDefaultAsync();
 
         }
 

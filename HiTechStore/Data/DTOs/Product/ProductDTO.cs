@@ -1,3 +1,5 @@
+using HiTechStore.Models;
+
 namespace HiTechStore.Data.DTOs.Product;
 
 public class ProductDto
@@ -7,9 +9,17 @@ public class ProductDto
     public string? Title { get; set; }
     public string? Description { get; set; }
     public string? AuthorId { get; set; }
+    public List<ProductPropertyValueDto> Properties { get; set; } = new();
     public virtual List<ProductMediaDto> Media { get; set; } = new();
     public virtual List<int> Categories { get; set; } = new();
     public double? AverageScore { get; set; } = 0.0;
     public int ScoreCounts { get; set; } = 0;
     public int? MyScore { get; set; }
+}
+
+public class ProductPropertyValueDto
+{
+    public string? Value { get; set; }
+    public string? Name { get; set; }
+    public int PropertyId { get; set; }
 }

@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
+using HiTechStore.Data.DTOs.Binders;
 using HiTechStore.Data.DTOs.Product;
 using HiTechStore.Data.DTOs.Product.Validations;
 
@@ -21,6 +23,7 @@ namespace HiTechStore.DTOs.Product
         [ProductMediaValidation]
         public IEnumerable<IFormFile>? Media { get; set; }
         [Required]
+        [FromJson]
         public ProductCategoryPropertyValuesDto? PropertiesValues { get; set; }
         public MediaMetaDataDto? MediaMetaData;
     }
@@ -29,14 +32,21 @@ namespace HiTechStore.DTOs.Product
 public class ProductCategoryPropertyValuesDto
 {
     [Required]
-    public int CategoryId;
+    [JsonPropertyName("categoryId")]
+    public int? CategoryId { get; set; } = null; // null just for model binding error
     [Required]
-    public IEnumerable<ProductPropertyValueEntryDto>? Properties;
+    [MinLength(1)]
+    [JsonPropertyName("properties")]
+    public IEnumerable<ProductPropertyValueEntryDto>? Properties { get; set; }
 }
 
 public class ProductPropertyValueEntryDto
 {
-    public int PropertyId;
-    public string? PropertyValue;
+    [Required]
+    [JsonPropertyName("propertyId")]
+    public int? PropertyId { get; set; } = null;
+    [Required]
+    [JsonPropertyName("propertyValue")]
+    public string? PropertyValue { get; set; }
 }
 

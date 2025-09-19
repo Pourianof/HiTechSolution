@@ -32,11 +32,9 @@ namespace HiTechStore.Models
     public class ProductPropertyValue
     {
         public string? Value { get; set; }
-        [Key]
-        public int PropertyId;
+        public int PropertyId { get; set; }
         public virtual CategoryProperty? Property { get; set; }
-        [Key]
-        public int ProductId;
+        public int ProductId { get; set; }
         public virtual Product? Product { get; set; }
     }
 }
