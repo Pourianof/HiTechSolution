@@ -1,5 +1,6 @@
+using System.Reflection;
+
 using HiTechStore.Core;
-using HiTechStore.Models;
 
 namespace HiTechStore.Helpers.Types
 {
@@ -8,13 +9,27 @@ namespace HiTechStore.Helpers.Types
         public static int? GetId(this IModel model)
         {
             var modelType = model.GetType();
-            var modelTypeName = modelType.Name;
 
-            var prop = modelType.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)
-                .FirstOrDefault(p => p.Name == "Id" || p.Name == $"{modelTypeName}Id")?.GetValue(model);
+            var prop = ModelHelper.GetModelIdPropertyInfo(modelType)?.GetValue(model);
 
 
             return int.TryParse(prop?.ToString(), out var id) ? id : null;
+        }
+    }
+
+    public static class ModelHelper
+    {
+        public static PropertyInfo? GetModelIdPropertyInfo(Type modelType)
+        {
+            var modelTypeName = modelType.Name;
+
+            return modelType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                 .FirstOrDefault(p => p.Name == "Id" || p.Name == $"{modelTypeName}Id");
+        }
+
+        public static string? GetModelIdPropertyName(Type modelType)
+        {
+            return GetModelIdPropertyInfo(modelType)?.Name; ;
         }
     }
 }

@@ -33,7 +33,8 @@ namespace HiTechStore.Data.Repositories
         }
         public virtual async Task<T?> GetByIdAsync(int id)
         {
-            return await GetByIdAsyncQueryBuilder(_dbSet).Where((entity) => entity.GetId() == id).FirstAsync();
+            var query = GetByIdAsyncQueryBuilder(_dbSet);
+            return await query.FindById(id).FirstAsync();
         }
 
         public virtual async Task AddAsync(T entity)
