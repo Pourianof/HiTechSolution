@@ -18,9 +18,16 @@ public class JsonModelBinder : IModelBinder
 
         if (valueProviderResult != ValueProviderResult.None)
         {
-            var valueAsString = valueProviderResult.FirstValue;
-            var result = JsonSerializer.Deserialize(valueAsString!, bindingContext.ModelType);
-            bindingContext.Result = ModelBindingResult.Success(result);
+            try
+            {
+                var valueAsString = valueProviderResult.FirstValue;
+                var result = JsonSerializer.Deserialize(valueAsString!, bindingContext.ModelType);
+                bindingContext.Result = ModelBindingResult.Success(result);
+            }
+            catch
+            {
+                bindingContext.Result = ModelBindingResult.Failed();
+            }
         }
 
         return Task.CompletedTask;
