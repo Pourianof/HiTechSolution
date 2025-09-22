@@ -11,15 +11,15 @@ namespace HiTechStore.Controllers.ActionFilters
     where Type : class, IModel
     {
 
-        private readonly IUnitOfWork _unitOfWork;
+        protected readonly IUnitOfWork UnitOfWork;
         private readonly System.Type _entityType;
-        private protected IRepository<Type> DbSet;
+        private protected IRepositoryBase<Type> DbSet;
 
         public ModelAccessorBaseActionFilterAttribute(IUnitOfWork unitOfWork)
         {
-            _unitOfWork = unitOfWork;
+            UnitOfWork = unitOfWork;
             _entityType = typeof(Type);
-            var dbSet = _unitOfWork.GetRepositoryOfType<Type>();
+            var dbSet = UnitOfWork.GetRepositoryOfType<Type>();
 
             if (dbSet is null)
             {
@@ -33,7 +33,7 @@ namespace HiTechStore.Controllers.ActionFilters
 
         protected async Task CompleteDbWork()
         {
-            await _unitOfWork.Complete();
+            await UnitOfWork.Complete();
         }
 
     }

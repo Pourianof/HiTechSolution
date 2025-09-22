@@ -1,13 +1,12 @@
-using AutoMapper.QueryableExtensions;
-
 using HiTechStore.Core.Repositories;
+using HiTechStore.Data.Queries;
 using HiTechStore.Models;
 
 using Microsoft.EntityFrameworkCore;
 
 namespace HiTechStore.Data.Repositories
 {
-    public class ProductRepository : Repository<Product>, IProductRepository
+    public class ProductRepository : Repository<Product, ProductQuery>, IProductRepository
     {
         public ProductRepository(HiTechStoreDbContext context) : base(context)
         {
@@ -34,8 +33,13 @@ namespace HiTechStore.Data.Repositories
                 });
         }
 
-        protected override IQueryable<Product> GetAllQueryBuilder(IQueryable<Product> queryBuilder)
+        protected override IQueryable<Product> GetAllQueryBuilder(IQueryable<Product> queryBuilder, ProductQuery? productQueryParams)
         {
+            if (productQueryParams?.Category is not null)
+            {
+                queryBuilder.Where((p) => p.CategoryId == productQueryParams.Category);
+            }
+
             return BaseGettingQuery(queryBuilder);
         }
 
