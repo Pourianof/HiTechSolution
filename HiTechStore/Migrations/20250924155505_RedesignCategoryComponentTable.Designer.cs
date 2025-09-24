@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HiTechStore.Migrations
 {
     [DbContext(typeof(HiTechStoreDbContext))]
-    [Migration("20250924115852_RedesignCategoryComponentTable")]
+    [Migration("20250924155505_RedesignCategoryComponentTable")]
     partial class RedesignCategoryComponentTable
     {
         /// <inheritdoc />
@@ -27,21 +27,6 @@ namespace HiTechStore.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("CategoryComponentType", b =>
-                {
-                    b.Property<int>("CategoriesCategoryId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("ComponentsComponentTypeId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("CategoriesCategoryId", "ComponentsComponentTypeId");
-
-                    b.HasIndex("ComponentsComponentTypeId");
-
-                    b.ToTable("CategoryComponentType");
-                });
 
             modelBuilder.Entity("HiTechStore.Models.Brand", b =>
                 {
@@ -103,6 +88,29 @@ namespace HiTechStore.Migrations
                     b.HasKey("CategoryId");
 
                     b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("HiTechStore.Models.CategoryComponent", b =>
+                {
+                    b.Property<int>("CategoryComponentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CategoryComponentId"));
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ComponentId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("CategoryComponentId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("ComponentId");
+
+                    b.ToTable("CategoryComponent");
                 });
 
             modelBuilder.Entity("HiTechStore.Models.ComponentModel", b =>
@@ -546,21 +554,6 @@ namespace HiTechStore.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("CategoryComponentType", b =>
-                {
-                    b.HasOne("HiTechStore.Models.Category", null)
-                        .WithMany()
-                        .HasForeignKey("CategoriesCategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("HiTechStore.Models.ComponentType", null)
-                        .WithMany()
-                        .HasForeignKey("ComponentsComponentTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("HiTechStore.Models.BrandModel", b =>
                 {
                     b.HasOne("HiTechStore.Models.Brand", "Brand")
@@ -568,6 +561,25 @@ namespace HiTechStore.Migrations
                         .HasForeignKey("BrandId");
 
                     b.Navigation("Brand");
+                });
+
+            modelBuilder.Entity("HiTechStore.Models.CategoryComponent", b =>
+                {
+                    b.HasOne("HiTechStore.Models.Category", "Category")
+                        .WithMany("Components")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HiTechStore.Models.ComponentType", "Component")
+                        .WithMany("Categories")
+                        .HasForeignKey("ComponentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Component");
                 });
 
             modelBuilder.Entity("HiTechStore.Models.ComponentModel", b =>
@@ -729,11 +741,15 @@ namespace HiTechStore.Migrations
 
             modelBuilder.Entity("HiTechStore.Models.Category", b =>
                 {
+                    b.Navigation("Components");
+
                     b.Navigation("Properties");
                 });
 
             modelBuilder.Entity("HiTechStore.Models.ComponentType", b =>
                 {
+                    b.Navigation("Categories");
+
                     b.Navigation("Properties");
                 });
 

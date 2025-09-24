@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 using HiTechStore.Core;
 
 namespace HiTechStore.Models
@@ -9,6 +11,17 @@ namespace HiTechStore.Models
         public string? Name { get; set; }
         public string? Description { get; set; }
         public virtual List<Property>? Properties { get; set; }
-        public virtual List<ComponentType>? Components { get; set; }
+        public virtual List<CategoryComponent>? Components { get; set; }
+    }
+
+    public class CategoryComponent
+    {
+        public int CategoryComponentId { get; set; }
+        public int CategoryId { get; set; }
+        public virtual Category? Category { get; set; }
+        [ForeignKey("Component")]
+        public int ComponentId { get; set; }
+        public virtual ComponentType? Component { get; set; }
+
     }
 }

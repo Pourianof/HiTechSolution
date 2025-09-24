@@ -62,24 +62,26 @@ namespace HiTechStore.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CategoryComponentType",
+                name: "CategoryComponent",
                 columns: table => new
                 {
-                    CategoriesCategoryId = table.Column<int>(type: "integer", nullable: false),
-                    ComponentsComponentTypeId = table.Column<int>(type: "integer", nullable: false)
+                    CategoryComponentId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    CategoryId = table.Column<int>(type: "integer", nullable: false),
+                    ComponentId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CategoryComponentType", x => new { x.CategoriesCategoryId, x.ComponentsComponentTypeId });
+                    table.PrimaryKey("PK_CategoryComponent", x => x.CategoryComponentId);
                     table.ForeignKey(
-                        name: "FK_CategoryComponentType_Categories_CategoriesCategoryId",
-                        column: x => x.CategoriesCategoryId,
+                        name: "FK_CategoryComponent_Categories_CategoryId",
+                        column: x => x.CategoryId,
                         principalTable: "Categories",
                         principalColumn: "CategoryId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_CategoryComponentType_ComponentType_ComponentsComponentType~",
-                        column: x => x.ComponentsComponentTypeId,
+                        name: "FK_CategoryComponent_ComponentType_ComponentId",
+                        column: x => x.ComponentId,
                         principalTable: "ComponentType",
                         principalColumn: "ComponentTypeId",
                         onDelete: ReferentialAction.Cascade);
@@ -151,9 +153,14 @@ namespace HiTechStore.Migrations
                 column: "ProductPropertyValue");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CategoryComponentType_ComponentsComponentTypeId",
-                table: "CategoryComponentType",
-                column: "ComponentsComponentTypeId");
+                name: "IX_CategoryComponent_CategoryId",
+                table: "CategoryComponent",
+                column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CategoryComponent_ComponentId",
+                table: "CategoryComponent",
+                column: "ComponentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ComponentModel_BrandModelId",
@@ -208,7 +215,7 @@ namespace HiTechStore.Migrations
                 table: "ProductPropertyValue");
 
             migrationBuilder.DropTable(
-                name: "CategoryComponentType");
+                name: "CategoryComponent");
 
             migrationBuilder.DropTable(
                 name: "ComponentModel");
