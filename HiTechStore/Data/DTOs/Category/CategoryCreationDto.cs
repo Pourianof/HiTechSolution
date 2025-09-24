@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 using HiTechStore.Data.DTOs.Binders;
+using HiTechStore.Models;
 
 namespace HiTechStore.DTOs.Category
 {
@@ -19,6 +20,8 @@ namespace HiTechStore.DTOs.Category
         [Required]
         [FromJson]
         public IEnumerable<CategoryPropertyEntriesDto>? Properties { get; set; }
+        public IEnumerable<CategoryComponentsDto>? Components { get; set; }
+
     }
 
     public class CategoryPropertyEntriesDto
@@ -31,5 +34,32 @@ namespace HiTechStore.DTOs.Category
         [MinLength(10)]
         [JsonPropertyName("description")]
         public string? Description { get; set; }
+    }
+
+    public class CategoryComponentsDto
+    {
+        [Required]
+        [MinLength(2)]
+        [JsonPropertyName("name")]
+        public string? Name { get; set; }
+        [JsonPropertyName("brandModelId")]
+        public int? BrandModelId { get; set; }
+        [MinLength(10)]
+        [JsonPropertyName("description")]
+        public string? Description { get; set; }
+        public IEnumerable<ComponentPropertyDto>? Properties { get; set; }
+    }
+
+    public class ComponentPropertyDto
+    {
+        [Required]
+        [MinLength(2)]
+        [JsonPropertyName("name")]
+        public string? Name { get; set; }
+        [MinLength(10)]
+        [JsonPropertyName("description")]
+        public string? Description { get; set; }
+        public DataType? PropertyType { get; set; }
+
     }
 }

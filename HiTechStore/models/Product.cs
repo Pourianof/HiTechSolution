@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 using HiTechStore.Core;
@@ -27,15 +26,16 @@ namespace HiTechStore.Models
         [NotMapped]
         public int? MyScore { get; set; }
         public virtual List<ProductPropertyValue> Properties { get; set; } = new();
+        public virtual List<ComponentModel> ComponentModels { get; set; } = new();
     }
-
 
     public class ProductPropertyValue
     {
-        public string? Value { get; set; }
         public int PropertyId { get; set; }
-        public virtual CategoryProperty? Property { get; set; }
+        public virtual Property? Property { get; set; }
         public int ProductId { get; set; }
         public virtual Product? Product { get; set; }
+        [ForeignKey("ProductPropertyValue")]
+        public virtual PropertyValue? Value { get; set; }
     }
 }

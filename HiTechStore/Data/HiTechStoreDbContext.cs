@@ -52,8 +52,8 @@ namespace HiTechStore.Data
             modelBuilder.Entity<Category>(
                 (entity) =>
                 {
-                    entity.HasMany(c => c.CategoryProperties)
-                        .WithOne((cp) => cp.Category)
+                    entity.HasMany(c => c.Properties)
+                        .WithOne()
                         .OnDelete(DeleteBehavior.Cascade);
                 }
             );

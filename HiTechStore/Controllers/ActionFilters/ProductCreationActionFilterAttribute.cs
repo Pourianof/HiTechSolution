@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using AutoMapper;
 using HiTechStore.Helpers.IO;
 using HiTechStore.Data.DTOs.Product;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace HiTechStore.Controllers.ActionFilters;
 
@@ -17,6 +18,13 @@ public class ProductCreationActionFilterAttribute : ModelAccessorBaseActionFilte
     public ProductCreationActionFilterAttribute(IUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork)
     {
         _mapper = mapper;
+    }
+
+    protected ObjectResult InvalidModelState(ModelStateDictionary modelState)
+    {
+        var problem = new ValidationProblemDetails(modelState);
+
+        return new BadRequestObjectResult(problem);
     }
 
     public override void OnActionExecuting(ActionExecutingContext context)
@@ -46,18 +54,82 @@ public class ProductCreationActionFilterAttribute : ModelAccessorBaseActionFilte
 
         var createdProduct = _mapper.Map<Product>(product);
 
+
+        // register product properties
         if (product.PropertiesValues is not null)
         {
 
-            var categoryId = product.PropertiesValues.CategoryId;
-            createdProduct.CategoryId = categoryId!.Value;
+            // setting product category
+            var categoryId = product.PropertiesValues.CategoryId!.Value;
+            createdProduct.CategoryId = categoryId;
 
-            createdProduct.Properties = product.PropertiesValues.Properties!.Select(
-                (prop) =>
+            // load the valid properties based on category
+            var categoryProperties = UnitOfWork.Categories.GetCategoryPropertiesAsync(categoryId).Result;
+
+            createdProduct.Properties = new List<ProductPropertyValue>();
+
+            for (int index = 0; index < product.PropertiesValues!.Properties!.Count(); index++)
+            {
+                var prop = product.PropertiesValues.Properties!.ElementAt(index);
+
+                // some value must specified for property
+                if (prop.PropertyValue is null)
                 {
-                    return new ProductPropertyValue { PropertyId = prop.PropertyId!.Value, Value = prop.PropertyValue };
+                    context.ModelState.AddModelError($"PropertiesValues.Properties.{index}.PropertyValue", "PropertyValue is required");
+                    context.Result = InvalidModelState(context.ModelState);
+                    return;
                 }
-            ).ToList();
+
+                var ppv = new ProductPropertyValue
+                {
+                    PropertyId = prop.PropertyId!.Value,
+
+                };
+
+                // get the property which this item target to
+                var actualProp = categoryProperties.First((p) => p.PropertyId == prop.PropertyId);
+
+                if (actualProp is null)
+                {
+                    context.ModelState.AddModelError($"PropertiesValues.Properties.{index}.PropertyId", $"No PropertyId with id {prop.PropertyId} exist for specified category.");
+                    context.Result = InvalidModelState(context.ModelState);
+                    continue;
+                }
+
+                var pv = new PropertyValue();
+
+                // try to Convert the value to the type which defined in property specification
+                try
+                {
+
+                    switch (actualProp.propertyType)
+                    {
+                        case PropertyType.Number:
+                            pv.ValueNumber = Convert.ToDouble(prop.PropertyValue); break;
+                        case PropertyType.String:
+                            pv.ValueString = prop.PropertyValue; break;
+                        case PropertyType.Boolean:
+                            pv.ValueBoolean = Convert.ToBoolean(prop.PropertyValue); break;
+                        case PropertyType.DateTime:
+                            pv.ValueDateTime = Convert.ToDateTime(prop.PropertyValue); break;
+                        case PropertyType.Reference:
+                            pv.ValueReferenceId = Convert.ToInt16(prop.PropertyValue); break;
+                    }
+                }
+                catch
+                {
+                    context.ModelState.AddModelError(
+                        $"PropertiesValues.Properties.{index}.PropertyValue",
+                        $"You need to provide a '{PropertyTypeHelper.GetNameOfCategoryPropertyType(actualProp.propertyType)}' type value for specified property"
+                    );
+                    context.Result = InvalidModelState(context.ModelState);
+                    return;
+                }
+
+                ppv.Value = pv;
+                createdProduct.Properties.Append(ppv);
+            }
+
         }
 
         createdProduct.AuthorId = userId;

@@ -86,10 +86,10 @@ namespace HiTechStore.Controllers
                 Description = createCategoryDto.Description,
             };
 
-            category.CategoryProperties = createCategoryDto.Properties!.Select(
+            category.Properties = createCategoryDto.Properties!.Select(
                 (prop) =>
                 {
-                    return new CategoryProperty { Description = prop.Description, Name = prop.Name };
+                    return new Property { Description = prop.Description, Name = prop.Name };
                 }
             ).ToList();
 

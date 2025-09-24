@@ -3,6 +3,7 @@ using System;
 using HiTechStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HiTechStore.Migrations
 {
     [DbContext(typeof(HiTechStoreDbContext))]
-    partial class HiTechStoreDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250924115852_RedesignCategoryComponentTable")]
+    partial class RedesignCategoryComponentTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -286,6 +289,9 @@ namespace HiTechStore.Migrations
                     b.Property<int?>("CategoryId")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("ComponentTypeId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
@@ -301,6 +307,8 @@ namespace HiTechStore.Migrations
                     b.HasKey("PropertyId");
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("ComponentTypeId");
 
                     b.ToTable("Property");
                 });
@@ -657,6 +665,10 @@ namespace HiTechStore.Migrations
                         .WithMany("Properties")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("HiTechStore.Models.ComponentType", null)
+                        .WithMany("Properties")
+                        .HasForeignKey("ComponentTypeId");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -716,6 +728,11 @@ namespace HiTechStore.Migrations
                 });
 
             modelBuilder.Entity("HiTechStore.Models.Category", b =>
+                {
+                    b.Navigation("Properties");
+                });
+
+            modelBuilder.Entity("HiTechStore.Models.ComponentType", b =>
                 {
                     b.Navigation("Properties");
                 });
