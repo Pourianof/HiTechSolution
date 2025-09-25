@@ -1,4 +1,7 @@
+using AutoMapper;
+
 using HiTechStore.Core.Repositories;
+using HiTechStore.Data.DTOs.Product;
 using HiTechStore.Data.Queries;
 using HiTechStore.Models;
 
@@ -6,31 +9,29 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HiTechStore.Data.Repositories
 {
-    public class ProductRepository : Repository<Product, ProductQuery>, IProductRepository
+    public class ProductRepository : Repository<Product, ProductDto, ProductQuery>, IProductRepository
     {
-        public ProductRepository(HiTechStoreDbContext context) : base(context)
+        public ProductRepository(HiTechStoreDbContext context, IMapper mapper) : base(context, mapper)
         {
 
         }
 
         private IQueryable<Product> BaseGettingQuery(IQueryable<Product> queryBuilder)
         {
-            return queryBuilder
-                .Include((p) => p.Media).Include(p => p.Properties).ThenInclude(pp => pp.Property)
-                .Select(p => new Product
-                {
-                    ProductId = p.ProductId,
-                    Title = p.Title,
-                    AverageScore = p.Scores.Any()
+            return queryBuilder.Select(p => new Product
+            {
+                ProductId = p.ProductId,
+                Title = p.Title,
+                AverageScore = p.Scores.Any()
                                  ? p.Scores.Average(s => (double?)s.Score)
                                  : 0.0,
-                    ScoreCounts = p.Scores.Count(),
-                    AuthorId = p.AuthorId,
-                    Description = p.Description,
-                    Price = p.Price,
-                    Media = p.Media,
-                    Properties = p.Properties
-                });
+                ScoreCounts = p.Scores.Count(),
+                AuthorId = p.AuthorId,
+                Description = p.Description,
+                Price = p.Price,
+                Media = p.Media,
+                Properties = p.Properties
+            });
         }
 
         protected override IQueryable<Product> GetAllQueryBuilder(IQueryable<Product> queryBuilder, ProductQuery? productQueryParams)
@@ -48,9 +49,14 @@ namespace HiTechStore.Data.Repositories
             return BaseGettingQuery(queryBuilder);
         }
 
-        public async Task<Product?> GetByIdAsync(int id, string? userId)
+        public async Task<ProductDto?> GetByIdAsync(int id, string? userId)
         {
-            return await BaseGettingQuery(_dbSet).FirstOrDefaultAsync();
+            var query = BaseGettingQuery(_dbSet).Where(p => p.ProductId == id);
+            if (userId is string)
+            {
+                query.Where(p => p.AuthorId == userId);
+            }
+            return await Project(query).FirstOrDefaultAsync();
 
         }
 

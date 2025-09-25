@@ -3,6 +3,7 @@ using System;
 using HiTechStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HiTechStore.Migrations
 {
     [DbContext(typeof(HiTechStoreDbContext))]
-    partial class HiTechStoreDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250925111915_MakeCategoryComponentsTableForeignKeyNullable")]
+    partial class MakeCategoryComponentsTableForeignKeyNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -139,29 +142,6 @@ namespace HiTechStore.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("ComponentModel");
-                });
-
-            modelBuilder.Entity("HiTechStore.Models.ComponentPropertyValue", b =>
-                {
-                    b.Property<int>("ComponentPropertyValueId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ComponentPropertyValueId"));
-
-                    b.Property<int?>("ComponentModelId")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("PropertyId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("ComponentPropertyValueId");
-
-                    b.HasIndex("ComponentModelId");
-
-                    b.HasIndex("PropertyId");
-
-                    b.ToTable("ComponentPropertyValue");
                 });
 
             modelBuilder.Entity("HiTechStore.Models.ComponentType", b =>
@@ -368,9 +348,6 @@ namespace HiTechStore.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("PropertyValueId");
-
-                    b.HasIndex("ComponentPropertyValueId")
-                        .IsUnique();
 
                     b.ToTable("PropertyValue");
                 });
@@ -620,21 +597,6 @@ namespace HiTechStore.Migrations
                     b.Navigation("ComponentType");
                 });
 
-            modelBuilder.Entity("HiTechStore.Models.ComponentPropertyValue", b =>
-                {
-                    b.HasOne("HiTechStore.Models.ComponentModel", "ComponentModel")
-                        .WithMany("Properties")
-                        .HasForeignKey("ComponentModelId");
-
-                    b.HasOne("HiTechStore.Models.Property", "Property")
-                        .WithMany()
-                        .HasForeignKey("PropertyId");
-
-                    b.Navigation("ComponentModel");
-
-                    b.Navigation("Property");
-                });
-
             modelBuilder.Entity("HiTechStore.Models.Product", b =>
                 {
                     b.HasOne("HiTechStore.Models.User", "Author")
@@ -717,15 +679,6 @@ namespace HiTechStore.Migrations
                         .HasForeignKey("ComponentTypeId");
                 });
 
-            modelBuilder.Entity("HiTechStore.Models.PropertyValue", b =>
-                {
-                    b.HasOne("HiTechStore.Models.ComponentPropertyValue", null)
-                        .WithOne("Vlue")
-                        .HasForeignKey("HiTechStore.Models.PropertyValue", "ComponentPropertyValueId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -787,16 +740,6 @@ namespace HiTechStore.Migrations
                     b.Navigation("Components");
 
                     b.Navigation("Properties");
-                });
-
-            modelBuilder.Entity("HiTechStore.Models.ComponentModel", b =>
-                {
-                    b.Navigation("Properties");
-                });
-
-            modelBuilder.Entity("HiTechStore.Models.ComponentPropertyValue", b =>
-                {
-                    b.Navigation("Vlue");
                 });
 
             modelBuilder.Entity("HiTechStore.Models.ComponentType", b =>

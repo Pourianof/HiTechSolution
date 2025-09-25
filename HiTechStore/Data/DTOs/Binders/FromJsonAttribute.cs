@@ -24,8 +24,9 @@ public class JsonModelBinder : IModelBinder
                 var result = JsonSerializer.Deserialize(valueAsString!, bindingContext.ModelType);
                 bindingContext.Result = ModelBindingResult.Success(result);
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 bindingContext.Result = ModelBindingResult.Failed();
             }
         }

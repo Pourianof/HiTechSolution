@@ -16,11 +16,13 @@ public class ComponentModel
     public virtual ComponentType? ComponentType { get; set; }
     public virtual BrandModel? BrandModel { get; set; }
     public string? Description { get; set; }
+    public virtual IEnumerable<ComponentPropertyValue>? Properties { get; set; }
 }
 
 public class ComponentPropertyValue
 {
     public int ComponentPropertyValueId { get; set; }
+    public virtual PropertyValue? Vlue { get; set; }
     public virtual Property? Property { get; set; }
     public virtual ComponentModel? ComponentModel { get; set; }
 }

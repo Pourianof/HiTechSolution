@@ -1,3 +1,6 @@
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
+
 using HiTechStore.Core;
 using HiTechStore.Core.Repositories;
 using HiTechStore.Data.Queries;
@@ -7,17 +10,20 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HiTechStore.Data.Repositories
 {
-    public class Repository<T, Q> : IRepository<T, Q>
+    public class Repository<T, O, Q> : IRepository<T, O, Q>
         where T : class, IModel
         where Q : BaseQuery
+        where O : class
     {
         protected readonly HiTechStoreDbContext _context;
         protected readonly DbSet<T> _dbSet;
+        protected readonly IMapper _mapper;
 
-        public Repository(HiTechStoreDbContext context)
+        public Repository(HiTechStoreDbContext context, IMapper mapper)
         {
             _context = context;
             _dbSet = context.Set<T>();
+            _mapper = mapper;
         }
 
         protected virtual IQueryable<T> GetAllQueryBuilder(IQueryable<T> queryBuilder, Q? queyParams = null)
@@ -25,7 +31,7 @@ namespace HiTechStore.Data.Repositories
             return queryBuilder;
         }
 
-        public virtual async Task<IEnumerable<T>> GetAllAsync(Q queryParams)
+        public virtual async Task<IEnumerable<O>> GetAllAsync(Q queryParams)
         {
             var query = GetAllQueryBuilder(_dbSet.AsQueryable(), queryParams);
 
@@ -41,19 +47,34 @@ namespace HiTechStore.Data.Repositories
                 query.Take(queryParams.Limit.Value);
             }
 
-            return await query.ToListAsync();
+            return await Project(query).ToListAsync();
         }
 
-        public virtual async Task<IEnumerable<T>> GetAllAsync()
+        protected virtual IQueryable<O> Project(IQueryable<T> queryable)
         {
-            return await GetAllQueryBuilder(_dbSet.AsQueryable()).Take(10).ToListAsync();
+            if (typeof(O) == typeof(T))
+            {
+                return (IQueryable<O>)queryable;
+            }
+            return queryable.ProjectTo<O>(_mapper.ConfigurationProvider);
+        }
+
+        public virtual async Task<IEnumerable<O>> GetAllAsync()
+        {
+            return await Project(GetAllQueryBuilder(_dbSet.AsQueryable()).Take(10)).ToListAsync();
         }
 
         protected virtual IQueryable<T> GetByIdAsyncQueryBuilder(IQueryable<T> queryBuilder)
         {
             return queryBuilder;
         }
-        public virtual async Task<T?> GetByIdAsync(int id)
+        public virtual async Task<O?> GetByIdAsync(int id)
+        {
+            var query = GetByIdAsyncQueryBuilder(_dbSet);
+            return await Project(query.FindById(id)).FirstAsync();
+        }
+
+        public virtual async Task<T?> GetModelByIdAsync(int id)
         {
             var query = GetByIdAsyncQueryBuilder(_dbSet);
             return await query.FindById(id).FirstAsync();
@@ -92,10 +113,11 @@ namespace HiTechStore.Data.Repositories
         }
     }
 
-    public class Repository<T> : Repository<T, BaseQuery>
+    public class Repository<T> : Repository<T, T, BaseQuery>
             where T : class, IModel
     {
-        public Repository(HiTechStoreDbContext context) : base(context)
+        public Repository(HiTechStoreDbContext context, IMapper mapper)
+            : base(context, mapper)
         {
         }
     }

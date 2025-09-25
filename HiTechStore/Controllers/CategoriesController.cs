@@ -86,12 +86,16 @@ namespace HiTechStore.Controllers
                 Description = createCategoryDto.Description,
             };
 
-            category.Properties = createCategoryDto.Properties!.Select(
-                (prop) =>
-                {
-                    return new Property { Description = prop.Description, Name = prop.Name };
-                }
-            ).ToList();
+            if (createCategoryDto.Properties is not null)
+            {
+                category.Properties = _mapper.Map<List<Property>>(createCategoryDto.Properties);
+            }
+
+
+            if (createCategoryDto.Components is not null)
+            {
+                category.Components = _mapper.Map<List<CategoryComponent>>(createCategoryDto.Components);
+            }
 
             await _unitOfWork.Categories.AddAsync(category);
             await _unitOfWork.Complete();

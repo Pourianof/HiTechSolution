@@ -40,7 +40,7 @@ namespace HiTechStore.Controllers.ActionFilters
             // Check if route ID is valid
             if (int.TryParse(routeId, out var routeIdValue))
             {
-                var entity = DbSet.GetByIdAsync(routeIdValue).Result;
+                var entity = UnitOfWork.Products.GetByIdAsync(routeIdValue).Result;
 
                 // Check if there is corresponding entity for that route ID
                 if (entity == null)

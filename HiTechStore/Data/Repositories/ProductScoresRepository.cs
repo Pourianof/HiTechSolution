@@ -1,4 +1,6 @@
 
+using AutoMapper;
+
 using HiTechStore.Core.Repositories;
 using HiTechStore.Models;
 
@@ -10,8 +12,8 @@ public class ProductScoresRepository : Repository<ProductScore>, IProductScoresR
 {
 
 
-    public ProductScoresRepository(HiTechStoreDbContext context)
-    : base(context)
+    public ProductScoresRepository(HiTechStoreDbContext context, IMapper mapper)
+    : base(context, mapper)
     {
 
     }

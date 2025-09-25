@@ -1,6 +1,5 @@
 
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 using AutoMapper;
 
@@ -9,11 +8,9 @@ using HiTechStore.Controllers.ExceptionFilters;
 using HiTechStore.Core;
 using HiTechStore.Data.DTOs.Product;
 using HiTechStore.DTOs.Product;
-using HiTechStore.Helpers.IO;
 using HiTechStore.Models;
 
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HiTechStore.Controllers
@@ -35,7 +32,7 @@ namespace HiTechStore.Controllers
         public async Task<IEnumerable<ProductDto>> GetProducts()
         {
             var products = await _unitOfWork.Products.GetAllAsync();
-            return products.Select(_mapper.Map<ProductDto>);
+            return products;
         }
 
         [HttpGet("{id}")]
@@ -110,7 +107,7 @@ namespace HiTechStore.Controllers
         [TypeFilter<SameAuthorValidationActionFilterAttribute<Product>>]
         public async Task<IActionResult> DeleteProduct(int id)
         {
-            var product = await _unitOfWork.Products.GetByIdAsync(id);
+            var product = await _unitOfWork.Products.GetModelByIdAsync(id);
             if (product == null)
             {
                 return BadRequest();

@@ -6,10 +6,23 @@ using HiTechStore.Data.DTOs.Authorization;
 using HiTechStore.Data.DTOs.Category;
 using HiTechStore.Data.DTOs;
 using HiTechStore.Data.DTOs.Product;
+using HiTechStore.Data.DTOs.Component;
+using HiTechStore.DTOs.Category;
+using HiTechStore.Data.DTOs.Brand;
 
 public class MappingProfile : Profile
 {
     public MappingProfile()
+    {
+        ProductMap();
+        CategoryMap();
+        PropertyMap();
+        UserMap();
+        ComponentMap();
+        BrandMap();
+    }
+
+    private void ProductMap()
     {
         CreateMap<Product, ProductCreationDto>();
         CreateMap<ProductCreationDto, Product>()
@@ -18,15 +31,55 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.CategoryId, opt => opt.Ignore());
         CreateMap<ProductPatchDTO, Product>().MapOnlyNonNull();
         CreateMap<Product, ProductPatchDTO>();
-        CreateMap<Product, ProductDto>();
+        CreateMap<Product, ProductDto>()
+            .ForMember((dest) => dest.Components, (opt) => opt.MapFrom((src) => src.ComponentModels));
         CreateMap<ProductPropertyValue, ProductPropertyValueDto>()
             .ForMember((dest) => dest.Name, (opt) => opt.MapFrom((p) => p.Property!.Name));
         CreateMap<ProductMedia, ProductMediaDto>().ForMember((dest) => dest.Url, (opt) => opt.MapFrom(src => src.FilePath));
+    }
+
+    private void CategoryMap()
+    {
         CreateMap<CategoryUpdateDto, Category>().MapOnlyNonNull();
-        CreateMap<Category, CategoryDTO>().ForMember((dest) => dest.Properties, (opt) => opt.MapFrom(src => src.Properties));
-        CreateMap<Property, CategoryPropertyDto>();
+        CreateMap<CategoryCreationDto, Category>();
+        CreateMap<Category, CategoryDTO>()
+            .ForMember((dest) => dest.Properties, (opt) => opt.MapFrom(src => src.Properties))
+            .ForMember((dest) => dest.Components, (opt) => opt.MapFrom(src => src.Components!.Select(cmp => cmp.Component)));
+    }
+
+    private void ComponentMap()
+    {
+        CreateMap<ComponentModel, ComponentModelDto>();
+        CreateMap<ComponentType, ComponentTypeWithPropertiesDto>()
+            .ForMember((dest) => dest.ComponentId, opt => opt.MapFrom(src => src.ComponentTypeId));
+        CreateMap<ComponentsCreationDto, ComponentType>();
+        CreateMap<ComponentsCreationDto, CategoryComponent>()
+            .ForMember((dest) => dest.Component,
+                        opt =>
+                        {
+                            opt.MapFrom(src => src);
+                        }
+                        );
+    }
+
+    private void PropertyMap()
+    {
+        CreateMap<Property, PropertyDto>();
+        CreateMap<PropertyEntryCreationDto, Property>();
+    }
+
+    private void UserMap()
+    {
         CreateMap<RegisterDto, User>();
         CreateMap<User, RegisterDto>();
+    }
+
+    private void BrandMap()
+    {
+        CreateMap<BrandModel, BrandModelDto>()
+            .ForMember(dest => dest.BrandName, opt => opt.MapFrom((src) => src.Brand!.Name))
+            .ForMember(dest => dest.ModelName, opt => opt.MapFrom((src) => src.Name))
+            .ForMember(dest => dest.ModelId, opt => opt.MapFrom((src) => src.BrandModelId));
     }
 }
 

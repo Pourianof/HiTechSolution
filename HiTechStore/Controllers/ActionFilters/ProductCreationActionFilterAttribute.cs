@@ -56,11 +56,11 @@ public class ProductCreationActionFilterAttribute : ModelAccessorBaseActionFilte
 
 
         // register product properties
-        if (product.PropertiesValues is not null)
+        if (product.CategoryValues is not null)
         {
 
             // setting product category
-            var categoryId = product.PropertiesValues.CategoryId!.Value;
+            var categoryId = product.CategoryValues.CategoryId!.Value;
             createdProduct.CategoryId = categoryId;
 
             // load the valid properties based on category
@@ -68,14 +68,14 @@ public class ProductCreationActionFilterAttribute : ModelAccessorBaseActionFilte
 
             createdProduct.Properties = new List<ProductPropertyValue>();
 
-            for (int index = 0; index < product.PropertiesValues!.Properties!.Count(); index++)
+            for (int index = 0; index < product.CategoryValues!.Properties!.Count(); index++)
             {
-                var prop = product.PropertiesValues.Properties!.ElementAt(index);
+                var prop = product.CategoryValues.Properties!.ElementAt(index);
 
                 // some value must specified for property
                 if (prop.PropertyValue is null)
                 {
-                    context.ModelState.AddModelError($"PropertiesValues.Properties.{index}.PropertyValue", "PropertyValue is required");
+                    context.ModelState.AddModelError($"CategoryValues.Properties.{index}.PropertyValue", "PropertyValue is required");
                     context.Result = InvalidModelState(context.ModelState);
                     return;
                 }
@@ -87,11 +87,11 @@ public class ProductCreationActionFilterAttribute : ModelAccessorBaseActionFilte
                 };
 
                 // get the property which this item target to
-                var actualProp = categoryProperties.First((p) => p.PropertyId == prop.PropertyId);
+                var actualProp = categoryProperties.FirstOrDefault((p) => p.PropertyId == prop.PropertyId);
 
                 if (actualProp is null)
                 {
-                    context.ModelState.AddModelError($"PropertiesValues.Properties.{index}.PropertyId", $"No PropertyId with id {prop.PropertyId} exist for specified category.");
+                    context.ModelState.AddModelError($"CategoryValues.Properties.{index}.PropertyId", $"No PropertyId with id {prop.PropertyId} exist for specified category.");
                     context.Result = InvalidModelState(context.ModelState);
                     continue;
                 }
@@ -119,7 +119,7 @@ public class ProductCreationActionFilterAttribute : ModelAccessorBaseActionFilte
                 catch
                 {
                     context.ModelState.AddModelError(
-                        $"PropertiesValues.Properties.{index}.PropertyValue",
+                        $"CategoryValues.Properties.{index}.PropertyValue",
                         $"You need to provide a '{PropertyTypeHelper.GetNameOfCategoryPropertyType(actualProp.propertyType)}' type value for specified property"
                     );
                     context.Result = InvalidModelState(context.ModelState);
@@ -135,7 +135,7 @@ public class ProductCreationActionFilterAttribute : ModelAccessorBaseActionFilte
         createdProduct.AuthorId = userId;
 
         var productMedia = product.Media!;
-        DbSet.AddAsync(createdProduct).Wait();
+        UnitOfWork.Products.AddAsync(createdProduct).Wait();
         CompleteDbWork().Wait();
 
         try
@@ -157,7 +157,7 @@ public class ProductCreationActionFilterAttribute : ModelAccessorBaseActionFilte
         }
         catch
         {
-            DbSet.Delete(createdProduct);
+            UnitOfWork.Products.Delete(createdProduct);
             throw;
         }
         // For updating the product media

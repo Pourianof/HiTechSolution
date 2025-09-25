@@ -1,3 +1,5 @@
+using AutoMapper;
+
 using HiTechStore.Core;
 using HiTechStore.Core.Repositories;
 using HiTechStore.Data.Repositories;
@@ -11,12 +13,12 @@ namespace HiTechStore.Data
         public ICategoryRepository Categories { get; }
         public IProductScoresRepository ProductScores { get; }
 
-        public UnitOfWork(HiTechStoreDbContext context)
+        public UnitOfWork(HiTechStoreDbContext context, IMapper mapper)
         {
             _context = context;
-            Products = new ProductRepository(_context);
-            Categories = new CategoryRepository(_context);
-            ProductScores = new ProductScoresRepository(_context);
+            Products = new ProductRepository(_context, mapper);
+            Categories = new CategoryRepository(_context, mapper);
+            ProductScores = new ProductScoresRepository(_context, mapper);
         }
 
         public async Task<int> Complete()

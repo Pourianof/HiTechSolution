@@ -1,3 +1,5 @@
+using AutoMapper;
+
 using HiTechStore.Core.Repositories;
 using HiTechStore.Data.Queries;
 using HiTechStore.Models;
@@ -8,13 +10,14 @@ namespace HiTechStore.Data.Repositories
 {
     public class CategoryRepository : Repository<Category>, ICategoryRepository
     {
-        public CategoryRepository(HiTechStoreDbContext context) : base(context)
+        public CategoryRepository(HiTechStoreDbContext context, IMapper mapper) : base(context, mapper)
         {
         }
 
         protected override IQueryable<Category> GetAllQueryBuilder(IQueryable<Category> queryBuilder, BaseQuery? queryParams)
         {
-            return queryBuilder.Include((c) => c.Properties);
+            return queryBuilder.Include((c) => c.Properties)
+                        .Include((c) => c.Components)!.ThenInclude((cmp) => cmp.Component);
         }
         public IEnumerable<Category> GetCategoriesByName(string name)
         {
