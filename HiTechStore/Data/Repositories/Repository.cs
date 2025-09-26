@@ -113,6 +113,16 @@ namespace HiTechStore.Data.Repositories
         }
     }
 
+    public class Repository<T, O> : Repository<T, O, BaseQuery>
+          where T : class, IModel
+          where O : class
+    {
+        public Repository(HiTechStoreDbContext context, IMapper mapper)
+            : base(context, mapper)
+        {
+        }
+    }
+
     public class Repository<T> : Repository<T, T, BaseQuery>
             where T : class, IModel
     {

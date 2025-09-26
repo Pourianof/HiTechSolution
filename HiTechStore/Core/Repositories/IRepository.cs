@@ -30,7 +30,7 @@ namespace HiTechStore.Core.Repositories
         Task<IEnumerable<O>> GetAllAsync(Q query);
     }
 
-    public interface IRepository<T, O> : IRepository<T, T, BaseQuery>
+    public interface IRepository<T, O> : IRepository<T, O, BaseQuery>
         where T : class, IModel
         where O : class
     { }

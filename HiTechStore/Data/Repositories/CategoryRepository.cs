@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HiTechStore.Data.Repositories
 {
-    public class CategoryRepository : Repository<Category>, ICategoryRepository
+    public class CategoryRepository : Repository<Category, CategoryDTO>, ICategoryRepository
     {
         public CategoryRepository(HiTechStoreDbContext context, IMapper mapper) : base(context, mapper)
         {
