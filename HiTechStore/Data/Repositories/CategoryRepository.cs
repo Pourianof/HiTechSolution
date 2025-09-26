@@ -1,6 +1,7 @@
 using AutoMapper;
 
 using HiTechStore.Core.Repositories;
+using HiTechStore.Data.DTOs;
 using HiTechStore.Data.Queries;
 using HiTechStore.Models;
 
@@ -29,5 +30,6 @@ namespace HiTechStore.Data.Repositories
             return (await _dbSet.Include((c) => c.Properties).Where((c) => c.CategoryId == categoryId)
                         .Select((c) => c.Properties).FirstAsync()) ?? new List<Property>();
         }
+
     }
 }

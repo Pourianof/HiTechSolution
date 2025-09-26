@@ -38,7 +38,7 @@ namespace HiTechStore.Migrations
 
                     b.HasKey("BrandId");
 
-                    b.ToTable("Brand");
+                    b.ToTable("Brand", (string)null);
                 });
 
             modelBuilder.Entity("HiTechStore.Models.BrandModel", b =>
@@ -62,7 +62,7 @@ namespace HiTechStore.Migrations
 
                     b.HasIndex("BrandId");
 
-                    b.ToTable("BrandModel");
+                    b.ToTable("BrandModel", (string)null);
                 });
 
             modelBuilder.Entity("HiTechStore.Models.Category", b =>
@@ -84,7 +84,7 @@ namespace HiTechStore.Migrations
 
                     b.HasKey("CategoryId");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("HiTechStore.Models.CategoryComponent", b =>
@@ -107,7 +107,7 @@ namespace HiTechStore.Migrations
 
                     b.HasIndex("ComponentId");
 
-                    b.ToTable("CategoryComponent");
+                    b.ToTable("CategoryComponent", (string)null);
                 });
 
             modelBuilder.Entity("HiTechStore.Models.ComponentModel", b =>
@@ -138,7 +138,7 @@ namespace HiTechStore.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ComponentModel");
+                    b.ToTable("ComponentModel", (string)null);
                 });
 
             modelBuilder.Entity("HiTechStore.Models.ComponentPropertyValue", b =>
@@ -161,7 +161,7 @@ namespace HiTechStore.Migrations
 
                     b.HasIndex("PropertyId");
 
-                    b.ToTable("ComponentPropertyValue");
+                    b.ToTable("ComponentPropertyValue", (string)null);
                 });
 
             modelBuilder.Entity("HiTechStore.Models.ComponentType", b =>
@@ -180,7 +180,7 @@ namespace HiTechStore.Migrations
 
                     b.HasKey("ComponentTypeId");
 
-                    b.ToTable("ComponentType");
+                    b.ToTable("ComponentType", (string)null);
                 });
 
             modelBuilder.Entity("HiTechStore.Models.Product", b =>
@@ -256,7 +256,7 @@ namespace HiTechStore.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductMedia");
+                    b.ToTable("ProductMedia", (string)null);
                 });
 
             modelBuilder.Entity("HiTechStore.Models.ProductPropertyValue", b =>
@@ -276,7 +276,7 @@ namespace HiTechStore.Migrations
 
                     b.HasIndex("PropertyId");
 
-                    b.ToTable("ProductPropertyValue");
+                    b.ToTable("ProductPropertyValue", (string)null);
                 });
 
             modelBuilder.Entity("HiTechStore.Models.ProductScore", b =>
@@ -303,7 +303,7 @@ namespace HiTechStore.Migrations
                     b.HasIndex("ProductId", "UserId")
                         .IsUnique();
 
-                    b.ToTable("ProductScores");
+                    b.ToTable("ProductScores", (string)null);
                 });
 
             modelBuilder.Entity("HiTechStore.Models.Property", b =>
@@ -338,7 +338,7 @@ namespace HiTechStore.Migrations
 
                     b.HasIndex("ComponentTypeId");
 
-                    b.ToTable("Property");
+                    b.ToTable("Property", (string)null);
                 });
 
             modelBuilder.Entity("HiTechStore.Models.PropertyValue", b =>
@@ -372,7 +372,7 @@ namespace HiTechStore.Migrations
                     b.HasIndex("ComponentPropertyValueId")
                         .IsUnique();
 
-                    b.ToTable("PropertyValue");
+                    b.ToTable("PropertyValue", (string)null);
                 });
 
             modelBuilder.Entity("HiTechStore.Models.User", b =>

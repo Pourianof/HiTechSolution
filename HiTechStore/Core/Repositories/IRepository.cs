@@ -2,7 +2,12 @@ using HiTechStore.Data.Queries;
 
 namespace HiTechStore.Core.Repositories
 {
-    public interface IRepositoryBase<T, O>
+
+    public interface IRepositoryModelIndependent
+    {
+        Task<bool> IsExistsAsync(int id);
+    }
+    public interface IRepositoryBase<T, O> : IRepositoryModelIndependent
         where T : class, IModel
         where O : class
     {
@@ -12,7 +17,6 @@ namespace HiTechStore.Core.Repositories
         Task AddAsync(T entity);
         Task Delete(T entity);
         Task Delete(int id);
-        Task<bool> IsExistsAsync(int id);
     }
     public interface IRepositoryBase<T> : IRepositoryBase<T, T>
        where T : class, IModel

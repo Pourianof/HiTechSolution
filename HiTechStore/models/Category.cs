@@ -10,8 +10,8 @@ namespace HiTechStore.Models
         public int? ParentCategoryId { get; set; }
         public string? Name { get; set; }
         public string? Description { get; set; }
-        public virtual List<Property>? Properties { get; set; }
-        public virtual List<CategoryComponent>? Components { get; set; }
+        public virtual List<Property>? Properties { get; set; } = new();
+        public virtual List<CategoryComponent>? Components { get; set; } = new();
     }
 
     public class CategoryComponent

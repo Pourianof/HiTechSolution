@@ -22,7 +22,7 @@ namespace HiTechStore.DTOs.Category
         [FromJson]
         public IEnumerable<PropertyEntryCreationDto>? Properties { get; set; }
         [FromJson]
-        public IEnumerable<ComponentsCreationDto>? Components { get; set; }
+        public IEnumerable<ComponentCreationDto>? Components { get; set; }
 
     }
 

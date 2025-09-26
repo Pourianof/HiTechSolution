@@ -50,10 +50,11 @@ public class MappingProfile : Profile
     private void ComponentMap()
     {
         CreateMap<ComponentModel, ComponentModelDto>();
+        CreateMap<ComponentType, ComponentTypeDto>();
         CreateMap<ComponentType, ComponentTypeWithPropertiesDto>()
             .ForMember((dest) => dest.ComponentId, opt => opt.MapFrom(src => src.ComponentTypeId));
-        CreateMap<ComponentsCreationDto, ComponentType>();
-        CreateMap<ComponentsCreationDto, CategoryComponent>()
+        CreateMap<ComponentCreationDto, ComponentType>();
+        CreateMap<ComponentCreationDto, CategoryComponent>()
             .ForMember((dest) => dest.Component,
                         opt =>
                         {

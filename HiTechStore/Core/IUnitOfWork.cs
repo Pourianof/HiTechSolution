@@ -7,6 +7,7 @@ namespace HiTechStore.Core
         IProductRepository Products { get; }
         ICategoryRepository Categories { get; }
         IProductScoresRepository ProductScores { get; }
+        IComponentRepository ComponentRepository { get; }
         Task<int> Complete();
     }
 }

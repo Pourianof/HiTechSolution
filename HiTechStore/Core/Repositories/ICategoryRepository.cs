@@ -1,5 +1,4 @@
 using HiTechStore.Data.DTOs;
-using HiTechStore.Data.Queries;
 using HiTechStore.Models;
 
 namespace HiTechStore.Core.Repositories

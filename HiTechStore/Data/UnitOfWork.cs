@@ -12,6 +12,7 @@ namespace HiTechStore.Data
         public IProductRepository Products { get; }
         public ICategoryRepository Categories { get; }
         public IProductScoresRepository ProductScores { get; }
+        public IComponentRepository ComponentRepository { get; }
 
         public UnitOfWork(HiTechStoreDbContext context, IMapper mapper)
         {
@@ -19,6 +20,7 @@ namespace HiTechStore.Data
             Products = new ProductRepository(_context, mapper);
             Categories = new CategoryRepository(_context, mapper);
             ProductScores = new ProductScoresRepository(_context, mapper);
+            ComponentRepository = new ComponentRepository(_context, mapper);
         }
 
         public async Task<int> Complete()

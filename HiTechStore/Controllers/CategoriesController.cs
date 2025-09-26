@@ -1,9 +1,12 @@
 using AutoMapper;
 
+using HiTechStore.Controllers.ActionFilters;
 using HiTechStore.Core;
 using HiTechStore.Core.Exceptions;
+using HiTechStore.Core.Repositories;
 using HiTechStore.Data.DTOs;
 using HiTechStore.Data.DTOs.Category;
+using HiTechStore.Data.DTOs.Component;
 using HiTechStore.DTOs.Category;
 using HiTechStore.Helpers.IO;
 using HiTechStore.Models;
@@ -158,6 +161,31 @@ namespace HiTechStore.Controllers
             await _unitOfWork.Complete();
 
             return NoContent();
+        }
+
+        [AllowAnonymous]
+        [HttpGet("{categoryId}/components")]
+        [TypeFilter<ResourceExistenceActionFilterAttribute<Category>>]
+        public async Task<ActionResult<ComponentType>> GetCategoryComponents(int categoryId)
+        {
+            var components = await _unitOfWork.ComponentRepository.GetComponentsOfCategory(categoryId);
+
+            return Ok(components);
+        }
+
+        [HttpPost("{categoryId}/components")]
+        [TypeFilter<ResourceExistenceActionFilterAttribute<Category>>]
+        public async Task<ActionResult> CreateComponentForCategory([FromBody] ComponentCreationDto componentDto, int categoryId)
+        {
+
+            var category = await _unitOfWork.Categories.GetModelByIdAsync(categoryId);
+
+            var componentType = _mapper.Map<CategoryComponent>(componentDto);
+            category!.Components!.Add(componentType);
+            await _unitOfWork.Complete();
+
+            return Ok(componentType);
+
         }
     }
 }
