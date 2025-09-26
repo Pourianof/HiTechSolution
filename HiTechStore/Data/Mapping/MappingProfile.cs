@@ -55,12 +55,14 @@ public class MappingProfile : Profile
             .ForMember((dest) => dest.ComponentId, opt => opt.MapFrom(src => src.ComponentTypeId));
         CreateMap<ComponentCreationDto, ComponentType>();
         CreateMap<ComponentCreationDto, CategoryComponent>()
-            .ForMember((dest) => dest.Component,
-                        opt =>
-                        {
-                            opt.MapFrom(src => src);
-                        }
-                        );
+            .ForMember(
+                dest => dest.Component,
+                opt =>
+                {
+                    opt.Condition((src) => src.ComponentId == null);
+                    opt.MapFrom(src => src);
+                }
+            );
     }
 
     private void PropertyMap()

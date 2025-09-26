@@ -57,9 +57,9 @@ namespace HiTechStore.Controllers
             return Ok(categoryDtos);
         }
 
-        private async Task<string> WriteCategoryImage(Category category, IFormFile image, bool deleteOnError = true)
+        private async Task<string> WriteCategoryImage(int categoryId, IFormFile image, bool deleteOnError = true)
         {
-            var publicPath = ProvideCategoryImagePublicPath(category.CategoryId);
+            var publicPath = ProvideCategoryImagePublicPath(categoryId);
             try
             {
                 await PublicAssetsHelper.WriteIFormFile(image, publicPath);
@@ -68,7 +68,7 @@ namespace HiTechStore.Controllers
             {
                 if (deleteOnError)
                 {
-                    await _unitOfWork.Categories.Delete(category);
+                    await _unitOfWork.Categories.Delete(categoryId);
                 }
                 throw;
             }
@@ -107,7 +107,7 @@ namespace HiTechStore.Controllers
 
             if (createCategoryDto.Image is not null)
             {
-                var imagePath = await WriteCategoryImage(category, createCategoryDto.Image);
+                var imagePath = await WriteCategoryImage(category.CategoryId, createCategoryDto.Image);
                 categoryDto.Image = imagePath;
             }
 
@@ -134,7 +134,7 @@ namespace HiTechStore.Controllers
 
             if (categoryUpdateDto.Image is not null)
             {
-                var imagePath = await WriteCategoryImage(category, categoryUpdateDto.Image, false);
+                var imagePath = await WriteCategoryImage(category.CategoryId, categoryUpdateDto.Image, false);
                 categoryDto.Image = imagePath;
             }
             else
@@ -157,7 +157,7 @@ namespace HiTechStore.Controllers
                 return NotFound();
             }
 
-            await _unitOfWork.Categories.Delete(category);
+            await _unitOfWork.Categories.Delete(category.CategoryId);
             await _unitOfWork.Complete();
 
             return NoContent();
@@ -184,7 +184,16 @@ namespace HiTechStore.Controllers
             category!.Components!.Add(componentType);
             await _unitOfWork.Complete();
 
-            return Ok(componentType);
+
+            // if component id specified then it tried to add existing component
+            // and we must fetch other data
+            if (componentDto.ComponentId is not null)
+            {
+                var component = await _unitOfWork.ComponentRepository.GetByIdAsync(componentDto.ComponentId.Value);
+                return Ok(component);
+            }
+
+            return Ok(_mapper.Map<ComponentTypeDto>(componentType.Component));
 
         }
     }
