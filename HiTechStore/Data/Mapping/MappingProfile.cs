@@ -33,8 +33,9 @@ public class MappingProfile : Profile
         CreateMap<Product, ProductPatchDTO>();
         CreateMap<Product, ProductDto>()
             .ForMember((dest) => dest.Components, (opt) => opt.MapFrom((src) => src.ComponentModels));
-        CreateMap<ProductPropertyValue, ProductPropertyValueDto>()
-            .ForMember((dest) => dest.Name, (opt) => opt.MapFrom((p) => p.Property!.Name));
+        CreateMap<ProductPropertyValue, PropertyValueDto>()
+            .ForMember((dest) => dest.Name, (opt) => opt.MapFrom((p) => p.Property!.Name))
+            .ForMember(dest => dest.ValueType, opt => opt.MapFrom(src => src.Property!.propertyType));
         CreateMap<ProductMedia, ProductMediaDto>().ForMember((dest) => dest.Url, (opt) => opt.MapFrom(src => src.FilePath));
     }
 
@@ -50,6 +51,7 @@ public class MappingProfile : Profile
     private void ComponentMap()
     {
         CreateMap<ComponentModel, ComponentModelDto>();
+        CreateMap<ComponentModelCreationDto, ComponentModel>();
         CreateMap<ComponentType, ComponentTypeDto>();
         CreateMap<ComponentType, ComponentTypeWithPropertiesDto>()
             .ForMember((dest) => dest.ComponentId, opt => opt.MapFrom(src => src.ComponentTypeId));

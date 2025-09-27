@@ -7,5 +7,6 @@ namespace HiTechStore.Models
         public const string User = "User";
 
         public static readonly string[] AllRoles = { Admin, Manager, User };
+        public static readonly string[] PrivilagedRoles = { Admin, Manager };
     }
 }

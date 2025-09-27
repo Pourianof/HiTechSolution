@@ -30,3 +30,11 @@ public class PropertyEntryCreationDto
     public PropertyType? PropertyType { get; set; } = Models.PropertyType.String;
 
 }
+
+public class PropertyValueDto
+{
+    public string? Value { get; set; }
+    public string? Name { get; set; }
+    public int PropertyId { get; set; }
+    public PropertyType ValueType { get; set; }
+}
