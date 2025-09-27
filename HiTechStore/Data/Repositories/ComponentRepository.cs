@@ -26,4 +26,10 @@ public class ComponentRepository : Repository<ComponentType, ComponentTypeDto>, 
         return await _context.ComponentType.Where((cmp) => cmp.Categories!.Any(c => c.CategoryId == categoryId))
                         .ProjectTo<ComponentTypeDto>(_mapper.ConfigurationProvider).ToListAsync();
     }
+
+    public async Task<ComponentTypeDto?> GetSingleComponentOfCategoryById(int categoryId, int componentId)
+    {
+        return await _context.ComponentType.Where((cmp) => cmp.ComponentTypeId == componentId && cmp.Categories!.Any(c => c.CategoryId == categoryId))
+                        .ProjectTo<ComponentTypeDto>(_mapper.ConfigurationProvider).FirstOrDefaultAsync();
+    }
 }

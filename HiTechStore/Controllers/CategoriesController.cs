@@ -1,3 +1,5 @@
+using System.Net;
+
 using AutoMapper;
 
 using HiTechStore.Controllers.ActionFilters;
@@ -179,19 +181,31 @@ namespace HiTechStore.Controllers
         {
 
             var category = await _unitOfWork.Categories.GetModelByIdAsync(categoryId);
-
             var componentType = _mapper.Map<CategoryComponent>(componentDto);
+
+            if (componentType.ComponentId is not null)
+            {
+                var isExisted = category!.Components?.Any(cmp => cmp.ComponentId == componentType.ComponentId) ?? false;
+                // if component id specified then it tried to add existing component
+                // and we must fetch other data
+                if (isExisted)
+                {
+                    var component = await _unitOfWork.ComponentRepository.GetByIdAsync(componentDto.ComponentId!.Value);
+                    var problem = new ProblemDetails
+                    {
+                        Status = (int)HttpStatusCode.Conflict,
+                        Title = "Duplicated model",
+                        Detail = $"The component tried to insert for this category has existed before",
+                        Extensions = {
+                            ["component"] = component
+                        }
+                    };
+                    return new BadRequestObjectResult(problem) { StatusCode = problem.Status };
+                }
+            }
+
             category!.Components!.Add(componentType);
             await _unitOfWork.Complete();
-
-
-            // if component id specified then it tried to add existing component
-            // and we must fetch other data
-            if (componentDto.ComponentId is not null)
-            {
-                var component = await _unitOfWork.ComponentRepository.GetByIdAsync(componentDto.ComponentId.Value);
-                return Ok(component);
-            }
 
             return Ok(_mapper.Map<ComponentTypeDto>(componentType.Component));
 
