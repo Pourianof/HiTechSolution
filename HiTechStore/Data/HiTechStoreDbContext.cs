@@ -68,6 +68,13 @@ namespace HiTechStore.Data
                 }
             );
 
+            modelBuilder.Entity<CategoryComponent>(
+                entity =>
+                {
+                    entity.HasKey(categoryComponent => new { categoryComponent.ComponentId, categoryComponent.CategoryId });
+                }
+            );
+
         }
 
         public DbSet<Product> Products { get; set; }
