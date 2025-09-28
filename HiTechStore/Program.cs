@@ -2,6 +2,7 @@ using Core.Authorization;
 
 using HiTechStore.Controllers.ExceptionFilters;
 using HiTechStore.Core;
+using HiTechStore.Core.ExceptionHandlers;
 using HiTechStore.Data;
 using HiTechStore.Data.Seeders;
 using HiTechStore.Models;
@@ -106,10 +107,8 @@ builder.Services.AddProblemDetails();
 builder.Services.AddScoped<IAuthorizationHandler, SameAuthorAccessAuthorization>();
 builder.Services.AddScoped<IAuthorizationHandler, AdminIsAlwaysAuthorizedAuthorization>();
 
-builder.Services.AddControllers(options =>
-{
-    options.Filters.Add(typeof(GlobalExceptionFilter));
-});
+builder.Services.AddExceptionHandler<PgDbExceptionHandler>();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 var app = builder.Build();
 
@@ -144,6 +143,7 @@ app.UseStaticFiles(
     }
 );
 app.MapControllers();
+app.UseExceptionHandler();
 
 
 app.Run();

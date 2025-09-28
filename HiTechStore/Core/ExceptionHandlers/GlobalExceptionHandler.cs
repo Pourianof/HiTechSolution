@@ -1,22 +1,21 @@
 using HiTechStore.Core.Exceptions;
 
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace HiTechStore.Controllers.ExceptionFilters;
 
-public class GlobalExceptionFilter : ExceptionFilterAttribute
+public class GlobalExceptionHandler : IExceptionHandler
 {
-    private ILogger<GlobalExceptionFilter> _logger;
-    public GlobalExceptionFilter(ILogger<GlobalExceptionFilter> logger)
+    private ILogger<GlobalExceptionHandler> _logger;
+    public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
     {
         _logger = logger;
     }
-    public override void OnException(ExceptionContext context)
+    public ValueTask<bool> TryHandleAsync(HttpContext context, Exception exception, CancellationToken cancellationToken)
     {
-        _logger.LogError(context.Exception, "Unhandled exception");
+        _logger.LogError(exception, "Unhandled exception");
 
-        var exception = context.Exception;
 
         ProblemDetails problem;
         if (exception.IsChecked())
@@ -28,6 +27,11 @@ public class GlobalExceptionFilter : ExceptionFilterAttribute
 
             problem = new ProblemDetails { Title = "Error", Detail = "Some error happened.", Status = StatusCodes.Status500InternalServerError };
         }
-        context.Result = new ObjectResult(problem) { StatusCode = problem.Status };
+
+        context.Response.StatusCode = problem.Status ?? 500;
+        context.Response.WriteAsJsonAsync(problem);
+
+
+        return ValueTask.FromResult(true);
     }
 }
