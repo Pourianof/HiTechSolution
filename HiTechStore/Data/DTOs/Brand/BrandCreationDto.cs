@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HiTechStore.Data.DTOs.Brand;
 
-public class CreateBrandDto
+public class BrandCreationDto
 {
     [Required]
     [MinLength(2)]

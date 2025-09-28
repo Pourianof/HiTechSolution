@@ -11,7 +11,7 @@ namespace HiTechStore.Controllers.ActionFilters
     {
 
         protected readonly IUnitOfWork UnitOfWork;
-        protected IRepositoryModelIndependent Repo { get; set; }
+        protected IRepositoryModelBase<TModel> Repo { get; set; }
         private readonly System.Type _entityType;
 
 

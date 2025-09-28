@@ -77,7 +77,7 @@ namespace HiTechStore.Data.Repositories
         public virtual async Task<T?> GetModelByIdAsync(int id)
         {
             var query = GetByIdAsyncQueryBuilder(_dbSet);
-            return await query.FindById(id).FirstAsync();
+            return await query.FindById(id).FirstOrDefaultAsync();
         }
 
         public virtual async Task AddAsync(T entity)
@@ -99,6 +99,11 @@ namespace HiTechStore.Data.Repositories
                 _dbSet.Remove(entity);
             }
             return Task.CompletedTask;
+        }
+
+        public virtual Task<int> DeleteImmediately(int id)
+        {
+            return _dbSet.FindById(id).ExecuteDeleteAsync();
         }
 
         public virtual Task<bool> IsExistsAsync(int id)

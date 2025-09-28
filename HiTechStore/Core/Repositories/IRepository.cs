@@ -7,16 +7,23 @@ namespace HiTechStore.Core.Repositories
     {
         Task<bool> IsExistsAsync(int id);
     }
-    public interface IRepositoryBase<T, O> : IRepositoryModelIndependent
+
+    public interface IRepositoryModelBase<TModel> : IRepositoryModelIndependent
+        where TModel : class, IModel
+    {
+        Task<TModel?> GetModelByIdAsync(int id);
+        Task AddAsync(TModel entity);
+        Task Delete(TModel entity);
+        Task Delete(int id);
+        Task<int> DeleteImmediately(int id);
+    }
+
+    public interface IRepositoryBase<T, O> : IRepositoryModelBase<T>
         where T : class, IModel
         where O : class
     {
         Task<IEnumerable<O>> GetAllAsync();
         Task<O?> GetByIdAsync(int id);
-        Task<T?> GetModelByIdAsync(int id);
-        Task AddAsync(T entity);
-        Task Delete(T entity);
-        Task Delete(int id);
     }
     public interface IRepositoryBase<T> : IRepositoryBase<T, T>
        where T : class, IModel

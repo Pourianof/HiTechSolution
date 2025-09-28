@@ -17,8 +17,8 @@ public static class UnitOfWorkExtensions
         ).FirstOrDefault()?.GetValue(unitOfWork);
     }
 
-    public static IRepositoryModelIndependent? GetRepositoryOfModelType<TModel>(this IUnitOfWork unitOfWork)
-        where TModel : IModel
+    public static IRepositoryModelBase<TModel>? GetRepositoryOfModelType<TModel>(this IUnitOfWork unitOfWork)
+        where TModel : class, IModel
     {
         var targetType = unitOfWork.GetType();
         var modelType = typeof(TModel);
@@ -37,7 +37,7 @@ public static class UnitOfWorkExtensions
                 i.GenericDefinition == typeof(IRepository<>)) && i.FirstArg == modelType))
 
             {
-                return prop.GetValue(unitOfWork) as IRepositoryModelIndependent;
+                return prop.GetValue(unitOfWork) as IRepositoryModelBase<TModel>;
             }
         }
 

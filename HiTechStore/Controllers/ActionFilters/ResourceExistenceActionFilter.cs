@@ -33,14 +33,16 @@ public class ResourceExistenceActionFilterAttribute<TModel> : ModelAccessorBaseA
 
         if (resourceId is not null)
         {
-            var isExist = Repo.IsExistsAsync(resourceId.Value).Result;
+            var model = Repo.GetModelByIdAsync(resourceId.Value).Result;
 
-            if (!isExist)
+            if (model is null)
             {
                 var problemDetails = new ProblemDetails { Status = StatusCodes.Status404NotFound, Title = "Resource not found", Detail = $"No {EntityName} found with id {resourceId}" };
                 context.Result = new NotFoundObjectResult(problemDetails);
                 return;
             }
+
+            context.HttpContext.Items["resource"] = model;
         }
     }
 }

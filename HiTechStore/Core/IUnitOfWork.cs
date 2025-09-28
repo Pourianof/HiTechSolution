@@ -8,6 +8,8 @@ namespace HiTechStore.Core
         ICategoryRepository Categories { get; }
         IProductScoresRepository ProductScores { get; }
         IComponentRepository ComponentRepository { get; }
+        IBrandRepository BrandRepository { get; }
+        IBrandModelRepository BrandModelRepository { get; }
         Task<int> Complete();
     }
 }
