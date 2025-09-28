@@ -35,7 +35,7 @@ public class MappingProfile : Profile
             .ForMember((dest) => dest.Components, (opt) => opt.MapFrom((src) => src.ComponentModels));
         CreateMap<ProductPropertyValue, PropertyValueDto>()
             .ForMember((dest) => dest.Name, (opt) => opt.MapFrom((p) => p.Property!.Name))
-            .ForMember(dest => dest.ValueType, opt => opt.MapFrom(src => src.Property!.propertyType));
+            .ForMember(dest => dest.ValueType, opt => opt.MapFrom(src => src.Property!.PropertyType));
         CreateMap<ProductMedia, ProductMediaDto>().ForMember((dest) => dest.Url, (opt) => opt.MapFrom(src => src.FilePath));
     }
 

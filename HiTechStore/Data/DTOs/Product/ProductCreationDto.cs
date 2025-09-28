@@ -1,10 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
+using HiTechStore.Data.DTOs;
 using HiTechStore.Data.DTOs.Binders;
 using HiTechStore.Data.DTOs.Product;
 using HiTechStore.Data.DTOs.Product.Validations;
-using HiTechStore.Helpers.Types;
 
 namespace HiTechStore.DTOs.Product
 {
@@ -53,15 +53,5 @@ public class ProductCategoryValuesDto
     [JsonPropertyName("componentsValues")]
     public ComponentsPropertiesValuesDto? ComponentsPropertiesValues { get; set; }
 
-}
-
-public class PropertyValueEntryCreationDto
-{
-    [Required]
-    [JsonPropertyName("propertyId")]
-    public int? PropertyId { get; set; } = null;
-    [Required]
-    [JsonPropertyName("propertyValue")]
-    public string? PropertyValue { get; set; }
 }
 

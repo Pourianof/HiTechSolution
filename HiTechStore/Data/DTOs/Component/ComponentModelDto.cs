@@ -7,6 +7,8 @@ public class ComponentTypeDto
     public int? ComponentTypeId { get; set; }
     public string? Name { get; set; }
     public string? Description { get; set; }
+    public IEnumerable<PropertyDto>? Properties { get; set; }
+
 }
 
 public class ComponentModelDto

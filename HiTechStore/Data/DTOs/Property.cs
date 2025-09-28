@@ -7,9 +7,10 @@ namespace HiTechStore.Data.DTOs;
 
 public class PropertyDto
 {
+    public int PropertyId { get; set; }
     public string? Name { get; set; }
     public string? Description { get; set; }
-    public DataType? PropertyType { get; set; }
+    public PropertyType? PropertyType { get; set; }
 
 }
 
@@ -38,3 +39,14 @@ public class PropertyValueDto
     public int PropertyId { get; set; }
     public PropertyType ValueType { get; set; }
 }
+
+public class PropertyValueEntryCreationDto
+{
+    [Required]
+    [JsonPropertyName("propertyId")]
+    public int? PropertyId { get; set; } = null;
+    [Required]
+    [JsonPropertyName("propertyValue")]
+    public string? PropertyValue { get; set; }
+}
+

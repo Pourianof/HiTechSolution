@@ -15,7 +15,7 @@ public class Property
     public string? Name { get; set; }
     public string? Description { get; set; }
     public string? Unit { get; set; }
-    public virtual PropertyType propertyType { get; set; }
+    public virtual PropertyType PropertyType { get; set; }
 }
 
 public class PropertyValue
