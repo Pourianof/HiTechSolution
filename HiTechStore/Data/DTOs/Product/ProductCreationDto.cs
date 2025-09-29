@@ -36,10 +36,6 @@ public class ComponentsPropertiesValuesDto
     [Required]
     [JsonPropertyName("componentModelId")]
     public int? ComponentModelId { get; set; } = null; // null just for model binding error
-    [Required]
-    [MinLength(1)]
-    [JsonPropertyName("properties")]
-    public IEnumerable<PropertyValueEntryCreationDto>? Properties { get; set; }
 }
 
 
@@ -50,8 +46,8 @@ public class ProductCategoryValuesDto
     public int? CategoryId { get; set; } = null; // null just for model binding error
     [JsonPropertyName("properties")]
     public IEnumerable<PropertyValueEntryCreationDto>? Properties { get; set; }
-    [JsonPropertyName("componentsValues")]
-    public ComponentsPropertiesValuesDto? ComponentsPropertiesValues { get; set; }
+    [JsonPropertyName("componentModels")]
+    public IEnumerable<int>? ComponentModels { get; set; }
 
 }
 

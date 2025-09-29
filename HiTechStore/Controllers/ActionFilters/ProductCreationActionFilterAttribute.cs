@@ -65,12 +65,55 @@ public class ProductCreationActionFilterAttribute : ModelAccessorBaseActionFilte
             var categoryId = product.CategoryValues.CategoryId!.Value;
             createdProduct.CategoryId = categoryId;
 
-            // load the valid properties based on category
-            var categoryProperties = UnitOfWork.Categories.GetCategoryPropertiesAsync(categoryId).Result;
+            var productCategory = UnitOfWork.Categories.GetByIdAsync(categoryId).Result;
+
+            if (productCategory is null)
+            {
+                var problem = new ProblemDetails()
+                {
+                    Title = "Category not found",
+                    Detail = $"Category with id {categoryId} not exist",
+                    Status = StatusCodes.Status404NotFound
+                };
+                context.Result = new NotFoundObjectResult(problem);
+                return;
+            }
+
+
+            if (product.CategoryValues.ComponentModels != null && product.CategoryValues.ComponentModels.Any())
+            {
+                var componentModelIds = product.CategoryValues.ComponentModels;
+
+                var categoryValidModels = UnitOfWork.Categories.GetModelsOfCategory(categoryId, componentModelIds).Result;
+
+                for (var index = 0; index < componentModelIds.Count(); index++)
+                {
+                    var modelId = componentModelIds.ElementAt(index);
+                    var componentModel = categoryValidModels.Where((cvm) => cvm.ComponentModelId == modelId).FirstOrDefault();
+
+                    if (componentModel is null)
+                    {
+                        context.ModelState.AddModelError($"categoryValues.componentModels.{index}",
+                            $"specified component model-id is not belong to a component of the '{productCategory.Name}' category");
+                        var problem = new ValidationProblemDetails(context.ModelState)
+                        {
+                            Status = StatusCodes.Status400BadRequest
+                        };
+                        context.Result = new BadRequestObjectResult(problem);
+                        return;
+                    }
+
+                    createdProduct.ComponentModels.Add(componentModel);
+                }
+
+
+            }
+
+            var categoryProperties = productCategory.Properties;
 
             createdProduct.Properties = new List<ProductPropertyValue>();
 
-            for (int index = 0; index < product.CategoryValues!.Properties!.Count(); index++)
+            for (int index = 0; index < (product.CategoryValues.Properties?.Count() ?? 0); index++)
             {
                 var prop = product.CategoryValues.Properties!.ElementAt(index);
 
@@ -89,7 +132,7 @@ public class ProductCreationActionFilterAttribute : ModelAccessorBaseActionFilte
                 };
 
                 // get the property which this item target to
-                var actualProp = categoryProperties.FirstOrDefault((p) => p.PropertyId == prop.PropertyId);
+                var actualProp = categoryProperties?.FirstOrDefault((p) => p.PropertyId == prop.PropertyId);
 
                 if (actualProp is null)
                 {
@@ -100,12 +143,9 @@ public class ProductCreationActionFilterAttribute : ModelAccessorBaseActionFilte
 
                 var pv = new PropertyValue();
 
-                // try to Convert the value to the type which defined in property specification
-                pv.PopulateValue(actualProp.PropertyType, prop.PropertyValue);
-
                 try
                 {
-                    pv.PopulateValue(actualProp.PropertyType, prop.PropertyValue);
+                    pv.PopulateValue(actualProp.PropertyType!.Value, prop.PropertyValue);
                 }
                 catch (PropertyValueTypeDismatchException ex)
                 {
@@ -119,8 +159,8 @@ public class ProductCreationActionFilterAttribute : ModelAccessorBaseActionFilte
                 ppv.Value = pv;
                 createdProduct.Properties.Append(ppv);
             }
-
         }
+
 
         createdProduct.AuthorId = userId;
 

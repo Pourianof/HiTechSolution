@@ -31,5 +31,15 @@ namespace HiTechStore.Data.Repositories
                         .Select((c) => c.Properties).FirstAsync()) ?? new List<Property>();
         }
 
+        public async Task<IEnumerable<ComponentModel>> GetModelsOfCategory(int categoryId, IEnumerable<int> modelIds)
+        {
+            return await _context.Categories.Where(c => c.CategoryId == categoryId)
+                        .SelectMany((cc) => cc.Components!)
+                        .Select(ct => ct.Component)
+                        .SelectMany((c) => c!.ComponentModels!)
+                        .Where(cm => modelIds.Contains(cm.ComponentModelId))
+                        // .Include(cm => cm.ComponentType)
+                        .ToListAsync();
+        }
     }
 }

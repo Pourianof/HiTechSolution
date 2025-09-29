@@ -71,7 +71,7 @@ namespace HiTechStore.Data.Repositories
         public virtual async Task<O?> GetByIdAsync(int id)
         {
             var query = GetByIdAsyncQueryBuilder(_dbSet);
-            return await Project(query.FindById(id)).FirstAsync();
+            return await Project(query.FindById(id)).FirstOrDefaultAsync();
         }
 
         public virtual async Task<T?> GetModelByIdAsync(int id)
