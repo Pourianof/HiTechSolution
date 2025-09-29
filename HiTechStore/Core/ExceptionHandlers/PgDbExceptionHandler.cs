@@ -53,17 +53,17 @@ public class PgDbExceptionHandler : IExceptionHandler
             return null;
         }
 
-        var pattern = @"^IX_\w+_(Normalized)(\w+)$";
-        var match = Regex.Match(constraint, pattern, RegexOptions.IgnoreCase);
+        var lastPart = constraint.Split('_').ElementAt(^1);
 
-        if (match.Success)
+        if (lastPart is string)
         {
-            if (match.Groups[1].Value.ToLower() == "normalized")
+            var normalizedStr = "normalized";
+            if (lastPart.ToLower().StartsWith(normalizedStr))
             {
-                return match.Groups[2].Value;
+                return lastPart.Substring(normalizedStr.Length);
             }
 
-            return match.Groups[1].Value;
+            return lastPart;
 
         }
 

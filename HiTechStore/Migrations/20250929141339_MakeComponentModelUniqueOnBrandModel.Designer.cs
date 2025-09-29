@@ -3,6 +3,7 @@ using System;
 using HiTechStore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HiTechStore.Migrations
 {
     [DbContext(typeof(HiTechStoreDbContext))]
-    partial class HiTechStoreDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250929141339_MakeComponentModelUniqueOnBrandModel")]
+    partial class MakeComponentModelUniqueOnBrandModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

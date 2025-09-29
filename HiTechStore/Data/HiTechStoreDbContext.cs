@@ -75,6 +75,15 @@ namespace HiTechStore.Data
                 }
             );
 
+            modelBuilder.Entity<ComponentModel>(
+                (entity) =>
+                {
+                    entity
+                        .HasIndex(m => new { m.ComponentTypeId, m.BrandModelId })
+                        .IsUnique();
+                }
+            );
+
             modelBuilder.Entity<Brand>(
                 (entity) =>
                 {

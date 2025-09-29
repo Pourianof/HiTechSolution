@@ -18,6 +18,7 @@ public class ComponentModel : IModel
     public int ComponentModelId { get; set; }
     public virtual int? ComponentTypeId { get; set; }
     public virtual ComponentType? ComponentType { get; set; }
+    public virtual int? BrandModelId { get; set; }
     public virtual BrandModel? BrandModel { get; set; }
     public string? Description { get; set; }
     public virtual IEnumerable<ComponentPropertyValue>? Properties { get; set; }
