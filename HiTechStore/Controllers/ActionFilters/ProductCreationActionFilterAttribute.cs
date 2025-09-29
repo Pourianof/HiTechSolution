@@ -9,6 +9,8 @@ using AutoMapper;
 using HiTechStore.Helpers.IO;
 using HiTechStore.Data.DTOs.Product;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using HiTechStore.Helpers.Types;
+using HiTechStore.Core.Exceptions;
 
 namespace HiTechStore.Controllers.ActionFilters;
 
@@ -99,33 +101,21 @@ public class ProductCreationActionFilterAttribute : ModelAccessorBaseActionFilte
                 var pv = new PropertyValue();
 
                 // try to Convert the value to the type which defined in property specification
+                pv.PopulateValue(actualProp.PropertyType, prop.PropertyValue);
+
                 try
                 {
-
-                    switch (actualProp.propertyType)
-                    {
-                        case PropertyType.Number:
-                            pv.ValueNumber = Convert.ToDouble(prop.PropertyValue); break;
-                        case PropertyType.String:
-                            pv.ValueString = prop.PropertyValue; break;
-                        case PropertyType.Boolean:
-                            pv.ValueBoolean = Convert.ToBoolean(prop.PropertyValue); break;
-                        case PropertyType.DateTime:
-                            pv.ValueDateTime = Convert.ToDateTime(prop.PropertyValue); break;
-                        case PropertyType.Reference:
-                            pv.ValueReferenceId = Convert.ToInt16(prop.PropertyValue); break;
-                    }
+                    pv.PopulateValue(actualProp.PropertyType, prop.PropertyValue);
                 }
-                catch
+                catch (PropertyValueTypeDismatchException ex)
                 {
                     context.ModelState.AddModelError(
                         $"CategoryValues.Properties.{index}.PropertyValue",
-                        $"You need to provide a '{PropertyTypeHelper.GetNameOfCategoryPropertyType(actualProp.propertyType)}' type value for specified property"
+                        ex.Message
                     );
                     context.Result = InvalidModelState(context.ModelState);
                     return;
                 }
-
                 ppv.Value = pv;
                 createdProduct.Properties.Append(ppv);
             }

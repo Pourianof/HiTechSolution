@@ -14,7 +14,7 @@ public class ComponentTypeDto
 public class ComponentModelDto
 {
     public int ComponentModelId { get; set; }
-    public int? ComponentType { get; set; }
+    public int? ComponentTypeId { get; set; }
     public BrandModelDto? BrandModel { get; set; }
     public string? Description { get; set; }
     public IEnumerable<PropertyValueDto>? Properties { get; set; }

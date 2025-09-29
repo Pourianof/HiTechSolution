@@ -71,6 +71,18 @@ public class MappingProfile : Profile
     {
         CreateMap<Property, PropertyDto>();
         CreateMap<PropertyEntryCreationDto, Property>();
+        CreateMap<PropertyValueEntryCreationDto, ComponentPropertyValue>()
+            .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src));
+        CreateMap<PropertyValueEntryCreationDto, PropertyValue>()
+            .ForMember(dest => dest.ValueString, opt => opt.MapFrom(src => src.PropertyValue));
+        CreateMap<ComponentPropertyValue, PropertyValueDto>()
+            .ForMember((dest) => dest.Name, opt => opt.MapFrom(src => src.Property == null ? null : src.Property.Name))
+            .ForMember((dest) => dest.Value, opt => opt.MapFrom(src => src.Value != null ?
+                    (object?)src.Value.ValueNumber ??
+                    (object?)src.Value.ValueDateTime ??
+                    (object?)src.Value.ValueBoolean ??
+                    src.Value.ValueString
+                : null));
     }
 
     private void UserMap()

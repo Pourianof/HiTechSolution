@@ -34,7 +34,7 @@ public class PropertyEntryCreationDto
 
 public class PropertyValueDto
 {
-    public string? Value { get; set; }
+    public object? Value { get; set; }
     public string? Name { get; set; }
     public int PropertyId { get; set; }
     public PropertyType ValueType { get; set; }
@@ -47,6 +47,6 @@ public class PropertyValueEntryCreationDto
     public int? PropertyId { get; set; } = null;
     [Required]
     [JsonPropertyName("propertyValue")]
-    public string? PropertyValue { get; set; }
+    public object? PropertyValue { get; set; }
 }
 

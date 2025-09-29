@@ -2,7 +2,9 @@ using AutoMapper;
 
 using HiTechStore.Controllers.ActionFilters;
 using HiTechStore.Core;
+using HiTechStore.Core.Exceptions;
 using HiTechStore.Data.DTOs.Component;
+using HiTechStore.Helpers.Types;
 using HiTechStore.Models;
 
 using Microsoft.AspNetCore.Authorization;
@@ -49,10 +51,54 @@ public class ComponentsController : ControllerBase
         var component = await _unitOfWork.ComponentRepository.GetModelByIdAsync(id);
 
         var model = _mapper.Map<ComponentModel>(componentModelDto);
-        component!.ComponentModels!.Append(model);
+
+        if (component?.Properties == null || !component.Properties.Any())
+        {
+            model.Properties = new List<ComponentPropertyValue>();
+        }
+        else
+        {
+            for (int index = 0; index < (model.Properties ?? []).Count(); index++)
+            {
+                var prop = model.Properties!.ElementAt(index);
+                var errorPropPath = $"Properties.{index}.PropertyId";
+
+                var actualProperty = component.Properties.Where((p) => p.PropertyId == prop.PropertyId).FirstOrDefault();
+
+                if (actualProperty is null)
+                {
+                    ModelState.AddModelError(errorPropPath, $"No property with id {prop.Property!.PropertyId} registered for component with id {id}");
+                    var problem = new ValidationProblemDetails(ModelState)
+                    {
+                        Title = "Bad input",
+                        Detail = "Property not found",
+                        Status = StatusCodes.Status400BadRequest
+                    };
+                    return BadRequest(problem);
+                }
+
+                var propType = actualProperty.PropertyType;
+
+                try
+                {
+                    prop.Value!.PopulateValue(propType);
+                }
+                catch (PropertyValueTypeDismatchException ex)
+                {
+                    ModelState.AddModelError(
+                       errorPropPath,
+                       ex.Message
+                    );
+                    var problem = new ValidationProblemDetails(ModelState);
+                    return BadRequest(problem);
+                }
+            }
+        }
+
+        component!.ComponentModels!.Add(model);
         await _unitOfWork.Complete();
 
-        return Ok(model);
+        return Ok(_mapper.Map<ComponentModelDto>(model));
     }
 
     [HttpGet("{id}/models")]
@@ -61,6 +107,6 @@ public class ComponentsController : ControllerBase
     {
         var models = await _unitOfWork.ComponentRepository.GetComponentsModels(id);
 
-        return Ok(models);
+        return Ok(_mapper.Map<IEnumerable<ComponentModelDto>>(models));
     }
 }
