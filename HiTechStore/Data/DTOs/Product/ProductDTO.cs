@@ -11,10 +11,9 @@ public class ProductDto
     public string? AuthorId { get; set; }
     public List<PropertyValueDto> Properties { get; set; } = new();
     public List<ProductMediaDto> Media { get; set; } = new();
-    public int? Category { get; set; }
+    public int? CategoryId { get; set; }
     public List<ComponentModelDto> Components { get; set; } = new();
     public double? AverageScore { get; set; } = 0.0;
     public int ScoreCounts { get; set; } = 0;
     public int? MyScore { get; set; }
 }
-

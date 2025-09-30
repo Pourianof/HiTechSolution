@@ -46,7 +46,7 @@ namespace HiTechStore.Controllers
                 return NotFound();
             }
 
-            return _mapper.Map<ProductDto>(product);
+            return product;
         }
 
 

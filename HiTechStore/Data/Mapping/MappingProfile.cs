@@ -78,9 +78,9 @@ public class MappingProfile : Profile
         CreateMap<ComponentPropertyValue, PropertyValueDto>()
             .ForMember((dest) => dest.Name, opt => opt.MapFrom(src => src.Property == null ? null : src.Property.Name))
             .ForMember((dest) => dest.Value, opt => opt.MapFrom(src => src.Value != null ?
-                    (object?)src.Value.ValueNumber ??
-                    (object?)src.Value.ValueDateTime ??
-                    (object?)src.Value.ValueBoolean ??
+                    src.Value.ValueNumber != null ? (object?)src.Value.ValueNumber :
+                    src.Value.ValueDateTime != null ? (object?)src.Value.ValueDateTime :
+                    src.Value.ValueBoolean != null ? (object?)src.Value.ValueBoolean :
                     src.Value.ValueString
                 : null));
     }

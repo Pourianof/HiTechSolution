@@ -107,6 +107,6 @@ public class ComponentsController : ControllerBase
     {
         var models = await _unitOfWork.ComponentRepository.GetComponentsModels(id);
 
-        return Ok(_mapper.Map<IEnumerable<ComponentModelDto>>(models));
+        return Ok(models);
     }
 }

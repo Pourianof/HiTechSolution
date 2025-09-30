@@ -33,9 +33,11 @@ public class ComponentRepository : Repository<ComponentType, ComponentTypeDto>, 
                         .ProjectTo<ComponentTypeDto>(_mapper.ConfigurationProvider).FirstOrDefaultAsync();
     }
 
-    public async Task<IEnumerable<ComponentModel>> GetComponentsModels(int componentId)
+    public async Task<IEnumerable<ComponentModelDto>> GetComponentsModels(int componentId)
     {
         return await _context.ComponentType.Where((cmp) => cmp.ComponentTypeId == componentId)
-                        .SelectMany(cmp => cmp.ComponentModels!).ToListAsync();
+                        .SelectMany(cmp => cmp.ComponentModels!)
+                        .ProjectTo<ComponentModelDto>(_mapper.ConfigurationProvider)
+                        .ToListAsync();
     }
 }
