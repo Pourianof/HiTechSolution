@@ -1,7 +1,9 @@
+using HiTechStore.Helpers.URLFilterQuery;
+
 namespace HiTechStore.Data.Queries;
 
 public class ProductQuery : BaseQuery
 {
-    public int? Category { get; set; }
+    public QueryFilterItem<int>? Category { get; set; }
     // public 
 }

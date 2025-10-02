@@ -1,7 +1,9 @@
+using HiTechStore.Helpers.URLFilterQuery;
+
 namespace HiTechStore.Data.Queries;
 
 public class BaseQuery
 {
-    public short? Limit { get; set; }
-    public int? Page { get; set; }
+    public QueryFilterItem<int>? Limit { get; set; }
+    public QueryFilterItem<int>? Page { get; set; }
 }

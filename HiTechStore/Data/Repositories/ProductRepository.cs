@@ -45,7 +45,7 @@ namespace HiTechStore.Data.Repositories
         {
             if (productQueryParams?.Category is not null)
             {
-                queryBuilder.Where((p) => p.CategoryId == productQueryParams.Category);
+                queryBuilder = queryBuilder.Where((p) => productQueryParams.Category.Value == p.CategoryId);
             }
 
             return BaseGettingQuery(queryBuilder);

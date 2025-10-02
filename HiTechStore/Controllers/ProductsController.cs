@@ -7,7 +7,9 @@ using HiTechStore.Controllers.ActionFilters;
 using HiTechStore.Controllers.ExceptionFilters;
 using HiTechStore.Core;
 using HiTechStore.Data.DTOs.Product;
+using HiTechStore.Data.Queries;
 using HiTechStore.DTOs.Product;
+using HiTechStore.Helpers.URLFilterQuery;
 using HiTechStore.Models;
 
 using Microsoft.AspNetCore.Authorization;
@@ -29,9 +31,9 @@ namespace HiTechStore.Controllers
         }
 
         [HttpGet]
-        public async Task<IEnumerable<ProductDto>> GetProducts()
+        public async Task<IEnumerable<ProductDto>> GetProducts([ToQuery] ProductQuery query)
         {
-            var products = await _unitOfWork.Products.GetAllAsync();
+            var products = await _unitOfWork.Products.GetAllAsync(query);
             return products;
         }
 

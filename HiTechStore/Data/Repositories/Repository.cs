@@ -37,14 +37,14 @@ namespace HiTechStore.Data.Repositories
 
             if (queryParams?.Page is not null)
             {
-                query.Skip(
-                    (queryParams.Limit ?? 0) * (queryParams.Page.Value - 1)
+                query = query.Skip(
+                    (queryParams.Limit?.Value ?? 0) * (queryParams.Page.Value - 1)
                 );
             }
 
             if (queryParams?.Limit is not null)
             {
-                query.Take(queryParams.Limit.Value);
+                query = query.Take(queryParams.Limit.Value);
             }
 
             return await Project(query).ToListAsync();

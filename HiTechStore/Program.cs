@@ -5,6 +5,7 @@ using HiTechStore.Core;
 using HiTechStore.Core.ExceptionHandlers;
 using HiTechStore.Data;
 using HiTechStore.Data.Seeders;
+using HiTechStore.Helpers.URLFilterQuery;
 using HiTechStore.Models;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -20,7 +21,12 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(
+    (options) =>
+    {
+        options.ModelBinderProviders.Insert(0, new ToQueryModelBinderProvider());
+    }
+);
 
 var baseConnStr = builder.Configuration.GetConnectionString("DefaultConnection");
 var username = builder.Configuration["Db:Username"];
@@ -34,6 +40,7 @@ builder.Services.AddDbContext<HiTechStoreDbContext>(options =>
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
+builder.Services.AddQueryParser();
 
 // Set Identity
 builder.Services.AddIdentity<User, IdentityRole>()
