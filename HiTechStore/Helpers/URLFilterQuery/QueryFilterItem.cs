@@ -18,6 +18,19 @@ public class QueryFilterItem<TValue>(string Name, StringValues Value, QueryOpera
         }
     }
     public QueryOperator Op { get; } = Op;
+
+    public TTarget? GetValue<TTarget>()
+    {
+        return QueryFilterItemHelper.Convert<TTarget>(_val);
+    }
+
+    public void Deconstruct(out string name, out string? value, out QueryOperator op)
+    {
+        name = Name;
+        value = _val;
+        op = Op;
+    }
+
 }
 
 public class QueryFilterItem
@@ -65,7 +78,7 @@ static class QueryFilterItemHelper
 
             return (TTarget)System.Convert.ChangeType(actualValue, targetType);
         }
-        catch (InvalidCastException)
+        catch (Exception)
         {
             return default;
         }

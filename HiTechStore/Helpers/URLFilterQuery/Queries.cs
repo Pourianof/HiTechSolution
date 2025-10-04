@@ -1,3 +1,5 @@
+using Castle.Core.Internal;
+
 namespace HiTechStore.Helpers.URLFilterQuery;
 
 public class Queries
@@ -21,25 +23,47 @@ public class Queries
             return obj;
         }
 
-        foreach (var prop in props)
-        {
-            var propName = prop.Name;
-            var propType = prop.PropertyType;
+        List<string> unMatchedKeys = new();
 
-            if (_queries.ContainsKey(propName) && markerType.IsAssignableFrom(propType))
+        foreach (var (key, val) in _queries)
+        {
+            var matchedProp = props.FirstOrDefault((prop) => string.Equals(prop.Name, key, StringComparison.OrdinalIgnoreCase)
+                                                                && markerType.IsAssignableFrom(prop.PropertyType));
+
+            if (matchedProp is not null)
             {
+                var propName = matchedProp.Name;
+                var propType = matchedProp.PropertyType;
                 var genericType = propType.GetGenericArguments().FirstOrDefault();
                 object? queryFilterItem = _queries[propName];
 
                 if (genericType is not null)
                 {
                     var constructor = propType.GetConstructors().FirstOrDefault();
-                    var baseQueryFilterItem = (QueryFilterItem)queryFilterItem;
+                    var baseQueryFilterItem = val;
                     queryFilterItem = constructor?.Invoke([baseQueryFilterItem.Name, baseQueryFilterItem.Value, baseQueryFilterItem.Op]);
                 }
-                prop.SetValue(obj, queryFilterItem);
+                matchedProp.SetValue(obj, queryFilterItem);
+                continue;
+            }
+
+            unMatchedKeys.Add(key);
+        }
+
+        if (unMatchedKeys.Count() > 0)
+        {
+
+            var miscQueryFiltersProperty = props.FirstOrDefault(
+                 (prop) => prop.GetAttribute<QueryFiltersMarkerAttribute>() is not null
+             );
+
+            if (miscQueryFiltersProperty is not null)
+            {
+                var remainedFilters = _queries.Where((filter) => unMatchedKeys.Any(umk => umk == filter.Key)).ToDictionary();
+                miscQueryFiltersProperty?.SetValue(obj, remainedFilters);
             }
         }
+
 
         return obj;
     }
