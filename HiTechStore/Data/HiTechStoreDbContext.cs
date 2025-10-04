@@ -46,6 +46,19 @@ namespace HiTechStore.Data
                     entity.Property(e => e.CreatedAt)
                       .HasDefaultValueSql("CURRENT_TIMESTAMP"); // For Postgress
                     entity.HasQueryFilter((p) => p.IsDeleled == null || !p.IsDeleled!.Value);
+
+                    entity.HasMany((p) => p.ComponentModels)
+                        .WithMany()
+                        .UsingEntity<Dictionary<string, object>>(
+                            "ProductComponents",
+                            entity => entity.HasOne<ComponentModel>().WithMany().HasForeignKey("ComponentModelId"),
+                            entity => entity.HasOne<Product>().WithMany().HasForeignKey("ProductId"),
+                            entity =>
+                            {
+                                entity.HasKey("ProductId", "ComponentModelId");
+                                entity.HasIndex("ProductId", "ComponentModelId").IsUnique();
+                            }
+                            );
                 }
             );
 
