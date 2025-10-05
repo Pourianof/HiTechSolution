@@ -8,7 +8,7 @@ public class Queries
 
     public void Register(QueryFilterItem queryFilterItem)
     {
-        _queries.Add(queryFilterItem.Name, queryFilterItem);
+        _queries.Add($"{queryFilterItem.Name}_{queryFilterItem.Op}", queryFilterItem);
     }
 
     public object? MapTo(Type targetType)
@@ -27,7 +27,7 @@ public class Queries
 
         foreach (var (key, val) in _queries)
         {
-            var matchedProp = props.FirstOrDefault((prop) => string.Equals(prop.Name, key, StringComparison.OrdinalIgnoreCase)
+            var matchedProp = props.FirstOrDefault((prop) => string.Equals(prop.Name, val.Name, StringComparison.OrdinalIgnoreCase)
                                                                 && markerType.IsAssignableFrom(prop.PropertyType));
 
             if (matchedProp is not null)
@@ -35,7 +35,7 @@ public class Queries
                 var propName = matchedProp.Name;
                 var propType = matchedProp.PropertyType;
                 var genericType = propType.GetGenericArguments().FirstOrDefault();
-                object? queryFilterItem = _queries[propName];
+                object? queryFilterItem = _queries[key];
 
                 if (genericType is not null)
                 {

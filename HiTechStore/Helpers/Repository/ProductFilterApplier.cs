@@ -29,7 +29,7 @@ public static class ProductFilterApplier
             IEnumerable<(string ComponentName, string PropertyName)> referedComponentProperties = multiPartKeys.Select(
                 (mpk) =>
                 {
-                    var parts = mpk.Key.Split('.', 2, StringSplitOptions.RemoveEmptyEntries |
+                    var parts = mpk.Value.Name.Split('.', 2, StringSplitOptions.RemoveEmptyEntries |
                                                     StringSplitOptions.TrimEntries);
 
                     return (ComponentName: parts[0], PropertyName: parts[1]);
@@ -41,7 +41,7 @@ public static class ProductFilterApplier
                  (mpk) =>
                  {
                      var (key, filter) = mpk;
-                     var parts = key.Split('.', 2, StringSplitOptions.RemoveEmptyEntries |
+                     var parts = filter.Name.Split('.', 2, StringSplitOptions.RemoveEmptyEntries |
                                                      StringSplitOptions.TrimEntries);
 
                      // All types defined as Nullable because all PropertyValue.Value*** has defined as nullable,
