@@ -1,5 +1,6 @@
 namespace HiTechStore.Helpers.URLFilterQuery;
 
+using System.Collections;
 
 using Microsoft.Extensions.Primitives;
 
@@ -53,7 +54,7 @@ static class QueryFilterItemHelper
         }
         try
         {
-            var enumerableType = typeof(IEnumerable<>);
+            var enumerableType = typeof(IEnumerable);
 
             if (enumerableType.IsAssignableFrom(targetType))
             {
@@ -63,9 +64,32 @@ static class QueryFilterItemHelper
                     return default;
                 }
 
-                return (TTarget)value.Select(
-                    (v) => System.Convert.ChangeType(value, actualType)
-                );
+                var elementType = targetType.GetGenericArguments()[0];
+
+                var converted = value
+                    .Select(v => System.Convert.ChangeType(v, elementType))
+                    .ToList();
+
+                if (targetType.IsArray)
+                {
+                    var array = Array.CreateInstance(elementType, converted.Count);
+                    converted.ToArray().CopyTo(array, 0);
+                    return (TTarget)(object)array;
+                }
+                else
+                {
+                    var listType = typeof(List<>).MakeGenericType(elementType);
+                    var list = (IList?)Activator.CreateInstance(listType);
+                    if (list is null)
+                    {
+                        return default;
+                    }
+                    foreach (var item in converted)
+                    {
+                        list.Add(item);
+                    }
+                    return (TTarget)list;
+                }
             }
 
 
