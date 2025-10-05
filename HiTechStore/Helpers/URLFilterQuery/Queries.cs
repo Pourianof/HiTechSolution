@@ -1,5 +1,6 @@
-using Castle.Core.Internal;
+using AutoMapper.Internal;
 
+using Castle.Core.Internal;
 namespace HiTechStore.Helpers.URLFilterQuery;
 
 public class Queries
@@ -25,10 +26,21 @@ public class Queries
 
         List<string> unMatchedKeys = new();
 
+        var namespacedProperties = props.Where((prop) => prop.Has<NamespacedQueryFiltersMarkerAttribute>())
+             .Select(
+                 (prop) => new
+                 {
+                     Property = prop,
+                     prop.GetAttribute<NamespacedQueryFiltersMarkerAttribute>().Namespace,
+                     Storage = new Dictionary<string, QueryFilterItem>()
+                 }
+             ).ToList();
+
         foreach (var (key, val) in _queries)
         {
             var matchedProp = props.FirstOrDefault((prop) => string.Equals(prop.Name, val.Name, StringComparison.OrdinalIgnoreCase)
                                                                 && markerType.IsAssignableFrom(prop.PropertyType));
+            var associatedFilter = _queries[key];
 
             if (matchedProp is not null)
             {
@@ -47,14 +59,43 @@ public class Queries
                 continue;
             }
 
+            // Populate namespaced properties
+            var matchedNamespacedProperty = namespacedProperties.FirstOrDefault(
+                (nsp) => val.Name.StartsWith($"{nsp.Namespace}.", StringComparison.OrdinalIgnoreCase)
+            );
+
+            if (matchedNamespacedProperty is not null)
+            {
+                var scopedKey = val.Name.Substring(matchedNamespacedProperty.Namespace.Length + 1);
+                var filter = new QueryFilterItem(
+                    scopedKey, associatedFilter.Value, associatedFilter.Op
+                );
+                matchedNamespacedProperty.Storage.Add(
+                    scopedKey, filter
+                );
+                continue;
+            }
+
             unMatchedKeys.Add(key);
+        }
+
+        foreach (var nsp in namespacedProperties)
+        {
+            if (nsp.Storage.Count() == 0)
+            {
+                continue;
+            }
+
+            nsp.Property.SetValue(
+                obj, nsp.Storage
+            );
         }
 
         if (unMatchedKeys.Count() > 0)
         {
 
             var miscQueryFiltersProperty = props.FirstOrDefault(
-                 (prop) => prop.GetAttribute<QueryFiltersMarkerAttribute>() is not null
+                 (prop) => prop.GetAttribute<MiscQueryFiltersMarkerAttribute>() is not null
              );
 
             if (miscQueryFiltersProperty is not null)
