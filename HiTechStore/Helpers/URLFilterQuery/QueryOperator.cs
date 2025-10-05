@@ -8,5 +8,4 @@ public enum QueryOperator
     LessThan,
     LessThanOrEqual,
     In,
-    Contains
 }

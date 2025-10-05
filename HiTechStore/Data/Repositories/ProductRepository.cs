@@ -87,45 +87,131 @@ namespace HiTechStore.Data.Repositories
                              var (key, filter) = mpk;
                              var parts = key.Split('.', 2, StringSplitOptions.RemoveEmptyEntries |
                                                              StringSplitOptions.TrimEntries);
+
+                             // All types defined as Nullable because all PropertyValue.Value*** has defined as nullable,
+                             // and when we trying to using them in expression tree we not encounter different data type
                              var stringValue = filter.Value;
                              var numberValue = filter.GetValue<double>();
                              bool? booleanValue = string.Equals(stringValue, "true", StringComparison.OrdinalIgnoreCase) ? true :
                                                 string.Equals(stringValue, "false", StringComparison.OrdinalIgnoreCase) ? false : null;
                              var dateValue = filter.GetValue<DateTime>();
 
-                             return new ComponentFilter(parts[0], parts[1], new PropertyPossibleValues(stringValue, numberValue, dateValue, booleanValue));
+                             return new ComponentFilter(parts[0], parts[1], mpk.Value.Op, new PropertyPossibleValues(stringValue, numberValue, dateValue, booleanValue));
                          }
                      );
+
+                    var compareExpressionBuilder = (string valuePropertyName, QueryOperator op, object value, ParameterExpression param) =>
+                       {
+                           var propValue = Expression.Property(
+                                          Expression.Property(param, nameof(ComponentPropertyValue.Value)), valuePropertyName);
+                           var left = Expression.Convert(
+                            propValue,
+                            value.GetType()
+                           );
+
+                           var right = Expression.Constant(value);
+                           var ifNotNull = op switch
+                           {
+                               QueryOperator.Equal => Expression.Equal(left, right),
+                               QueryOperator.GreaterThan => Expression.GreaterThan(left, right),
+                               QueryOperator.LessThan => Expression.LessThan(left, right),
+                               QueryOperator.GreaterThanOrEqual => Expression.GreaterThanOrEqual(left, right),
+                               QueryOperator.LessThanOrEqual => Expression.LessThanOrEqual(left, right),
+                               _ => throw new NotSupportedException()
+                           };
+
+                           var notNullLeft = Expression.Condition(
+                            Expression.NotEqual(propValue, Expression.Constant(null)),
+                            ifNotNull,
+                            Expression.Constant(false)
+                           );
+
+                           return notNullLeft;
+
+                       };
 
                     // Improvement: use expression abstract tree to handle which type must eliminates based on
                     // if for that type the converted value is null
 
                     foreach (var filter in filters)
                     {
-                        var (componentTypeName, propertyName, (stringValue, numberValue, dateValue, booleanValue)) = filter;
+                        var (componentTypeName, propertyName, op, (stringValue, numberValue, dateValue, booleanValue)) = filter;
 
                         IEnumerable<string> desiredComponentBrandModels = singlePartKeys.Where((filter) => filter.Key == componentTypeName)
                                                             .Select(f => f.Value.GetValue<string>()?.ToLower())
                                                             .Where(modelName => !string.IsNullOrWhiteSpace(modelName))!;
 
+
+                        ParameterExpression param = Expression.Parameter(typeof(ComponentPropertyValue), "prop");
+
+                        var propertyType = Expression.Property(
+                                                Expression.Property(param, nameof(ComponentPropertyValue.Property)), nameof(Property.PropertyType));
+
+
+                        List<(PropertyType, string, object?)> typeValuePairs = new() {
+                                                            (PropertyType.String,  nameof(PropertyValue.ValueString), stringValue),
+                                                            (PropertyType.Number,  nameof(PropertyValue.ValueNumber),numberValue),
+                                                            (PropertyType.DateTime, nameof(PropertyValue.ValueDateTime), dateValue),
+                                                            (PropertyType.Boolean, nameof(PropertyValue.ValueBoolean), booleanValue)
+                                                        };
+
+                        // Try to create a nested condition for each non-null value
+                        // PropertyType.Number == prop.PropertyType
+                        // ================ This is like ==================
+                        // prop.Property!.PropertyType == PropertyType.Number ?
+                        //     prop.Value!.ValueNumber == numberValue :
+                        // prop.Property.PropertyType == PropertyType.Boolean ?
+                        //     prop.Value!.ValueBoolean == booleanValue :
+                        // prop.Property.PropertyType == PropertyType.String ?
+                        //     prop.Value!.ValueString == stringValue :
+                        // false
+
+                        Expression? lastCondition = null;
+                        foreach (var (type, name, val) in typeValuePairs)
+                        {
+                            if (val is null)
+                            {
+                                continue;
+                            }
+
+                            if (type == PropertyType.String &&
+                                    (op != QueryOperator.In || op != QueryOperator.Equal || op != QueryOperator.In)
+                                )
+                            {
+                                continue;
+                            }
+
+                            lastCondition = Expression.Condition(
+                                                Expression.Equal(propertyType, Expression.Constant(type)),
+                                                compareExpressionBuilder(name, op, val, param),
+                                                lastCondition is null ? Expression.Constant(false) : lastCondition
+                                            );
+                        }
+
+
+                        var ilikeExpr = Expression.Call(
+                            typeof(NpgsqlDbFunctionsExtensions),
+                            nameof(NpgsqlDbFunctionsExtensions.ILike),
+                            Type.EmptyTypes,
+                            Expression.Constant(EF.Functions),
+                            Expression.Property(
+                                Expression.Property(param, "Property"), "Name"
+                            ),
+                            Expression.Constant(propertyName)
+                        );
+
+                        Expression finalExpr = Expression.AndAlso(ilikeExpr, lastCondition ?? Expression.Constant(true));
+
+                        var lambda = Expression.Lambda<Func<ComponentPropertyValue, bool>>(finalExpr, param);
+
                         queryBuilder = queryBuilder.Where(
                             (p) => p.ComponentModels.Any(
                                 (cm) =>
-                                    desiredComponentBrandModels.Contains(cm.BrandModel!.Brand!.NormalizedName) &&
+                                    desiredComponentBrandModels.Count() > 0 ?
+                                    desiredComponentBrandModels.Contains(cm.BrandModel!.Brand!.NormalizedName)
+                                    : true &&
                                     EF.Functions.ILike(componentTypeName, cm.ComponentType!.Name!) &&
-                                    cm.Properties!.Any(
-                                        (prop) => EF.Functions.ILike(prop.Property!.Name!, propertyName) &&
-                                                (
-                                                    prop.Property.PropertyType == PropertyType.Number ?
-                                                        prop.Value!.ValueNumber == numberValue :
-                                                    prop.Property.PropertyType == PropertyType.Boolean ?
-                                                        prop.Value!.ValueBoolean == booleanValue :
-                                                    prop.Property.PropertyType == PropertyType.String ?
-                                                        prop.Value!.ValueString == stringValue :
-                                                    false
-                                                )
-
-                                )
+                                    cm.Properties!.AsQueryable().Any(lambda)
                             )
                         );
                     }
@@ -171,5 +257,5 @@ namespace HiTechStore.Data.Repositories
     }
 }
 
-record struct ComponentFilter(string ComponentName, string PropertyName, PropertyPossibleValues PossibleValues);
+record struct ComponentFilter(string ComponentName, string PropertyName, QueryOperator Operator, PropertyPossibleValues PossibleValues);
 record struct PropertyPossibleValues(string? ValueString, double? ValueNumber, DateTime? ValueDateTime, bool? ValueBoolean);
