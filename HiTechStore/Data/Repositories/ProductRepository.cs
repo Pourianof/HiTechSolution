@@ -138,7 +138,8 @@ namespace HiTechStore.Data.Repositories
                         var (componentTypeName, propertyName, op, (stringValue, numberValue, dateValue, booleanValue)) = filter;
 
                         IEnumerable<string> desiredComponentBrandModels = singlePartKeys.Where((filter) => filter.Key == componentTypeName)
-                                                            .Select(f => f.Value.GetValue<string>()?.ToLower())
+                                                            .SelectMany(f => f.Value.GetValue<IEnumerable<string>>() ?? [])
+                                                            .Select(mn => mn?.ToLower())
                                                             .Where(modelName => !string.IsNullOrWhiteSpace(modelName))!;
 
 
@@ -207,9 +208,9 @@ namespace HiTechStore.Data.Repositories
                         queryBuilder = queryBuilder.Where(
                             (p) => p.ComponentModels.Any(
                                 (cm) =>
-                                    desiredComponentBrandModels.Count() > 0 ?
+                                    (desiredComponentBrandModels.Count() > 0 ?
                                     desiredComponentBrandModels.Contains(cm.BrandModel!.Brand!.NormalizedName)
-                                    : true &&
+                                    : true) &&
                                     EF.Functions.ILike(componentTypeName, cm.ComponentType!.Name!) &&
                                     cm.Properties!.AsQueryable().Any(lambda)
                             )
