@@ -149,7 +149,12 @@ public static class ProductFilterApplier
 
             // Improvement: use expression abstract tree to handle which type must eliminates based on
             // if for that type the converted value is null
-            // Improbement2: First combine all filters expression and then use it in queryBuilder
+            // Improvement2: First combine all filters expression and then use it in queryBuilder
+            // Improvement3: Current way to finding target products is: Products -> components -> properties -> properValues
+            // in this way we must find the target products based on other tables, means that we loop over all products and
+            // their properties to find which one is matched
+            // But the suggested ways: categories -> components -> properties -> propertyvalues -> Products
+            // in this way we loop over the more light weight and finite tables first and the find the target Product Ids
             foreach (var filter in filters)
             {
                 IEnumerable<string> desiredComponentBrandModels = singlePartKeys.Where((f) => f.Key == filter.ComponentName)
