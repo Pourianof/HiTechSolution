@@ -56,7 +56,8 @@ namespace HiTechStore.Data.Repositories
                     queryBuilder = queryBuilder.Where((p) => productQueryParams.Category.Value == p.CategoryId);
                 }
 
-                queryBuilder = ProductFilterApplier.Apply(queryBuilder, productQueryParams.FilterMaps);
+                queryBuilder = ProductFilterApplier.Apply(queryBuilder, productQueryParams.FilterMaps,
+                                new CategoryFilters([productQueryParams.Category?.Value], productQueryParams.CategoryProperties));
 
             }
             return BaseGettingQuery(queryBuilder);
@@ -97,5 +98,3 @@ namespace HiTechStore.Data.Repositories
     }
 }
 
-record struct ComponentFilter(string ComponentName, string PropertyName, QueryOperator Operator, PropertyPossibleValues PossibleValues);
-record struct PropertyPossibleValues(string? ValueString, double? ValueNumber, DateTime? ValueDateTime, bool? ValueBoolean);

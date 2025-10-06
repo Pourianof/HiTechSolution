@@ -24,11 +24,8 @@ public class ComponentModel : IModel
     public virtual IEnumerable<ComponentPropertyValue>? Properties { get; set; }
 }
 
-public class ComponentPropertyValue
+public class ComponentPropertyValue : BaseItemPropertyValue
 {
     public int ComponentPropertyValueId { get; set; }
-    public virtual PropertyValue? Value { get; set; }
-    public int PropertyId { get; set; }
-    public virtual Property? Property { get; set; }
     public virtual ComponentModel? ComponentModel { get; set; }
 }

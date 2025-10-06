@@ -29,6 +29,14 @@ public class PropertyValue
     public int? ValueReferenceId { get; set; }
 }
 
+
+public class BaseItemPropertyValue
+{
+    public virtual PropertyValue? Value { get; set; }
+    public int PropertyId { get; set; }
+    public virtual Property? Property { get; set; }
+}
+
 public static class PropertyTypeHelper
 {
     public static string GetNameOfCategoryPropertyType(PropertyType type) => type switch

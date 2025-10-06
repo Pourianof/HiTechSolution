@@ -29,13 +29,11 @@ namespace HiTechStore.Models
         public virtual List<ComponentModel> ComponentModels { get; set; } = new();
     }
 
-    public class ProductPropertyValue
+    public class ProductPropertyValue : BaseItemPropertyValue
     {
-        public int PropertyId { get; set; }
-        public virtual Property? Property { get; set; }
         public int ProductId { get; set; }
         public virtual Product? Product { get; set; }
         [ForeignKey("ProductPropertyValue")]
-        public virtual PropertyValue? Value { get; set; }
+        public override PropertyValue? Value { get; set; }
     }
 }
