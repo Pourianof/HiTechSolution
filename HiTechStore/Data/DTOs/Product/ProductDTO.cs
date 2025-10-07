@@ -12,8 +12,16 @@ public class ProductDto
     public List<PropertyValueDto> Properties { get; set; } = new();
     public List<ProductMediaDto> Media { get; set; } = new();
     public int? CategoryId { get; set; }
-    public List<ComponentModelDto> Components { get; set; } = new();
+    public List<ProductComponentDto> Components { get; set; } = new();
     public double? AverageScore { get; set; } = 0.0;
     public int ScoreCounts { get; set; } = 0;
     public int? MyScore { get; set; }
+}
+
+public class ProductComponentDto
+{
+    public int? ComponentTypeId { get; set; }
+    public string? Name { get; set; }
+    public string? Description { get; set; }
+    public IEnumerable<ComponentModelDto>? Models { get; set; }
 }

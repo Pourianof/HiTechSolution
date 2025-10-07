@@ -31,8 +31,6 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.CategoryId, opt => opt.Ignore());
         CreateMap<ProductPatchDTO, Product>().MapOnlyNonNull();
         CreateMap<Product, ProductPatchDTO>();
-        CreateMap<Product, ProductDto>()
-            .ForMember((dest) => dest.Components, (opt) => opt.MapFrom((src) => src.ComponentModels));
         CreateMap<ProductPropertyValue, PropertyValueDto>()
             .ForMember((dest) => dest.Name, (opt) => opt.MapFrom((p) => p.Property!.Name))
             .ForMember(dest => dest.ValueType, opt => opt.MapFrom(src => src.Property!.PropertyType));
