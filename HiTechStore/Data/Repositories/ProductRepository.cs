@@ -83,7 +83,13 @@ namespace HiTechStore.Data.Repositories
                 Price = p.Price,
                 CategoryId = p.CategoryId,
                 Description = p.Description,
-                Media = p.Media.Select(m => new ProductMediaDto() { IsMain = m.IsMain, ProductMediaId = m.ProductMediaId, Url = m.FilePath }).ToList(),
+                Media = p.Media.Select(m => new ProductMediaDto()
+                {
+                    IsMain = m.IsMain,
+                    ProductMediaId = m.ProductMediaId,
+                    Url = m.FilePath,
+                    Type = m.Type == MediaType.Image ? "Image" : "Video"
+                }).ToList(),
                 Properties = p.Properties.Select(
                     (prop) => new PropertyValueDto()
                     {
