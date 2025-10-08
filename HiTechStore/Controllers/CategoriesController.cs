@@ -210,11 +210,5 @@ namespace HiTechStore.Controllers
             return Ok(_mapper.Map<ComponentTypeDto>(componentType.Component));
 
         }
-        [HttpGet("{id}/filters")]
-        [AllowAnonymous]
-        public async Task<ActionResult> GetFilters(int id)
-        {
-            return Ok(await _unitOfWork.Categories.GetFilters(id));
-        }
     }
 }

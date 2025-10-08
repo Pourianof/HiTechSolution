@@ -15,6 +15,7 @@ namespace HiTechStore.Data
         public IComponentRepository ComponentRepository { get; }
         public IBrandRepository BrandRepository { get; }
         public IBrandModelRepository BrandModelRepository { get; }
+        public IFilterRepository FilterRepository { get; }
 
 
         public UnitOfWork(HiTechStoreDbContext context, IMapper mapper)
@@ -26,7 +27,7 @@ namespace HiTechStore.Data
             ComponentRepository = new ComponentRepository(_context, mapper);
             BrandRepository = new BrandRepository(_context, mapper);
             BrandModelRepository = new BrandModelRepository(_context, mapper);
-
+            FilterRepository = new FilterRepository(_context);
         }
 
         public async Task<int> Complete()

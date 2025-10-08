@@ -5,7 +5,13 @@ public class FilterDto
     public IEnumerable<BrandFilterDto>? Brands { get; set; }
     public IEnumerable<FilterPropertyDto>? Properties { get; set; }
     public IEnumerable<FilterComponentsDto>? Components { get; set; }
+    public ProductsPriceRangeDto? PriceRange { get; set; }
+}
 
+public class ProductsPriceRangeDto
+{
+    public double Max { get; set; }
+    public double Min { get; set; }
 }
 
 public class BrandFilterDto

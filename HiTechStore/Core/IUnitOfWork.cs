@@ -10,6 +10,7 @@ namespace HiTechStore.Core
         IComponentRepository ComponentRepository { get; }
         IBrandRepository BrandRepository { get; }
         IBrandModelRepository BrandModelRepository { get; }
+        IFilterRepository FilterRepository { get; }
         Task<int> Complete();
     }
 }
