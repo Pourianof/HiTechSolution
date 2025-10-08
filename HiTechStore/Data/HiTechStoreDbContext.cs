@@ -107,6 +107,15 @@ namespace HiTechStore.Data
                 }
             );
 
+            modelBuilder.Entity<BrandModel>(
+                (entity) =>
+                {
+                    entity
+                        .HasIndex(bm => new { bm.NormalizedName, bm.BrandId })
+                        .IsUnique();
+                }
+            );
+
         }
 
         public DbSet<Product> Products { get; set; }

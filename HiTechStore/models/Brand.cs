@@ -17,7 +17,6 @@ public class Brand : IModel
     public virtual List<BrandModel>? Models { get; set; }
 }
 
-[Index(nameof(NormalizedName), IsUnique = true)]
 public class BrandModel : IModel
 {
     public int BrandModelId { get; set; }
@@ -28,5 +27,6 @@ public class BrandModel : IModel
         set => Name?.ToLower();
     }
     public string? Description { get; set; }
+    public int BrandId { get; set; }
     public virtual Brand? Brand { get; set; }
 }
