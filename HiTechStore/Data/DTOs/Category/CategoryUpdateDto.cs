@@ -6,5 +6,7 @@ namespace HiTechStore.Data.DTOs.Category
         public string? Description { get; set; }
         public int? ParentCategoryId { get; set; }
         public IFormFile? Image { get; set; }
+        public IFormFile? Icon { get; set; }
+
     }
 }

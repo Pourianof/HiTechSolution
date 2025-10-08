@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
+using HiTechStore.Core.Validators;
 using HiTechStore.Data.DTOs;
 using HiTechStore.Data.DTOs.Binders;
 using HiTechStore.Data.DTOs.Component;
@@ -23,7 +24,9 @@ namespace HiTechStore.DTOs.Category
         public IEnumerable<PropertyEntryCreationDto>? Properties { get; set; }
         [FromJson]
         public IEnumerable<ComponentCreationDto>? Components { get; set; }
-
+        [Required]
+        [ValidExtensions(["svg"])]
+        public IFormFile? Icon { get; set; }
     }
 
 }

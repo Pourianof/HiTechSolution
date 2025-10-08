@@ -31,4 +31,10 @@ public static class PublicAssetsHelper
             throw new SavingFileException("Problem with saving file", ex);
         }
     }
+
+    static public void DeleteFile(string publicPath)
+    {
+        var filePath = Path.Combine("wwwroot", publicPath);
+        File.Delete(filePath);
+    }
 }

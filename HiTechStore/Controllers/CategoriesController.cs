@@ -4,8 +4,6 @@ using AutoMapper;
 
 using HiTechStore.Controllers.ActionFilters;
 using HiTechStore.Core;
-using HiTechStore.Core.Exceptions;
-using HiTechStore.Core.Repositories;
 using HiTechStore.Data.DTOs;
 using HiTechStore.Data.DTOs.Category;
 using HiTechStore.Data.DTOs.Component;
@@ -32,17 +30,6 @@ namespace HiTechStore.Controllers
             _mapper = mapper;
         }
 
-        private string ProvideCategoryImagePublicPath(int categoryId)
-        {
-            return Path.Combine("images", "category", $"{categoryId}.png");
-        }
-
-        private string? GetCategoryImagePathIfExist(int categoryId)
-        {
-            var pubPath = ProvideCategoryImagePublicPath(categoryId);
-            return PublicAssetsHelper.IsExist(pubPath) ? pubPath : null;
-        }
-
         [HttpGet]
         [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategories()
@@ -52,30 +39,14 @@ namespace HiTechStore.Controllers
                 (cat) =>
                 {
                     var categoryDto = _mapper.Map<CategoryDTO>(cat);
-                    categoryDto.Image = GetCategoryImagePathIfExist(cat.CategoryId);
+                    categoryDto.Image = CategoryAssetHelper.GetCategoryImagePathIfExist(cat.CategoryId);
+                    categoryDto.Image = CategoryAssetHelper.GetCategoryIconPathIfExist(cat.CategoryId);
                     return categoryDto;
                 }
             );
             return Ok(categoryDtos);
         }
 
-        private async Task<string> WriteCategoryImage(int categoryId, IFormFile image, bool deleteOnError = true)
-        {
-            var publicPath = ProvideCategoryImagePublicPath(categoryId);
-            try
-            {
-                await PublicAssetsHelper.WriteIFormFile(image, publicPath);
-            }
-            catch (SavingFileException)
-            {
-                if (deleteOnError)
-                {
-                    await _unitOfWork.Categories.Delete(categoryId);
-                }
-                throw;
-            }
-            return publicPath;
-        }
 
         [HttpPost]
         public async Task<ActionResult<CategoryDTO>> CreateCategory([FromForm] CategoryCreationDto createCategoryDto)
@@ -107,11 +78,16 @@ namespace HiTechStore.Controllers
 
             var categoryDto = _mapper.Map<CategoryDTO>(category);
 
-            if (createCategoryDto.Image is not null)
+            var writer = new CategoryAssetHelper(_unitOfWork, category.CategoryId)
             {
-                var imagePath = await WriteCategoryImage(category.CategoryId, createCategoryDto.Image);
-                categoryDto.Image = imagePath;
-            }
+                Icon = createCategoryDto.Icon,
+                Image = createCategoryDto.Image
+            };
+
+            await writer.Write();
+
+            categoryDto.Image = writer.ImagePath;
+            categoryDto.Icon = writer.IconPath;
 
 
             return CreatedAtAction(nameof(GetCategories), new { id = category.CategoryId }, categoryDto);
@@ -134,15 +110,16 @@ namespace HiTechStore.Controllers
             _mapper.Map(categoryUpdateDto, category);
             var categoryDto = _mapper.Map<CategoryDTO>(category);
 
-            if (categoryUpdateDto.Image is not null)
+            var writer = new CategoryAssetHelper(_unitOfWork, category.CategoryId)
             {
-                var imagePath = await WriteCategoryImage(category.CategoryId, categoryUpdateDto.Image, false);
-                categoryDto.Image = imagePath;
-            }
-            else
-            {
-                categoryDto.Image = GetCategoryImagePathIfExist(id);
-            }
+                Image = categoryUpdateDto.Image,
+                Icon = categoryUpdateDto.Icon,
+                DeleteOnError = false
+            };
+            await writer.Write();
+            categoryDto.Image = writer.ImagePath;
+            categoryDto.Image = writer.IconPath;
+
 
 
             await _unitOfWork.Complete();
@@ -161,6 +138,8 @@ namespace HiTechStore.Controllers
 
             await _unitOfWork.Categories.Delete(category.CategoryId);
             await _unitOfWork.Complete();
+
+            CategoryAssetHelper.RemoveAssets(id);
 
             return NoContent();
         }
