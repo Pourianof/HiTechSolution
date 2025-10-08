@@ -18,6 +18,7 @@ namespace HiTechStore.DTOs.Product
         [Required]
         [Range(0, 10000000)]
         public decimal? Price { get; set; }
+        public int? BrandModel { get; set; }
 
         [MaxLength(500)]
         public string? Description { get; set; }

@@ -28,7 +28,8 @@ public class MappingProfile : Profile
         CreateMap<ProductCreationDto, Product>()
             .ForMember(dest => dest.Category, opt => opt.Ignore())
             .ForMember(dest => dest.Media, opt => opt.Ignore())
-            .ForMember(dest => dest.CategoryId, opt => opt.Ignore());
+            .ForMember(dest => dest.CategoryId, opt => opt.Ignore())
+            .ForMember(dest => dest.BrandModel, opt => opt.Ignore());
         CreateMap<ProductPatchDTO, Product>().MapOnlyNonNull();
         CreateMap<Product, ProductPatchDTO>();
         CreateMap<ProductPropertyValue, PropertyValueDto>()

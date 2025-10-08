@@ -11,6 +11,7 @@ using HiTechStore.Data.DTOs.Product;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using HiTechStore.Helpers.Types;
 using HiTechStore.Core.Exceptions;
+using HiTechStore.Core.Repositories;
 
 namespace HiTechStore.Controllers.ActionFilters;
 
@@ -56,6 +57,23 @@ public class ProductCreationActionFilterAttribute : ModelAccessorBaseActionFilte
 
         var createdProduct = _mapper.Map<Product>(product);
 
+        if (product.BrandModel is not null)
+        {
+            var brandModel = UnitOfWork.BrandModelRepository.GetModelByIdAsync(product.BrandModel.Value).Result;
+            if (brandModel is null)
+            {
+                var problem = new ProblemDetails
+                {
+                    Detail = $"Specified brandModel with id '{product.BrandModel}' not exist",
+                    Title = "Bad request",
+                    Status = StatusCodes.Status404NotFound
+                };
+                context.Result = new NotFoundObjectResult(problem);
+                return;
+            }
+
+            createdProduct.BrandModel = brandModel;
+        }
 
         // register product properties
         if (product.CategoryValues is not null)
@@ -195,6 +213,6 @@ public class ProductCreationActionFilterAttribute : ModelAccessorBaseActionFilte
 
 
 
-        context.HttpContext.Items["createdProductDto"] = _mapper.Map<ProductDto>(createdProduct);
+        context.HttpContext.Items["createdProductDto"] = (Repo as IProductRepository)!.GetByIdAsync(createdProduct.ProductId).Result;
     }
 }
