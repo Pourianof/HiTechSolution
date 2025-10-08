@@ -16,13 +16,26 @@ public class Property
     public string? Description { get; set; }
     public string? Unit { get; set; }
     public virtual PropertyType PropertyType { get; set; }
+    public virtual IEnumerable<ComponentPropertyValue>? ComponentValues { get; set; }
+    public virtual IEnumerable<ProductPropertyValue>? ProductValues { get; set; }
 }
 
 public class PropertyValue
 {
     public int PropertyValueId { get; set; }
     public int ComponentPropertyValueId { get; set; }
-    public string? ValueString { get; set; }
+    private string? _stringValue;
+    public string? ValueString
+    {
+        get
+        {
+            return ValueNumber?.ToString() ??
+                    ValueBoolean?.ToString() ??
+                    ValueDateTime?.ToString() ??
+                    _stringValue;
+        }
+        set => _stringValue = value;
+    }
     public double? ValueNumber { get; set; }
     public bool? ValueBoolean { get; set; }
     public DateTime? ValueDateTime { get; set; }

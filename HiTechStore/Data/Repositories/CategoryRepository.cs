@@ -1,7 +1,10 @@
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 
 using HiTechStore.Core.Repositories;
 using HiTechStore.Data.DTOs;
+using HiTechStore.Data.DTOs.Brand;
+using HiTechStore.Data.DTOs.Component;
 using HiTechStore.Data.Queries;
 using HiTechStore.Models;
 
@@ -40,6 +43,86 @@ namespace HiTechStore.Data.Repositories
                         .Where(cm => modelIds.Contains(cm.ComponentModelId))
                         // .Include(cm => cm.ComponentType)
                         .ToListAsync();
+        }
+
+        public async Task<object?> GetFilters(int categoryId)
+        {
+            var brands = await _context.Products.Where((p) => p.CategoryId == categoryId && p.BrandModel != null)
+                            .Select(p => p.BrandModel!.Brand)
+                            .GroupBy(
+                                b => new { b!.BrandId, b.Name }
+                            ).Select(
+                                (g) => new BrandFilterDto
+                                {
+                                    BrandId = g.Key.BrandId,
+                                    Name = g.Key.Name,
+                                    Frequency = g.Count()
+                                }
+                            ).OrderBy((b) => b.Frequency)
+                            .ToListAsync();
+
+            var properties = await _dbSet.Where((c) => c.CategoryId == categoryId)
+                                .SelectMany((c) => c.Properties!)
+                                .Select(p => new FilterPropertyDto
+                                {
+                                    Name = p.Name,
+                                    PropertyId = p.PropertyId,
+                                    Unit = p.Unit,
+                                    TotalFrequency = p.ProductValues!.Count(),
+                                    CommonValues = p.ProductValues!.GroupBy(
+                                                (v) => new
+                                                {
+                                                    v.Value!.ValueNumber,
+                                                    v.Value!.ValueString,
+                                                    v.Value!.ValueDateTime,
+                                                    v.Value!.ValueBoolean
+                                                }
+                                            ).Select(
+                                                (g) => new PropertyCommomValueDto
+                                                {
+                                                    Value = p.PropertyType == PropertyType.Number ? g.Key.ValueNumber :
+                                                            p.PropertyType == PropertyType.DateTime ? g.Key.ValueDateTime :
+                                                            p.PropertyType == PropertyType.Boolean ? g.Key.ValueBoolean :
+                                                            p.PropertyType == PropertyType.String ? g.Key.ValueString :
+                                                            null,
+                                                    Frequency = g.Count(),
+                                                }
+                                            )
+                                })
+                                .ToListAsync();
+            var components = await _dbSet.Where((c) => c.CategoryId == categoryId)
+                                .SelectMany((c) => c.Components!).Select(cmp => cmp.Component)
+                                .Select((cmp) => new FilterComponentsDto
+                                {
+                                    ComponentId = cmp!.ComponentTypeId,
+                                    Name = cmp!.Name,
+                                    Properties = cmp!.Properties!.Select(
+                                        p => new FilterPropertyDto
+                                        {
+                                            Name = p.Name,
+                                            PropertyId = p.PropertyId,
+                                            Unit = p.Unit,
+                                            TotalFrequency = p.ComponentValues!.Count(),
+                                            CommonValues = p.ComponentValues!.GroupBy(
+                                                (v) => v.Value!.ValueNumber
+                                            ).Select(
+                                                (g) => new PropertyCommomValueDto
+                                                {
+                                                    Value = g.Key,
+                                                    Frequency = g.Count(),
+                                                }
+                                            )
+                                        }
+                                    ),
+                                })
+                                .ToListAsync();
+
+            return new FilterDto
+            {
+                Brands = brands,
+                Properties = properties,
+                Components = components
+            };
         }
     }
 }
