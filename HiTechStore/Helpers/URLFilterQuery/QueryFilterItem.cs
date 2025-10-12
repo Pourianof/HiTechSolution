@@ -17,7 +17,7 @@ public class QueryFilterItem
         FilterKey = Name;
     }
 
-    public IEnumerable<TValue>? GetValues<TValue>(QueryOperator op)
+    public IEnumerable<TValue?> GetValues<TValue>(QueryOperator op)
     {
         var results = new List<TValue?>();
         foreach (var (key, filter) in _opValuePairs)
@@ -33,7 +33,7 @@ public class QueryFilterItem
             }
         }
 
-        return default;
+        return results;
     }
 
     public TValue? GetValue<TValue>(QueryOperator op)
