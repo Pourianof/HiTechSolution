@@ -7,6 +7,7 @@ using HiTechStore.Data.DTOs.Component;
 using HiTechStore.Data.DTOs.Product;
 using HiTechStore.Data.Queries;
 using HiTechStore.Helpers.Repository;
+using HiTechStore.Helpers.URLFilterQuery;
 using HiTechStore.Models;
 
 using Microsoft.EntityFrameworkCore;
@@ -110,13 +111,27 @@ namespace HiTechStore.Data.Repositories
 
             if (productQueryParams is not null)
             {
-                if (productQueryParams.Category is not null)
+                var categoryId = productQueryParams.Category?.GetValues<int>(QueryOperator.Equal)?.FirstOrDefault();
+                if (categoryId is not null)
                 {
-                    queryBuilder = queryBuilder.Where((p) => productQueryParams.Category.Value == p.CategoryId);
+                    queryBuilder = queryBuilder.Where((p) => categoryId == p.CategoryId);
+                }
+
+                var priceFilters = productQueryParams.Price?.GetFilters(
+                         QueryOperator.GreaterThan |
+                         QueryOperator.GreaterThanOrEqual |
+                         QueryOperator.LessThan |
+                         QueryOperator.LessThanOrEqual
+                 );
+                if (priceFilters is not null && priceFilters.Count() > 0)
+                {
+                    queryBuilder = ProductFilterApplier.ApplyFilterTo(
+                            queryBuilder, (Product product) => product.Price, priceFilters
+                    );
                 }
 
                 queryBuilder = ProductFilterApplier.Apply(queryBuilder, productQueryParams.FilterMaps,
-                                new CategoryFilters([productQueryParams.Category?.Value], productQueryParams.CategoryProperties));
+                                new CategoryFilters([categoryId], productQueryParams.CategoryProperties));
 
             }
             return queryBuilder;

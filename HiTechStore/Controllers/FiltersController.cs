@@ -20,9 +20,10 @@ public class FiltersController : ControllerBase
     [HttpGet]
     public async Task<ActionResult> GetProductsFilters([ToQuery] FilterRequestQuery query)
     {
-        if (query.Category?.Value is not null)
+        var categoryId = query.Category?.GetValue<int>(QueryOperator.Equal);
+        if (categoryId is not null)
         {
-            return Ok(await _unitOfWork.FilterRepository.GetCategoryFiltersAsync(query.Category.Value));
+            return Ok(await _unitOfWork.FilterRepository.GetCategoryFiltersAsync(categoryId.Value));
         }
 
         return Ok(await _unitOfWork.FilterRepository.GetProductsOveralFilters());
@@ -32,5 +33,5 @@ public class FiltersController : ControllerBase
 
 public class FilterRequestQuery
 {
-    public QueryFilterItem<int>? Category { get; set; }
+    public QueryFilterItem? Category { get; set; }
 }

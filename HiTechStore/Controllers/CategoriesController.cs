@@ -101,7 +101,7 @@ namespace HiTechStore.Controllers
                 return BadRequest(ModelState);
             }
 
-            var category = await _unitOfWork.Categories.GetByIdAsync(id);
+            var category = await _unitOfWork.Categories.GetModelByIdAsync(id);
             if (category == null)
             {
                 return NotFound();
@@ -118,13 +118,13 @@ namespace HiTechStore.Controllers
             };
             await writer.Write();
             categoryDto.Image = writer.ImagePath;
-            categoryDto.Image = writer.IconPath;
+            categoryDto.Icon = writer.IconPath;
 
 
 
             await _unitOfWork.Complete();
 
-            return Ok(_mapper.Map<CategoryDTO>(categoryDto));
+            return Ok(categoryDto);
         }
 
         [HttpDelete("{id}")]

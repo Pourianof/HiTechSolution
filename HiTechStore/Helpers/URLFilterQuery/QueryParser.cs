@@ -13,8 +13,7 @@ public class QueryParser : IQueryParser
             // eg: key = "price[gte]"
             var (field, op) = ParseKey(key); // like : ("price", "gte")
             var @operator = MapToOperator(op);
-            var queryFilterItem = new QueryFilterItem(field, values, @operator);
-            queries.Register(queryFilterItem);
+            queries.Register(field, @operator, values);
         }
 
         return queries;

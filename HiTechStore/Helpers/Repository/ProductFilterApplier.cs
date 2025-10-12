@@ -4,17 +4,23 @@ using HiTechStore.Helpers.URLFilterQuery;
 using HiTechStore.Models;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Primitives;
 
 namespace HiTechStore.Helpers.Repository;
 
 public static class ProductFilterApplier
 {
-    private static Expression CompareExpressionBuilder(string valuePropertyName, QueryOperator op, object value, ParameterExpression param)
+
+    // Generate:
+    // WHEN <left> != null THEN <left> <operator> <right> ELSE false END
+    private static Expression CompareExpressionBuilder(
+                    QueryOperator op, object value,
+                    Expression targetParameter
+                    )
     {
-        var propValue = Expression.Property(
-                       Expression.Property(param, nameof(ComponentPropertyValue.Value)), valuePropertyName);
+
         var left = Expression.Convert(
-         propValue,
+         targetParameter,
          value.GetType()
         );
 
@@ -29,15 +35,38 @@ public static class ProductFilterApplier
             _ => throw new NotSupportedException()
         };
 
-        var notNullLeft = Expression.Condition(
-         Expression.NotEqual(propValue, Expression.Constant(null)),
-         ifNotNull,
-         Expression.Constant(false)
-        );
+        Expression notNullLeft = ifNotNull;
+        if (targetParameter.Type.IsAssignableTo(typeof(Nullable<>)))
+        {
+            notNullLeft = Expression.Condition(
+                Expression.NotEqual(targetParameter, Expression.Constant(null)),
+                ifNotNull,
+                Expression.Constant(false)
+                );
+        }
+
+
 
         return notNullLeft;
 
     }
+
+    public static IQueryable<Product> ApplyFilterTo<T>(IQueryable<Product> queryable, Expression<Func<Product, T>> to, Dictionary<QueryOperator, OperatorValuePair> filters)
+    {
+        foreach (var (op, filter) in filters)
+        {
+            var value = filter.GetValue(typeof(T));
+            if (value is null)
+            {
+                continue;
+            }
+            var body = CompareExpressionBuilder(op, value, to.Body);
+            var compareExpression = Expression.Lambda<Func<Product, bool>>(body, to.Parameters);
+            queryable = queryable.Where(compareExpression);
+        }
+        return queryable;
+    }
+
     private static Expression<Func<TItem, bool>> ProvideAppliedQueryFilterPropertyExpression<TItem>(PropertyFilter filter)
         where TItem : BaseItemPropertyValue
     {
@@ -67,7 +96,6 @@ public static class ProductFilterApplier
         // prop.Property.PropertyType == PropertyType.String ?
         //     prop.Value!.ValueString == stringValue :
         // false
-
         Expression? lastCondition = null;
         foreach (var (type, name, val) in typeValuePairs)
         {
@@ -77,15 +105,26 @@ public static class ProductFilterApplier
             }
 
             if (type == PropertyType.String &&
-                    (op != QueryOperator.In || op != QueryOperator.Equal || op != QueryOperator.In)
+                    (op != QueryOperator.In || op != QueryOperator.Equal)
                 )
+            {
+                continue;
+            }
+
+            Expression targetValueParam = Expression.Property(
+                Expression.Property(
+                    param, nameof(BaseItemPropertyValue.Value)
+                ), name
+            );
+
+            if (targetValueParam is null)
             {
                 continue;
             }
 
             lastCondition = Expression.Condition(
                                 Expression.Equal(propertyType, Expression.Constant(type)),
-                                CompareExpressionBuilder(name, op, val, param),
+                                CompareExpressionBuilder(op, val, targetValueParam),
                                 lastCondition is null ? Expression.Constant(false) : lastCondition
                             );
         }
@@ -97,7 +136,7 @@ public static class ProductFilterApplier
             Type.EmptyTypes,
             Expression.Constant(EF.Functions),
             Expression.Property(
-                Expression.Property(param, "Property"), "Name"
+                Expression.Property(param, nameof(BaseItemPropertyValue.Property)), nameof(Property.Name)
             ),
             Expression.Constant(propertyName)
         );
@@ -127,13 +166,17 @@ public static class ProductFilterApplier
                 (filter) =>
                 filter.Key.Split('.', 2).Length);
 
-            var singlePartKeys = filterKeyTypeGroups.FirstOrDefault((g) => g.Key == 1)?.ToList() ?? [];
-            var multiPartKeys = filterKeyTypeGroups.FirstOrDefault((g) => g.Key == 2)?.ToList() ?? [];
+            var singlePartKeys = FilterMapper.MapQueryFiltersToFilterItems(
+                                        filterKeyTypeGroups.FirstOrDefault((g) => g.Key == 1)?.ToDictionary()
+                                );
+            var multiPartKeys = FilterMapper.MapQueryFiltersToFilterItems(
+                                    filterKeyTypeGroups.FirstOrDefault((g) => g.Key == 2)?.ToDictionary()
+                                    );
 
             IEnumerable<(string ComponentName, string PropertyName)> referedComponentProperties = multiPartKeys.Select(
                 (mpk) =>
                 {
-                    var parts = mpk.Value.Name.Split('.', 2, StringSplitOptions.RemoveEmptyEntries |
+                    var parts = mpk.Name.Split('.', 2, StringSplitOptions.RemoveEmptyEntries |
                                                     StringSplitOptions.TrimEntries);
 
                     return (ComponentName: parts[0], PropertyName: parts[1]);
@@ -142,7 +185,7 @@ public static class ProductFilterApplier
 
 
             var filters = multiPartKeys.Select(
-                 (mpk) => FilterMapper.QueryFilterToComponentFilter(mpk.Value)
+                 FilterMapper.QueryFilterToComponentFilter
              );
 
 
@@ -157,8 +200,8 @@ public static class ProductFilterApplier
             // in this way we loop over the more light weight and finite tables first and the find the target Product Ids
             foreach (var filter in filters)
             {
-                IEnumerable<string> desiredComponentBrandModels = singlePartKeys.Where((f) => f.Key == filter.ComponentName)
-                                                    .SelectMany(f => f.Value.GetValue<IEnumerable<string>>() ?? [])
+                IEnumerable<string> desiredComponentBrandModels = singlePartKeys.Where((f) => f.Name == filter.ComponentName)
+                                                    .SelectMany(f => f.GetValue<IEnumerable<string>>() ?? [])
                                                     .Select(mn => mn?.ToLower())
                                                     .Where(modelName => !string.IsNullOrWhiteSpace(modelName))!;
 
@@ -178,9 +221,10 @@ public static class ProductFilterApplier
                     categoryFilters.categoriesFilters.Any() &&
                     categoryFilters.Ids.Any())
             {
-                foreach (var filter in categoryFilters.categoriesFilters)
+                var categoryOperatorFilters = FilterMapper.MapQueryFiltersToFilterItems(categoryFilters.categoriesFilters);
+                foreach (var filter in categoryOperatorFilters)
                 {
-                    var propertyFilter = FilterMapper.QueryFilterToPropertyFilter(filter.Value);
+                    var propertyFilter = FilterMapper.QueryFilterToPropertyFilter(filter);
                     if (propertyFilter is null)
                     { continue; }
 
@@ -199,7 +243,17 @@ public static class ProductFilterApplier
 
 static class FilterMapper
 {
-    private static PropertyPossibleValues ProvidePropertyValues(QueryFilterItem filter)
+    public static List<FilterItem> MapQueryFiltersToFilterItems(Dictionary<string, QueryFilterItem>? filters)
+    {
+        if (filters is null)
+        {
+            return new();
+        }
+        return filters.SelectMany(
+                (item) => item.Value.AllFilters.Select((f) => new FilterItem(item.Value.FilterKey, f))
+            ).ToList();
+    }
+    internal static PropertyPossibleValues ProvidePropertyValues(FilterItem filter)
     {
         // All types defined as Nullable because all PropertyValue.Value*** has defined as nullable,
         // and when we trying to using them in expression tree we not encounter different data type
@@ -211,17 +265,17 @@ static class FilterMapper
 
         return new PropertyPossibleValues(stringValue, numberValue, dateValue, booleanValue);
     }
-    public static ComponentFilter QueryFilterToComponentFilter(QueryFilterItem filter)
+    public static ComponentFilter QueryFilterToComponentFilter(FilterItem filter)
     {
         var parts = filter.Name.Split('.', 2, StringSplitOptions.RemoveEmptyEntries |
                                         StringSplitOptions.TrimEntries);
 
-        return new ComponentFilter(parts[0], parts[1], filter.Op, ProvidePropertyValues(filter));
+        return new ComponentFilter(parts[0], parts[1], filter.Operator, ProvidePropertyValues(filter));
     }
 
-    public static PropertyFilter QueryFilterToPropertyFilter(QueryFilterItem filter)
+    public static PropertyFilter QueryFilterToPropertyFilter(FilterItem filter)
     {
-        return new PropertyFilter(filter.Name, filter.Op, ProvidePropertyValues(filter));
+        return new PropertyFilter(filter.Name, filter.Operator, ProvidePropertyValues(filter));
     }
 }
 
@@ -230,3 +284,16 @@ record class ComponentFilter(string ComponentName, string PropertyName, QueryOpe
     : PropertyFilter(PropertyName, Operator, PossibleValues);
 record struct PropertyPossibleValues(string? ValueString, double? ValueNumber, DateTime? ValueDateTime, bool? ValueBoolean);
 public record class CategoryFilters(IEnumerable<int?> Ids, Dictionary<string, QueryFilterItem>? categoriesFilters);
+
+public class FilterItem(string name, OperatorValuePair pair)
+{
+    private OperatorValuePair _pair = pair;
+    public string Name { get; } = name;
+    public QueryOperator Operator { get; } = pair.Operator;
+    public StringValues Value { get; } = pair.Value;
+
+    public TValue? GetValue<TValue>()
+    {
+        return _pair.GetValue<TValue>();
+    }
+}

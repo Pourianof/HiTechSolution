@@ -1,15 +1,21 @@
 using AutoMapper.Internal;
 
 using Castle.Core.Internal;
+
+using Microsoft.Extensions.Primitives;
 namespace HiTechStore.Helpers.URLFilterQuery;
 
 public class Queries
 {
     private Dictionary<string, QueryFilterItem> _queries { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
-    public void Register(QueryFilterItem queryFilterItem)
+    public void Register(string keyName, QueryOperator op, StringValues value)
     {
-        _queries.Add($"{queryFilterItem.Name}_{queryFilterItem.Op}", queryFilterItem);
+        QueryFilterItem filter = _queries.ContainsKey(keyName) ?
+                _queries[keyName] : new QueryFilterItem(keyName);
+
+        filter.AddOperatorValuePair(op, value);
+        _queries.Add(keyName, filter);
     }
 
     public object? MapTo(Type targetType)
@@ -38,38 +44,25 @@ public class Queries
 
         foreach (var (key, val) in _queries)
         {
-            var matchedProp = props.FirstOrDefault((prop) => string.Equals(prop.Name, val.Name, StringComparison.OrdinalIgnoreCase)
+            var matchedProp = props.FirstOrDefault((prop) => string.Equals(prop.Name, val.FilterKey, StringComparison.OrdinalIgnoreCase)
                                                                 && markerType.IsAssignableFrom(prop.PropertyType));
             var associatedFilter = _queries[key];
 
             if (matchedProp is not null)
             {
-                var propName = matchedProp.Name;
-                var propType = matchedProp.PropertyType;
-                var genericType = propType.GetGenericArguments().FirstOrDefault();
-                object? queryFilterItem = _queries[key];
-
-                if (genericType is not null)
-                {
-                    var constructor = propType.GetConstructors().FirstOrDefault();
-                    var baseQueryFilterItem = val;
-                    queryFilterItem = constructor?.Invoke([baseQueryFilterItem.Name, baseQueryFilterItem.Value, baseQueryFilterItem.Op]);
-                }
-                matchedProp.SetValue(obj, queryFilterItem);
+                matchedProp.SetValue(obj, val);
                 continue;
             }
 
             // Populate namespaced properties
             var matchedNamespacedProperty = namespacedProperties.FirstOrDefault(
-                (nsp) => val.Name.StartsWith($"{nsp.Namespace}.", StringComparison.OrdinalIgnoreCase)
+                (nsp) => val.FilterKey.StartsWith($"{nsp.Namespace}.", StringComparison.OrdinalIgnoreCase)
             );
 
             if (matchedNamespacedProperty is not null)
             {
-                var scopedKey = val.Name.Substring(matchedNamespacedProperty.Namespace.Length + 1);
-                var filter = new QueryFilterItem(
-                    scopedKey, associatedFilter.Value, associatedFilter.Op
-                );
+                var scopedKey = val.FilterKey.Substring(matchedNamespacedProperty.Namespace.Length + 1);
+                var filter = new QueryFilterItem(scopedKey);
                 matchedNamespacedProperty.Storage.Add(
                     scopedKey, filter
                 );

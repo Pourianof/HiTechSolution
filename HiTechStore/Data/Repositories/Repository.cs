@@ -5,6 +5,7 @@ using HiTechStore.Core;
 using HiTechStore.Core.Repositories;
 using HiTechStore.Data.Queries;
 using HiTechStore.Helpers.Types;
+using HiTechStore.Helpers.URLFilterQuery;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -34,17 +35,18 @@ namespace HiTechStore.Data.Repositories
         public virtual async Task<IEnumerable<O>> GetAllAsync(Q queryParams)
         {
             var query = GetAllQueryBuilder(_dbSet.AsQueryable(), queryParams);
-
-            if (queryParams?.Page is not null)
+            var page = queryParams?.Page?.GetValue<int>(QueryOperator.Equal);
+            var limit = queryParams?.Limit?.GetValue<int>(QueryOperator.Equal);
+            if (page is not null)
             {
                 query = query.Skip(
-                    (queryParams.Limit?.Value ?? 0) * (queryParams.Page.Value - 1)
+                    (limit ?? 0) * (page.Value - 1)
                 );
             }
 
-            if (queryParams?.Limit is not null)
+            if (limit is not null)
             {
-                query = query.Take(queryParams.Limit.Value);
+                query = query.Take(limit.Value);
             }
 
             return await Project(query).ToListAsync();

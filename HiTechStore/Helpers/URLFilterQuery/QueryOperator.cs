@@ -1,11 +1,12 @@
 namespace HiTechStore.Helpers.URLFilterQuery;
 
+[Flags]
 public enum QueryOperator
 {
-    Equal,
-    GreaterThan,
-    GreaterThanOrEqual,
-    LessThan,
-    LessThanOrEqual,
-    In,
+    Equal = 0,
+    GreaterThan = 1 << 0,
+    GreaterThanOrEqual = 1 << 1,
+    LessThan = 1 << 2,
+    LessThanOrEqual = 1 << 3,
+    In = 1 << 4,
 }

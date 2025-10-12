@@ -4,8 +4,8 @@ namespace HiTechStore.Data.Queries;
 
 public class BaseQuery
 {
-    public QueryFilterItem<int>? Limit { get; set; }
-    public QueryFilterItem<int>? Page { get; set; }
+    public QueryFilterItem? Limit { get; set; }
+    public QueryFilterItem? Page { get; set; }
     [MiscQueryFiltersMarker]
     public Dictionary<string, QueryFilterItem> FilterMaps { get; set; } = new();
 }
