@@ -11,11 +11,15 @@ public class Queries
 
     public void Register(string keyName, QueryOperator op, StringValues value)
     {
-        QueryFilterItem filter = _queries.ContainsKey(keyName) ?
+        var isKeyExist = _queries.ContainsKey(keyName);
+        QueryFilterItem filter = isKeyExist ?
                 _queries[keyName] : new QueryFilterItem(keyName);
 
         filter.AddOperatorValuePair(op, value);
-        _queries.Add(keyName, filter);
+        if (!isKeyExist)
+        {
+            _queries.Add(keyName, filter);
+        }
     }
 
     public object? MapTo(Type targetType)
