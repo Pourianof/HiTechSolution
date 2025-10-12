@@ -123,6 +123,10 @@ static class QueryFilterItemHelper
 
             if (enumerableType.IsAssignableFrom(targetType))
             {
+                if (targetType == typeof(string))
+                {
+                    return value.FirstOrDefault();
+                }
                 var actualType = targetType.GetGenericArguments().FirstOrDefault();
                 if (actualType is null)
                 {
