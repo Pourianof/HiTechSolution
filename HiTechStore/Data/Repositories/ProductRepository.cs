@@ -125,7 +125,7 @@ namespace HiTechStore.Data.Repositories
                  );
                 if (priceFilters is not null && priceFilters.Count() > 0)
                 {
-                    queryBuilder = ProductFilterApplier.ApplyFilterTo(
+                    queryBuilder = ProductFilterApplier.ApplyFiltersTo(
                             queryBuilder, (Product product) => product.Price, priceFilters
                     );
                 }

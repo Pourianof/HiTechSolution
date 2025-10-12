@@ -11,60 +11,14 @@ namespace HiTechStore.Helpers.Repository;
 public static class ProductFilterApplier
 {
 
-    // Generate:
-    // WHEN <left> != null THEN <left> <operator> <right> ELSE false END
-    private static Expression CompareExpressionBuilder(
-                    QueryOperator op, object value,
-                    Expression targetParameter
-                    )
+
+
+    public static IQueryable<Product> ApplyFiltersTo<T>(
+        IQueryable<Product> queryable,
+        Expression<Func<Product, T>> to,
+        Dictionary<QueryOperator, OperatorValuePair> filters)
     {
-
-        var left = Expression.Convert(
-         targetParameter,
-         value.GetType()
-        );
-
-        var right = Expression.Constant(value);
-        var ifNotNull = op switch
-        {
-            QueryOperator.Equal => Expression.Equal(left, right),
-            QueryOperator.GreaterThan => Expression.GreaterThan(left, right),
-            QueryOperator.LessThan => Expression.LessThan(left, right),
-            QueryOperator.GreaterThanOrEqual => Expression.GreaterThanOrEqual(left, right),
-            QueryOperator.LessThanOrEqual => Expression.LessThanOrEqual(left, right),
-            _ => throw new NotSupportedException()
-        };
-
-        Expression notNullLeft = ifNotNull;
-        if (targetParameter.Type.IsAssignableTo(typeof(Nullable<>)))
-        {
-            notNullLeft = Expression.Condition(
-                Expression.NotEqual(targetParameter, Expression.Constant(null)),
-                ifNotNull,
-                Expression.Constant(false)
-                );
-        }
-
-
-
-        return notNullLeft;
-
-    }
-
-    public static IQueryable<Product> ApplyFilterTo<T>(IQueryable<Product> queryable, Expression<Func<Product, T>> to, Dictionary<QueryOperator, OperatorValuePair> filters)
-    {
-        foreach (var (op, filter) in filters)
-        {
-            var value = filter.GetValue(typeof(T));
-            if (value is null)
-            {
-                continue;
-            }
-            var body = CompareExpressionBuilder(op, value, to.Body);
-            var compareExpression = Expression.Lambda<Func<Product, bool>>(body, to.Parameters);
-            queryable = queryable.Where(compareExpression);
-        }
-        return queryable;
+        return FilterApplierHelper.ApplyFiltersTo(queryable, to, filters);
     }
 
     private static Expression<Func<TItem, bool>> ProvideAppliedQueryFilterPropertyExpression<TItem>(PropertyFilter filter)
@@ -124,7 +78,7 @@ public static class ProductFilterApplier
 
             lastCondition = Expression.Condition(
                                 Expression.Equal(propertyType, Expression.Constant(type)),
-                                CompareExpressionBuilder(op, val, targetValueParam),
+                               FilterApplierHelper.CompareExpressionBuilder(op, val, targetValueParam),
                                 lastCondition is null ? Expression.Constant(false) : lastCondition
                             );
         }
