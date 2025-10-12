@@ -54,7 +54,7 @@ public class FilterApplierHelper
     {
         foreach (var (op, filter) in filters)
         {
-            var value = filter.GetValue(typeof(TModel));
+            var value = filter.GetValue(typeof(TReturn));
             if (value is null)
             {
                 continue;
