@@ -130,6 +130,17 @@ namespace HiTechStore.Data.Repositories
                     );
                 }
 
+                var brandFilters = productQueryParams.Brand?.GetFilters(
+                         QueryOperator.In |
+                         QueryOperator.Equal
+                 );
+                if (brandFilters is not null && brandFilters.Count() > 0)
+                {
+                    queryBuilder = ProductFilterApplier.ApplyFiltersTo(
+                            queryBuilder, (Product product) => product.BrandModel!.Brand!.Name, brandFilters
+                    );
+                }
+
                 queryBuilder = ProductFilterApplier.Apply(queryBuilder, productQueryParams.FilterMaps,
                                 new CategoryFilters([categoryId], productQueryParams.CategoryProperties));
 
