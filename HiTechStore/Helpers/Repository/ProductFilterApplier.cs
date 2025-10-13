@@ -229,13 +229,14 @@ static class FilterMapper
     }
     internal static PropertyPossibleValues ProvidePropertyValues(FilterItem filter)
     {
+        var isInOp = filter.Operator == QueryOperator.In;
         // All types defined as Nullable because all PropertyValue.Value*** has defined as nullable,
         // and when we trying to using them in expression tree we not encounter different data type
-        var stringValue = filter.Value;
-        var numberValue = filter.GetValue<double>();
-        bool? booleanValue = string.Equals(stringValue, "true", StringComparison.OrdinalIgnoreCase) ? true :
-                           string.Equals(stringValue, "false", StringComparison.OrdinalIgnoreCase) ? false : null;
-        var dateValue = filter.GetValue<DateTime>();
+        object? stringValue = isInOp ? filter.GetValue<IEnumerable<string>>() : filter.Value;
+        object? numberValue = isInOp ? filter.GetValue<IEnumerable<double>>() : filter.GetValue<double>();
+        bool? booleanValue = string.Equals(filter.Value, "true", StringComparison.OrdinalIgnoreCase) ? true :
+                           string.Equals(filter.Value, "false", StringComparison.OrdinalIgnoreCase) ? false : null;
+        object? dateValue = isInOp ? filter.GetValue<IEnumerable<DateTime>>() : filter.GetValue<DateTime>();
 
         return new PropertyPossibleValues(stringValue, numberValue, dateValue, booleanValue);
     }
@@ -256,7 +257,7 @@ static class FilterMapper
 record class PropertyFilter(string PropertyName, QueryOperator Operator, PropertyPossibleValues PossibleValues);
 record class ComponentFilter(string ComponentName, string PropertyName, QueryOperator Operator, PropertyPossibleValues PossibleValues)
     : PropertyFilter(PropertyName, Operator, PossibleValues);
-record struct PropertyPossibleValues(string? ValueString, double? ValueNumber, DateTime? ValueDateTime, bool? ValueBoolean);
+record struct PropertyPossibleValues(object? ValueString, object? ValueNumber, object? ValueDateTime, bool? ValueBoolean);
 public record class CategoryFilters(IEnumerable<int?> Ids, Dictionary<string, QueryFilterItem>? categoriesFilters);
 
 public class FilterItem(string name, OperatorValuePair pair)
