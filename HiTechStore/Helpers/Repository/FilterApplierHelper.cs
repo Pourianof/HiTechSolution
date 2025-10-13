@@ -1,4 +1,6 @@
+using System.Collections;
 using System.Linq.Expressions;
+using System.Reflection;
 
 using HiTechStore.Helpers.URLFilterQuery;
 
@@ -14,11 +16,45 @@ public class FilterApplierHelper
                     Expression targetParameter
                     )
     {
+        // For "in" operator we recieve IEnumerable of values
+        // so we try to figure out what is the elements type 
+        var valueType = value.GetType();
+        var enumerableType = typeof(IEnumerable);
+        if (valueType.IsGenericType)
+        {
+            var genericType = valueType.GetGenericArguments().FirstOrDefault();
+            if (genericType is null)
+            {
+                return Expression.Empty();
+            }
+
+            if (valueType.IsGenericType
+                            && valueType.IsAssignableTo(enumerableType)
+                        )
+            {
+                valueType = genericType;
+                enumerableType = typeof(IEnumerable<>).MakeGenericType(valueType);
+            }
+        }
+
+        var leftType = Nullable.GetUnderlyingType(targetParameter.Type) ??
+                            targetParameter.Type ??
+                            valueType;
 
         var left = Expression.Convert(
          targetParameter,
-         value.GetType()
+        leftType
         );
+
+        Func<Expression> getInExpr = () =>
+        {
+            var containsMethod = typeof(Enumerable)
+                .GetMethods()
+                .First(m => m.Name == nameof(Enumerable.Contains) && m.GetParameters().Length == 2)
+                .MakeGenericMethod(valueType);
+
+            return Expression.Call(containsMethod, Expression.Constant(value), left);
+        };
 
         var right = Expression.Constant(value);
         var ifNotNull = op switch
@@ -28,11 +64,12 @@ public class FilterApplierHelper
             QueryOperator.LessThan => Expression.LessThan(left, right),
             QueryOperator.GreaterThanOrEqual => Expression.GreaterThanOrEqual(left, right),
             QueryOperator.LessThanOrEqual => Expression.LessThanOrEqual(left, right),
+            QueryOperator.In => getInExpr(),
             _ => throw new NotSupportedException()
         };
 
         Expression notNullLeft = ifNotNull;
-        if (targetParameter.Type.IsAssignableTo(typeof(Nullable<>)))
+        if (leftType.IsAssignableTo(typeof(Nullable<>)))
         {
             notNullLeft = Expression.Condition(
                 Expression.NotEqual(targetParameter, Expression.Constant(null)),
@@ -54,7 +91,9 @@ public class FilterApplierHelper
     {
         foreach (var (op, filter) in filters)
         {
-            var value = filter.GetValue(typeof(TReturn));
+            var value = op == QueryOperator.In ?
+                                filter.GetValue<IEnumerable<TReturn>>() :
+                                (object?)filter.GetValue<TReturn>();
             if (value is null)
             {
                 continue;
