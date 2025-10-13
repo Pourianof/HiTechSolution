@@ -25,6 +25,7 @@ public class FilterComponentsDto
 {
     public int ComponentId { get; set; }
     public string? Name { get; set; }
+    public IEnumerable<BrandFilterDto>? CommonBrands { get; set; }
     public IEnumerable<FilterPropertyDto>? Properties { get; set; }
 }
 

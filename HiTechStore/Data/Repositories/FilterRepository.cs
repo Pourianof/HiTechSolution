@@ -93,6 +93,19 @@ public class FilterRepository : IFilterRepository
                             {
                                 ComponentId = cmp!.ComponentTypeId,
                                 Name = cmp!.Name,
+                                CommonBrands = cmp.ComponentModels!.Select(
+                                    (model) => model.BrandModel!.Brand
+                                ).GroupBy(
+                                    b => new { b!.BrandId, b.Name }
+                                ).Select(
+                                    (g) => new BrandFilterDto
+                                    {
+                                        BrandId = g.Key.BrandId,
+                                        Name = g.Key.Name,
+                                        Frequency = g.Count()
+                                    }
+                                )
+                                .OrderBy((b) => b.Frequency).ToList(),
                                 Properties = cmp!.Properties!.Select(
                                     p => new FilterPropertyDto
                                     {
@@ -111,8 +124,7 @@ public class FilterRepository : IFilterRepository
                                         )
                                     }
                                 ),
-                            })
-                            .ToListAsync();
+                            }).ToListAsync();
         var productsPriceRange = await ProvideProductsPriceRange();
 
 
