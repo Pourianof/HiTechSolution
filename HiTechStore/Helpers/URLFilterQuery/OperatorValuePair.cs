@@ -135,14 +135,34 @@ public class EqualityOperatorPair
     }
 }
 
-public class InOperatorPair(StringValues value)
-    : OperatorValuePair(QueryOperator.In, value)
+public class InOperatorPair :
+    OperatorValuePair
 {
+
+    public InOperatorPair(StringValues value) :
+        base(QueryOperator.In, value)
+    {
+        HandleValue(value, replace: true);
+    }
+
+    private void HandleValue(StringValues value, bool replace = false)
+    {
+        var newValues = value.WhereNotNull().SelectMany(v => v!.Split(','));
+        if (!replace)
+        {
+            var valSet = Value.ToHashSet();
+            valSet.UnionWith(newValues.ToHashSet());
+
+            Value = new StringValues(valSet.WhereNotNull().ToArray());
+        }
+        else
+        {
+            Value = new StringValues(newValues.ToArray());
+        }
+    }
+
     public override void HandleNewValue(StringValues value)
     {
-        var valSet = Value.ToHashSet();
-        valSet.UnionWith(value.ToHashSet());
-
-        Value = new StringValues(valSet.WhereNotNull().ToArray());
+        HandleValue(value);
     }
 }

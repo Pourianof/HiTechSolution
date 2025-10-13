@@ -133,21 +133,19 @@ static class QueryFilterItemHelper
                     return default;
                 }
 
-                var elementType = targetType.GetGenericArguments()[0];
-
                 var converted = value
-                    .Select(v => System.Convert.ChangeType(v, elementType))
+                    .Select(v => System.Convert.ChangeType(v, actualType))
                     .ToList();
 
                 if (targetType.IsArray)
                 {
-                    var array = Array.CreateInstance(elementType, converted.Count);
+                    var array = Array.CreateInstance(actualType, converted.Count);
                     converted.ToArray().CopyTo(array, 0);
                     return array;
                 }
                 else
                 {
-                    var listType = typeof(List<>).MakeGenericType(elementType);
+                    var listType = typeof(List<>).MakeGenericType(actualType);
                     var list = (IList?)Activator.CreateInstance(listType);
                     if (list is null)
                     {
