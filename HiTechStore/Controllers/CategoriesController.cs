@@ -9,6 +9,7 @@ using HiTechStore.Data.DTOs.Category;
 using HiTechStore.Data.DTOs.Component;
 using HiTechStore.DTOs.Category;
 using HiTechStore.Helpers.IO;
+using HiTechStore.Helpers.Types;
 using HiTechStore.Models;
 
 using Microsoft.AspNetCore.Authorization;
@@ -71,6 +72,22 @@ namespace HiTechStore.Controllers
             if (createCategoryDto.Components is not null)
             {
                 category.Components = _mapper.Map<List<CategoryComponent>>(createCategoryDto.Components);
+                var notExisted = (await _unitOfWork.ComponentRepository.CheckExistence(
+                      category.Components.Select((c) => c.ComponentId).WhereNotNull()
+                  )).Where((result) => !result.DoesExist);
+
+                if (notExisted.Any())
+                {
+                    foreach (var notExistedComponent in notExisted)
+                    {
+                        ModelState.AddModelError(
+                            $"components[{category.Components.FindIndex(c => c.ComponentId == notExistedComponent.Id)}]",
+                            $"Specified componentId({notExistedComponent.Id}) not refer to existing component"
+                        );
+                    }
+                    var problem = new ValidationProblemDetails(ModelState);
+                    return BadRequest(problem);
+                }
             }
 
             await _unitOfWork.Categories.AddAsync(category);
