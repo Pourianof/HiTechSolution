@@ -8,6 +8,7 @@ using HiTechStore.Helpers.Types;
 using HiTechStore.Helpers.URLFilterQuery;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace HiTechStore.Data.Repositories
 {
@@ -117,6 +118,23 @@ namespace HiTechStore.Data.Repositories
                 throw new InvalidOperationException("Entity does not have an Id property.");
             }
             return _dbSet.AnyAsync(e => EF.Property<int>(e, modelIdName) == id);
+        }
+
+        public async Task<IEnumerable<ResourceExistenceResult>> CheckExistence(IEnumerable<int> ids)
+        {
+            var existingResources = await _dbSet
+                .WhereIdExists(ids)
+                .ToListAsync();
+
+            var existingIds = existingResources.Select((res) => res.GetId());
+
+            return ids
+                 .Select(id => new ResourceExistenceResult
+                 {
+                     Id = id,
+                     DoesExist = existingIds.Contains(id)
+                 })
+                 .ToList();
         }
     }
 

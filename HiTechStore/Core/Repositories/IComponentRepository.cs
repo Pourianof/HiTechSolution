@@ -9,5 +9,4 @@ public interface IComponentRepository : IRepository<ComponentType, ComponentType
     Task<IEnumerable<ComponentTypeDto>> GetComponentsOfCategory(int categoryId);
     Task<IEnumerable<ComponentModel>> GetComponentModelsOfCategory(int categoryId);
     Task<IEnumerable<ComponentModelDto>> GetComponentsModels(int categoryId);
-
 }
