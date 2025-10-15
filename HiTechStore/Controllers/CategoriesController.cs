@@ -156,7 +156,7 @@ namespace HiTechStore.Controllers
 
         [HttpPost("{categoryId}/components")]
         [TypeFilter<ResourceExistenceActionFilterAttribute<Category>>]
-        public async Task<ActionResult> CreateComponentForCategory([FromBody] ComponentCreationDto componentDto, int categoryId)
+        public async Task<ActionResult> CreateComponentForCategory([FromBody] ComponentCreationOrReferenceDto componentDto, int categoryId)
         {
 
             var category = await _unitOfWork.Categories.GetModelByIdAsync(categoryId);

@@ -29,11 +29,26 @@ public class PgDbExceptionHandler : IExceptionHandler
 
             var constraintColumn = GetConstraintColumnName(constraintName);
 
-            var problem = new ProblemDetails
+            var problem = httpContext.Request.Method.ToLower() switch
             {
-                Title = "Bad input data",
-                Detail = $"Duplicated '{constraintColumn ?? "<unknown-property>"}' value in {tableName}",
-                Status = StatusCodes.Status409Conflict
+                "post" => new ProblemDetails
+                {
+                    Title = "Bad input data",
+                    Detail = $"Duplicated '{constraintColumn ?? "<unknown-property>"}' value in {tableName}",
+                    Status = StatusCodes.Status409Conflict
+                },
+                "delete" => new ProblemDetails
+                {
+                    Title = "Data conflict",
+                    Detail = $"There is some dependency in database to the item you wanna delete which not allowable",
+                    Status = StatusCodes.Status409Conflict
+                },
+                _ => new ProblemDetails
+                {
+                    Title = "Data conflict",
+                    Detail = $"Action you wanna do could not happen in database",
+                    Status = StatusCodes.Status409Conflict
+                }
             };
 
             httpContext.Response.WriteAsJsonAsync(problem).Wait();

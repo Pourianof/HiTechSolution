@@ -34,6 +34,29 @@ public class ComponentsController : ControllerBase
         return Ok(components);
     }
 
+    [HttpPost]
+    [Authorize(Roles = $"{IdentityRoles.Manager}, {IdentityRoles.Admin}")]
+    public async Task<ActionResult<ComponentTypeDto>> CreateComponent(ComponentCreationDto componentCreationDto)
+    {
+        var componentModel = _mapper.Map<ComponentType>(componentCreationDto);
+        await _unitOfWork.ComponentRepository.AddAsync(componentModel);
+
+        return CreatedAtAction(nameof(GetComponent), new { id = componentModel.ComponentTypeId }, _mapper.Map<ComponentTypeDto>(componentModel));
+    }
+
+    [HttpDelete("{id}")]
+    [TypeFilter<ResourceExistenceActionFilterAttribute<ComponentType>>]
+    [Authorize(Roles = $"{IdentityRoles.Manager}, {IdentityRoles.Admin}")]
+    public async Task<ActionResult> DeleteComponent(int id)
+    {
+        var model = HttpContext.Items["resource"] as ComponentType;
+
+        await _unitOfWork.ComponentRepository.Delete(model!);
+        await _unitOfWork.Complete();
+
+        return NoContent();
+    }
+
     [HttpGet("{id}")]
     [TypeFilter<ResourceExistenceActionFilterAttribute<ComponentType>>]
     public async Task<ActionResult<ComponentTypeDto>> GetComponent(int id)

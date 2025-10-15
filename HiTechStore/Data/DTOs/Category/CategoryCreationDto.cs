@@ -23,7 +23,7 @@ namespace HiTechStore.DTOs.Category
         [FromJson]
         public IEnumerable<PropertyEntryCreationDto>? Properties { get; set; }
         [FromJson]
-        public IEnumerable<ComponentCreationDto>? Components { get; set; }
+        public IEnumerable<ComponentCreationOrReferenceDto>? Components { get; set; }
         [Required]
         [ValidExtensions(["svg"])]
         public IFormFile? Icon { get; set; }

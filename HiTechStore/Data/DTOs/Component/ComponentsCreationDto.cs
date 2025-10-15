@@ -5,7 +5,6 @@ namespace HiTechStore.Data.DTOs.Component;
 
 public class ComponentCreationDto
 {
-    public int? ComponentId { get; set; }
     [Required]
     [MinLength(2)]
     [JsonPropertyName("name")]
@@ -17,4 +16,9 @@ public class ComponentCreationDto
     [MinLength(1)]
     [JsonPropertyName("properties")]
     public IEnumerable<PropertyEntryCreationDto>? Properties { get; set; }
+}
+
+public class ComponentCreationOrReferenceDto : ComponentCreationDto
+{
+    public int? ComponentId { get; set; }
 }
