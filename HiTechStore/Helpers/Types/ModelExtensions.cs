@@ -21,7 +21,8 @@ namespace HiTechStore.Helpers.Types
     {
         public static PropertyInfo? GetModelIdPropertyInfo(Type modelType)
         {
-            var modelTypeName = modelType.Name;
+            var proxyStr = "Proxy";
+            var modelTypeName = modelType.Name.EndsWith(proxyStr) ? modelType.Name.Substring(0, modelType.Name.Length - proxyStr.Length) : modelType.Name;
 
             return modelType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
                  .FirstOrDefault(p => p.Name == "Id" || p.Name == $"{modelTypeName}Id");
