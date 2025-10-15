@@ -40,6 +40,7 @@ public class ComponentsController : ControllerBase
     {
         var componentModel = _mapper.Map<ComponentType>(componentCreationDto);
         await _unitOfWork.ComponentRepository.AddAsync(componentModel);
+        await _unitOfWork.Complete();
 
         return CreatedAtAction(nameof(GetComponent), new { id = componentModel.ComponentTypeId }, _mapper.Map<ComponentTypeDto>(componentModel));
     }
