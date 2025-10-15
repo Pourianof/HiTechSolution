@@ -40,7 +40,7 @@ namespace HiTechStore.Controllers
                 {
                     var categoryDto = _mapper.Map<CategoryDTO>(cat);
                     categoryDto.Image = CategoryAssetHelper.GetCategoryImagePathIfExist(cat.CategoryId);
-                    categoryDto.Image = CategoryAssetHelper.GetCategoryIconPathIfExist(cat.CategoryId);
+                    categoryDto.Icon = CategoryAssetHelper.GetCategoryIconPathIfExist(cat.CategoryId);
                     return categoryDto;
                 }
             );

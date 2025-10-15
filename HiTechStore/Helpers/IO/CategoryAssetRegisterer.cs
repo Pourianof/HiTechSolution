@@ -89,7 +89,7 @@ internal class CategoryAssetHelper
     {
         if (Image is not null)
         {
-            var publicPath = ProvideCategoryAssetPublicPath(_categoryId, CategoryAssetType.Icon);
+            var publicPath = ProvideCategoryAssetPublicPath(_categoryId, CategoryAssetType.Image);
             await PublicAssetsHelper.WriteIFormFile(Image, publicPath!);
         }
     }
