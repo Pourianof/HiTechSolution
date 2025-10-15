@@ -17,8 +17,3 @@ public class ComponentCreationDto
     [JsonPropertyName("properties")]
     public IEnumerable<PropertyEntryCreationDto>? Properties { get; set; }
 }
-
-public class ComponentCreationOrReferenceDto : ComponentCreationDto
-{
-    public int? ComponentId { get; set; }
-}

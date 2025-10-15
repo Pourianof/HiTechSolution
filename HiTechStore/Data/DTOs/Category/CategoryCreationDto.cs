@@ -30,3 +30,19 @@ namespace HiTechStore.DTOs.Category
     }
 
 }
+
+public class ComponentCreationOrReferenceDto : IValidatableObject
+{
+    [JsonPropertyName("componentId")]
+    public int? ComponentId { get; set; }
+    [JsonPropertyName("newComponent")]
+    public ComponentCreationDto? NewComponent { get; set; }
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (ComponentId is null && NewComponent is null)
+        {
+            yield return new ValidationResult("Must refer to an existing component by setting 'componentId' or create new one in 'newComponent' field");
+        }
+    }
+}

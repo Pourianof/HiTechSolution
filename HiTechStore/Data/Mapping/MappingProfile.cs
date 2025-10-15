@@ -62,7 +62,7 @@ public class MappingProfile : Profile
                 opt =>
                 {
                     opt.Condition((src) => src.ComponentId == null);
-                    opt.MapFrom(src => src);
+                    opt.MapFrom(src => src.NewComponent);
                 }
             );
     }

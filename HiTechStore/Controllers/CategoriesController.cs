@@ -76,7 +76,7 @@ namespace HiTechStore.Controllers
             await _unitOfWork.Categories.AddAsync(category);
             await _unitOfWork.Complete();
 
-            var categoryDto = _mapper.Map<CategoryDTO>(category);
+            var categoryDto = await _unitOfWork.Categories.GetByIdAsync(category.CategoryId);
 
             var writer = new CategoryAssetHelper(_unitOfWork, category.CategoryId)
             {
@@ -86,7 +86,7 @@ namespace HiTechStore.Controllers
 
             await writer.Write();
 
-            categoryDto.Image = writer.ImagePath;
+            categoryDto!.Image = writer.ImagePath;
             categoryDto.Icon = writer.IconPath;
 
 
