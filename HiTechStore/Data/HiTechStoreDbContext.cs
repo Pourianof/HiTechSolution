@@ -24,6 +24,7 @@ namespace HiTechStore.Data
         {
             base.OnModelCreating(modelBuilder);
             ProductEntityBuilder.Build(modelBuilder);
+            ComponentTypeEntityBuilder.Build(modelBuilder);
 
             modelBuilder.Entity<ProductScore>(entity =>
                 {
