@@ -73,7 +73,7 @@ namespace HiTechStore.Controllers
             {
                 category.Components = _mapper.Map<List<CategoryComponent>>(createCategoryDto.Components);
                 var notExisted = (await _unitOfWork.ComponentRepository.CheckExistence(
-                      category.Components.Select((c) => c.ComponentId).WhereNotNull()
+                      category.Components.Select((c) => c.ComponentTypeId).WhereNotNull()
                   )).Where((result) => !result.DoesExist);
 
                 if (notExisted.Any())
@@ -81,8 +81,8 @@ namespace HiTechStore.Controllers
                     foreach (var notExistedComponent in notExisted)
                     {
                         ModelState.AddModelError(
-                            $"components[{category.Components.FindIndex(c => c.ComponentId == notExistedComponent.Id)}]",
-                            $"Specified componentId({notExistedComponent.Id}) not refer to existing component"
+                            $"components[{category.Components.FindIndex(c => c.ComponentTypeId == notExistedComponent.Id)}]",
+                            $"Specified ComponentId({notExistedComponent.Id}) not refer to existing component"
                         );
                     }
                     var problem = new ValidationProblemDetails(ModelState);
@@ -179,14 +179,14 @@ namespace HiTechStore.Controllers
             var category = await _unitOfWork.Categories.GetModelByIdAsync(categoryId);
             var componentType = _mapper.Map<CategoryComponent>(componentDto);
 
-            if (componentType.ComponentId is not null)
+            if (componentType.ComponentTypeId is not null)
             {
-                var isExisted = category!.Components?.Any(cmp => cmp.ComponentId == componentType.ComponentId) ?? false;
+                var isExisted = category!.Components?.Any(cmp => cmp.ComponentTypeId == componentType.ComponentTypeId) ?? false;
                 // if component id specified then it tried to add existing component
                 // and we must fetch other data
                 if (isExisted)
                 {
-                    var component = await _unitOfWork.ComponentRepository.GetByIdAsync(componentDto.ComponentId!.Value);
+                    var component = await _unitOfWork.ComponentRepository.GetByIdAsync(componentDto.ComponentTypeId!.Value);
                     var problem = new ProblemDetails
                     {
                         Status = (int)HttpStatusCode.Conflict,

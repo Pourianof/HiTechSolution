@@ -19,7 +19,7 @@ namespace HiTechStore.Models
         public int? CategoryId { get; set; }
         public virtual Category? Category { get; set; }
         [ForeignKey("Component")]
-        public int? ComponentId { get; set; }
+        public int? ComponentTypeId { get; set; }
         public virtual ComponentType? Component { get; set; }
 
     }

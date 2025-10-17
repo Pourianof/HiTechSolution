@@ -91,7 +91,7 @@ public class FilterRepository : IFilterRepository
                             .SelectMany((c) => c.Components!).Select(cmp => cmp.Component)
                             .Select((cmp) => new FilterComponentsDto
                             {
-                                ComponentId = cmp!.ComponentTypeId,
+                                ComponentTypeId = cmp!.ComponentTypeId,
                                 Name = cmp!.Name,
                                 CommonBrands = cmp.ComponentModels!.Select(
                                     (model) => model.BrandModel!.Brand

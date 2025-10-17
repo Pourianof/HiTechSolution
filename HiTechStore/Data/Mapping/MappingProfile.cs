@@ -53,7 +53,7 @@ public class MappingProfile : Profile
         CreateMap<ComponentModelCreationDto, ComponentModel>();
         CreateMap<ComponentType, ComponentTypeDto>();
         CreateMap<ComponentType, ComponentTypeWithPropertiesDto>()
-            .ForMember((dest) => dest.ComponentId, opt => opt.MapFrom(src => src.ComponentTypeId));
+            .ForMember((dest) => dest.ComponentTypeId, opt => opt.MapFrom(src => src.ComponentTypeId));
         CreateMap<ComponentCreationOrReferenceDto, ComponentType>();
         CreateMap<ComponentCreationDto, ComponentType>();
         CreateMap<ComponentCreationOrReferenceDto, CategoryComponent>()
@@ -61,7 +61,7 @@ public class MappingProfile : Profile
                 dest => dest.Component,
                 opt =>
                 {
-                    opt.Condition((src) => src.ComponentId == null);
+                    opt.Condition((src) => src.ComponentTypeId == null);
                     opt.MapFrom(src => src.NewComponent);
                 }
             );

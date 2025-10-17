@@ -11,7 +11,7 @@ namespace HiTechStore.Data.EntityBuilder
             modelBuilder.Entity<CategoryComponent>(
                 entity =>
                 {
-                    entity.HasKey(categoryComponent => new { categoryComponent.ComponentId, categoryComponent.CategoryId });
+                    entity.HasKey(categoryComponent => new { categoryComponent.ComponentTypeId, categoryComponent.CategoryId });
                 }
             );
         }

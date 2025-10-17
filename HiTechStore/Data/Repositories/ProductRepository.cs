@@ -50,9 +50,9 @@ namespace HiTechStore.Data.Repositories
                     (c) => new ProductComponentDto()
                     {
                         Name = c.Component!.Name,
-                        ComponentTypeId = c.ComponentId,
+                        ComponentTypeId = c.ComponentTypeId,
                         Description = c.Component!.Description,
-                        Models = p.ComponentModels.Where(m => m.ComponentTypeId == c.ComponentId).Select(
+                        Models = p.ComponentModels.Where(m => m.ComponentTypeId == c.ComponentTypeId).Select(
                             (m) => new ComponentModelDto()
                             {
                                 BrandModel = m.BrandModel != null ? new BrandModelDto()
@@ -63,7 +63,7 @@ namespace HiTechStore.Data.Repositories
                                     ModelName = m.BrandModel.Name
                                 } : null,
                                 ComponentModelId = m.ComponentModelId,
-                                ComponentTypeId = c.ComponentId,
+                                ComponentTypeId = c.ComponentTypeId,
                                 Description = m.Description,
                                 Properties = m.Properties!.Select(
                                     (prop) => new PropertyValueDto()
