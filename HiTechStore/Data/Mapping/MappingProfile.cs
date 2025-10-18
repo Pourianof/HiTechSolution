@@ -98,7 +98,8 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.ModelName, opt => opt.MapFrom((src) => src.Name))
             .ForMember(dest => dest.ModelId, opt => opt.MapFrom((src) => src.BrandModelId));
 
-        CreateMap<Brand, BrandDto>();
+        CreateMap<Brand, BrandDto>()
+            .ForMember(dest => dest.BrandModels, opt => opt.MapFrom((src) => src.Models));
         CreateMap<BrandCreationDto, Brand>();
         CreateMap<BrandModelCreationDto, BrandModel>();
 
