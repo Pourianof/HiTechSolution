@@ -3,6 +3,7 @@ using AutoMapper;
 using HiTechStore.Controllers.ActionFilters;
 using HiTechStore.Core;
 using HiTechStore.Core.Exceptions;
+using HiTechStore.Data.DTOs.Brand;
 using HiTechStore.Data.DTOs.Component;
 using HiTechStore.Helpers.Types;
 using HiTechStore.Models;
@@ -70,11 +71,28 @@ public class ComponentsController : ControllerBase
     [HttpPost("{id}/models")]
     [TypeFilter<ResourceExistenceActionFilterAttribute<ComponentType>>]
     [Authorize(Roles = $"{IdentityRoles.Manager}, {IdentityRoles.Admin}")]
-    public async Task<ActionResult<ComponentModel>> CreateComponentModel(int id, ComponentModelCreationDto componentModelDto)
+    public async Task<ActionResult<ComponentModel>> CreateComponentModel(int id, ComponentModelCreationDto componentModelCreationDto)
     {
         var component = await _unitOfWork.ComponentRepository.GetModelByIdAsync(id);
 
-        var model = _mapper.Map<ComponentModel>(componentModelDto);
+        var model = _mapper.Map<ComponentModel>(componentModelCreationDto);
+        BrandModelDto? brandModel = null;
+        if (componentModelCreationDto.BrandModelId is not null)
+        {
+            brandModel = await _unitOfWork.BrandModelRepository.GetByIdAsync(componentModelCreationDto.BrandModelId.Value);
+            if (brandModel is null)
+            {
+                return BadRequest(
+                    new ProblemDetails()
+                    {
+                        Title = "not exist data reference",
+                        Detail = $"There is no brand-model with id {componentModelCreationDto.BrandModelId}",
+                        Status = StatusCodes.Status400BadRequest
+
+                    }
+                );
+            }
+        }
 
         if (component?.Properties == null || !component.Properties.Any())
         {
@@ -122,7 +140,9 @@ public class ComponentsController : ControllerBase
         component!.ComponentModels!.Add(model);
         await _unitOfWork.Complete();
 
-        return Ok(_mapper.Map<ComponentModelDto>(model));
+        var componentModelDto = _mapper.Map<ComponentModelDto>(model);
+        componentModelDto.BrandModel = brandModel;
+        return Ok(componentModelDto);
     }
 
     [HttpGet("{id}/models")]
