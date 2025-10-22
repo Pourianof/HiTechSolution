@@ -1,5 +1,8 @@
+using AutoMapper;
+
 using HiTechStore.Core;
 using HiTechStore.Data.DTOs.Brand;
+using HiTechStore.Models;
 
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,14 +13,64 @@ namespace HiTechStore.Controllers;
 public class BrandModelsController : ControllerBase
 {
     private IUnitOfWork _unitOfWork { get; set; }
-    public BrandModelsController(IUnitOfWork unitOfWork) : base()
+    private IMapper _mapper { get; set; }
+    public BrandModelsController(IUnitOfWork unitOfWork, IMapper mapper) : base()
     {
         _unitOfWork = unitOfWork;
+        _mapper = mapper;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<BrandModelDto>>> GetAllBrandModels()
     {
         return Ok(await _unitOfWork.BrandModelRepository.GetAllAsync());
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<BrandModelDto>> RegisterBrandModel([FromForm] BrandModelCreationDto brandModelCreationDto)
+    {
+        var brandModel = _mapper.Map<BrandModel>(brandModelCreationDto);
+        var resultDto = _mapper.Map<BrandModelDto>(brandModel);
+
+        if (brandModelCreationDto.Brand is not null)
+        {
+            var brandName = brandModelCreationDto.Brand.name;
+            var dbBrand = _unitOfWork.BrandRepository.GetBrandByName(brandName!);
+
+            if (dbBrand is null)
+            {
+                brandModel.Brand = new Brand
+                {
+                    Name = brandName,
+                };
+            }
+            else
+            {
+                brandModel.BrandId = dbBrand.Id;
+            }
+        }
+        else
+        {
+            var brand = await _unitOfWork.BrandRepository.GetByIdAsync(brandModel.BrandId);
+            if (brand is null)
+            {
+                var problem = new ProblemDetails()
+                {
+                    Title = "Not found brand",
+                    Detail = "specified brand id does not exist",
+                    Status = StatusCodes.Status400BadRequest
+                };
+                return BadRequest(problem);
+            }
+
+            resultDto.BrandName = brand.Name;
+        }
+
+        await _unitOfWork.BrandModelRepository.AddAsync(brandModel);
+        await _unitOfWork.Complete();
+
+        resultDto.ModelId = brandModel.BrandModelId;
+
+        return Ok(resultDto);
     }
 }
