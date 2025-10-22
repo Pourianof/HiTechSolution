@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 
 using HiTechStore.Data.DTOs;
 using HiTechStore.Data.DTOs.Binders;
+using HiTechStore.Data.DTOs.Component;
 using HiTechStore.Data.DTOs.Product;
 using HiTechStore.Data.DTOs.Product.Validations;
 
@@ -42,7 +43,21 @@ public class ProductCategoryValuesDto
     [JsonPropertyName("properties")]
     public IEnumerable<PropertyValueEntryCreationDto>? Properties { get; set; }
     [JsonPropertyName("componentModels")]
-    public IEnumerable<int>? ComponentModels { get; set; }
+    public IEnumerable<ProductComponentModelCreationDto>? ComponentModels { get; set; }
 
 }
 
+public class ProductComponentModelCreationDto : IValidatableObject
+{
+    public ComponentModelCreationDto? Component { get; set; }
+    public int? ComponentModelId { get; set; }
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (Component is null && ComponentModelId is null)
+        {
+            yield return new ValidationResult($"You must refer to an existing component-model by its id({nameof(ComponentModelId)}) or define a new one({nameof(Component)})");
+        }
+        yield return ValidationResult.Success!;
+    }
+}

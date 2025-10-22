@@ -100,11 +100,18 @@ public class ProductCreationActionFilterAttribute : ModelAccessorBaseActionFilte
 
             if (product.CategoryValues.ComponentModels != null && product.CategoryValues.ComponentModels.Any())
             {
-                var componentModelIds = product.CategoryValues.ComponentModels;
+                var componentModels = product.CategoryValues.ComponentModels;
+                var componentGroups = componentModels.GroupBy(
+                    (cm) => cm.ComponentModelId is null
+                );
+
+                var componentModelIds = componentGroups.Where((g) => !g.Key)
+                                                    .SelectMany((g) => g)
+                                                    .Select(cm => cm.ComponentModelId!.Value);
 
                 var categoryValidModels = UnitOfWork.Categories.GetModelsOfCategory(categoryId, componentModelIds).Result;
 
-                for (var index = 0; index < componentModelIds.Count(); index++)
+                for (var index = 0; index < componentModels.Count(); index++)
                 {
                     var modelId = componentModelIds.ElementAt(index);
                     var componentModel = categoryValidModels.Where((cvm) => cvm.ComponentModelId == modelId).FirstOrDefault();
@@ -124,7 +131,15 @@ public class ProductCreationActionFilterAttribute : ModelAccessorBaseActionFilte
                     createdProduct.ComponentModels.Add(componentModel);
                 }
 
+                var componentCreationDtos = componentGroups.Where((g) => g.Key).SelectMany((g) => g);
 
+                // Todo: Must validate the component-models for the existence of component type 
+                // and properties and association of properties to its component-type
+                if (componentCreationDtos.Any())
+                {
+                    var candidateCreationComponentModels = _mapper.Map<IEnumerable<ComponentModel>>(componentCreationDtos);
+                    createdProduct.ComponentModels.AddRange(candidateCreationComponentModels);
+                }
             }
 
             var categoryProperties = productCategory.Properties;
