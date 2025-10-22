@@ -17,6 +17,8 @@ namespace HiTechStore.Core.Repositories
         Task Delete(TModel entity);
         Task Delete(int id);
         Task<int> DeleteImmediately(int id);
+        Task<IEnumerable<TModel>> GetAll(IEnumerable<int> ids);
+        Task<IEnumerable<ResourceExistenceResultWithModel<TModel>>> CheckExistence(IEnumerable<int> ids, bool includeModel = false);
     }
 
     public interface IRepositoryBase<T, O> : IRepositoryModelBase<T>

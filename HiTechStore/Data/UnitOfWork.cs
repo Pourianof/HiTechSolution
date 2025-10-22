@@ -9,6 +9,7 @@ namespace HiTechStore.Data
     public class UnitOfWork : IUnitOfWork
     {
         private readonly HiTechStoreDbContext _context;
+        private readonly IMapper _mapper;
         public IProductRepository Products { get; }
         public ICategoryRepository Categories { get; }
         public IProductScoresRepository ProductScores { get; }
@@ -21,6 +22,7 @@ namespace HiTechStore.Data
         public UnitOfWork(HiTechStoreDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
             Products = new ProductRepository(_context, mapper);
             Categories = new CategoryRepository(_context, mapper);
             ProductScores = new ProductScoresRepository(_context, mapper);
@@ -40,6 +42,9 @@ namespace HiTechStore.Data
             _context.Dispose();
         }
 
-
+        IRepositoryModelBase<TModel> IUnitOfWork.RespositoryOf<TModel>()
+        {
+            return new RepositoryCore<TModel>(_context);
+        }
     }
 }

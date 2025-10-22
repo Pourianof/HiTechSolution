@@ -8,25 +8,109 @@ using HiTechStore.Helpers.Types;
 using HiTechStore.Helpers.URLFilterQuery;
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 
 namespace HiTechStore.Data.Repositories
 {
-    public class Repository<T, O, Q> : IRepository<T, O, Q>
-        where T : class, IModel
-        where Q : BaseQuery
-        where O : class
+    public class RepositoryCore<TModel>(HiTechStoreDbContext context) : IRepositoryModelBase<TModel>
+        where TModel : class, IModel
     {
-        protected readonly HiTechStoreDbContext _context;
-        protected readonly DbSet<T> _dbSet;
-        protected readonly IMapper _mapper;
-
-        public Repository(HiTechStoreDbContext context, IMapper mapper)
+        protected readonly HiTechStoreDbContext _context = context;
+        protected readonly DbSet<TModel> _dbSet = context.Set<TModel>();
+        public virtual async Task<TModel?> GetModelByIdAsync(int id)
         {
-            _context = context;
-            _dbSet = context.Set<T>();
-            _mapper = mapper;
+            var query = GetByIdAsyncQueryBuilder(_dbSet);
+            return await query.FindById(id).FirstOrDefaultAsync();
         }
+
+        protected virtual IQueryable<TModel> GetByIdAsyncQueryBuilder(IQueryable<TModel> queryBuilder)
+        {
+            return queryBuilder;
+        }
+
+        public virtual async Task AddAsync(TModel entity)
+        {
+            await _dbSet.AddAsync(entity);
+        }
+
+        public virtual Task Delete(TModel entity)
+        {
+            _dbSet.Remove(entity);
+            return Task.CompletedTask;
+        }
+
+        public virtual Task Delete(int id)
+        {
+            var entity = _dbSet.Find(id);
+            if (entity != null)
+            {
+                _dbSet.Remove(entity);
+            }
+            return Task.CompletedTask;
+        }
+
+        public virtual Task<int> DeleteImmediately(int id)
+        {
+            return _dbSet.FindById(id).ExecuteDeleteAsync();
+        }
+
+        public virtual Task<bool> IsExistsAsync(int id)
+        {
+            var modelType = typeof(TModel);
+            var modelIdName = modelType.GetProperties().FirstOrDefault(p => p.Name.Contains("Id"))?.Name;
+            if (modelIdName is null)
+            {
+                throw new InvalidOperationException("Entity does not have an Id property.");
+            }
+            return _dbSet.AnyAsync(e => EF.Property<int>(e, modelIdName) == id);
+        }
+
+        public async Task<IEnumerable<ResourceExistenceResult>> CheckExistence(IEnumerable<int> ids)
+        {
+            var existingResources = await _context.Set<TModel>()
+               .WhereIdExists(ids)
+               .ToListAsync();
+
+            var existingIds = existingResources.Select((res) => res.GetId());
+
+            return ids
+                 .Select(id => new ResourceExistenceResult
+                 {
+                     Id = id,
+                     DoesExist = existingIds.Contains(id)
+                 })
+                 .ToList();
+        }
+
+        public async Task<IEnumerable<TModel>> GetAll(IEnumerable<int> ids)
+        {
+            return await _dbSet.WhereIdExists(ids).ToListAsync();
+        }
+
+        public async Task<IEnumerable<ResourceExistenceResultWithModel<TModel>>> CheckExistence(IEnumerable<int> ids, bool includeModel = false)
+        {
+            var existingResources = await _context.Set<TModel>()
+               .WhereIdExists(ids)
+               .ToListAsync();
+
+            var existingIds = existingResources.Select((res) => res.GetId());
+
+            return ids
+                 .Select(id => new ResourceExistenceResultWithModel<TModel>
+                 {
+                     Id = id,
+                     DoesExist = existingIds.Contains(id),
+                     Model = existingResources.Where((res) => res.GetId() == id).FirstOrDefault()
+                 })
+                 .ToList();
+        }
+    }
+    public class Repository<T, O, Q>(HiTechStoreDbContext context, IMapper mapper) :
+        RepositoryCore<T>(context), IRepository<T, O, Q>
+            where T : class, IModel
+            where Q : BaseQuery
+            where O : class
+    {
+        protected readonly IMapper _mapper = mapper;
 
         protected virtual IQueryable<T> GetAllQueryBuilder(IQueryable<T> queryBuilder, Q? queyParams = null)
         {
@@ -67,74 +151,11 @@ namespace HiTechStore.Data.Repositories
             return await Project(GetAllQueryBuilder(_dbSet.AsQueryable()).Take(10)).ToListAsync();
         }
 
-        protected virtual IQueryable<T> GetByIdAsyncQueryBuilder(IQueryable<T> queryBuilder)
-        {
-            return queryBuilder;
-        }
+
         public virtual async Task<O?> GetByIdAsync(int id)
         {
             var query = GetByIdAsyncQueryBuilder(_dbSet);
             return await Project(query.FindById(id)).FirstOrDefaultAsync();
-        }
-
-        public virtual async Task<T?> GetModelByIdAsync(int id)
-        {
-            var query = GetByIdAsyncQueryBuilder(_dbSet);
-            return await query.FindById(id).FirstOrDefaultAsync();
-        }
-
-        public virtual async Task AddAsync(T entity)
-        {
-            await _dbSet.AddAsync(entity);
-        }
-
-        public virtual Task Delete(T entity)
-        {
-            _dbSet.Remove(entity);
-            return Task.CompletedTask;
-        }
-
-        public virtual Task Delete(int id)
-        {
-            var entity = _dbSet.Find(id);
-            if (entity != null)
-            {
-                _dbSet.Remove(entity);
-            }
-            return Task.CompletedTask;
-        }
-
-        public virtual Task<int> DeleteImmediately(int id)
-        {
-            return _dbSet.FindById(id).ExecuteDeleteAsync();
-        }
-
-        public virtual Task<bool> IsExistsAsync(int id)
-        {
-            var modelType = typeof(T);
-            var modelIdName = modelType.GetProperties().FirstOrDefault(p => p.Name.Contains("Id"))?.Name;
-            if (modelIdName is null)
-            {
-                throw new InvalidOperationException("Entity does not have an Id property.");
-            }
-            return _dbSet.AnyAsync(e => EF.Property<int>(e, modelIdName) == id);
-        }
-
-        public async Task<IEnumerable<ResourceExistenceResult>> CheckExistence(IEnumerable<int> ids)
-        {
-            var existingResources = await _dbSet
-                .WhereIdExists(ids)
-                .ToListAsync();
-
-            var existingIds = existingResources.Select((res) => res.GetId());
-
-            return ids
-                 .Select(id => new ResourceExistenceResult
-                 {
-                     Id = id,
-                     DoesExist = existingIds.Contains(id)
-                 })
-                 .ToList();
         }
     }
 
