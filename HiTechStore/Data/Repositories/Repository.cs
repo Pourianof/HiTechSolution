@@ -120,6 +120,16 @@ namespace HiTechStore.Data.Repositories
         public virtual async Task<IEnumerable<O>> GetAllAsync(Q queryParams)
         {
             var query = GetAllQueryBuilder(_dbSet.AsQueryable(), queryParams);
+
+            if (queryParams.SortBy is not null && queryParams.SortDir is not null)
+            {
+                var sortDir = queryParams.SortDir.GetValue<string>(QueryOperator.Equal)?.ToLower();
+                if (sortDir == "des")
+                {
+                    query = query.OrderDescending();
+                }
+            }
+
             var page = queryParams?.Page?.GetValue<int>(QueryOperator.Equal);
             var limit = queryParams?.Limit?.GetValue<int>(QueryOperator.Equal);
             if (page is not null)

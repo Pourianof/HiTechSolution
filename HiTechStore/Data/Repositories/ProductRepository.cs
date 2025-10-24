@@ -1,3 +1,6 @@
+using System.Diagnostics;
+using System.Linq.Expressions;
+
 using AutoMapper;
 
 using HiTechStore.Core.Repositories;
@@ -143,6 +146,23 @@ namespace HiTechStore.Data.Repositories
 
                 queryBuilder = ProductFilterApplier.Apply(queryBuilder, productQueryParams.FilterMaps,
                                 new CategoryFilters([categoryId], productQueryParams.CategoryProperties));
+
+                var sortBy = productQueryParams.SortBy?.GetValue<string>(QueryOperator.Equal);
+                if (sortBy is not null)
+                {
+
+                    Expression<Func<Product, object>> sorter = sortBy switch
+                    {
+                        "created_at" => (Product p) => p.CreatedAt,
+                        "price" => (Product p) => p.Price,
+                        _ => (Product p) => p.CreatedAt
+                    };
+                    queryBuilder = queryBuilder.OrderBy(sorter);
+                }
+                else
+                {
+                    queryBuilder = queryBuilder.OrderBy((Product p) => p.CreatedAt).OrderDescending();
+                }
 
             }
             return queryBuilder;
