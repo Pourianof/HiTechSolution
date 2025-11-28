@@ -1,3 +1,4 @@
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Env
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,11 +6,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HiTechPay - @ViewData["Title"]</title>
 
-    <link rel="stylesheet" href="~/css/output.css" asp-append-version="true" />
+    @if (Env.IsDevelopment())
+    {
+        <link rel="stylesheet" href="~/css/output.css?v=@DateTime.UtcNow.Ticks" />
+    }else{
+        <link rel="stylesheet" href="~/css/output.css" />
+    }
 </head>
 <body>
     <div class="container h-dvh">
-        @RenderBody()
+    <!-- Dark gradient overlay -->
+<div class="absolute inset-0 bg-linear-to-b from-black/70 to-black/90"></div>
+
+<!-- Floating Glow Elements -->
+        <div class="pointer-events-none absolute inset-0 overflow-hidden">
+            <div class="absolute top-20 left-10 w-72 h-72 bg-cyan-400/20 blur-3xl rounded-full animate-pulse"></div>
+            <div class="absolute bottom-10 right-10 w-96 h-96 bg-indigo-500/20 blur-3xl rounded-full animate-pulse"></div>
+        </div>
+        <div class="relative z-10 flex h-full items-center justify-center px-6">
+            <!-- Center Content -->
+            <div class="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-10 max-w-xl text-center shadow-2xl">
+                @RenderBody()
+            </div>
+        </div>
     </div>
 
     @RenderSection("Scripts", required: false)
