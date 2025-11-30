@@ -1,6 +1,13 @@
+using HiTechPay;
+using HiTechPay.Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddDependencies();
+
+builder.Services.Configure<SignatureOptions>(
+    builder.Configuration.GetSection("SignatureOptions"));
 
 var app = builder.Build();
 
