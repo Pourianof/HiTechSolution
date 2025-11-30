@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HiTechStore", "HiTechStore\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HiTechPay", "HiTechPay\HiTechPay.csproj", "{1B22DEEB-562F-4C83-B4FC-CE0C1E60DCE0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HiTechPay.Sdk", "HiTechPay.Sdk\HiTechPay.Sdk.csproj", "{0B225059-0325-44DC-87B9-0AB36A123867}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,18 @@ Global
 		{1B22DEEB-562F-4C83-B4FC-CE0C1E60DCE0}.Release|x64.Build.0 = Release|Any CPU
 		{1B22DEEB-562F-4C83-B4FC-CE0C1E60DCE0}.Release|x86.ActiveCfg = Release|Any CPU
 		{1B22DEEB-562F-4C83-B4FC-CE0C1E60DCE0}.Release|x86.Build.0 = Release|Any CPU
+		{0B225059-0325-44DC-87B9-0AB36A123867}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B225059-0325-44DC-87B9-0AB36A123867}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B225059-0325-44DC-87B9-0AB36A123867}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0B225059-0325-44DC-87B9-0AB36A123867}.Debug|x64.Build.0 = Debug|Any CPU
+		{0B225059-0325-44DC-87B9-0AB36A123867}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0B225059-0325-44DC-87B9-0AB36A123867}.Debug|x86.Build.0 = Debug|Any CPU
+		{0B225059-0325-44DC-87B9-0AB36A123867}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B225059-0325-44DC-87B9-0AB36A123867}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B225059-0325-44DC-87B9-0AB36A123867}.Release|x64.ActiveCfg = Release|Any CPU
+		{0B225059-0325-44DC-87B9-0AB36A123867}.Release|x64.Build.0 = Release|Any CPU
+		{0B225059-0325-44DC-87B9-0AB36A123867}.Release|x86.ActiveCfg = Release|Any CPU
+		{0B225059-0325-44DC-87B9-0AB36A123867}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
