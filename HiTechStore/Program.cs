@@ -117,6 +117,8 @@ builder.Services.AddScoped<IAuthorizationHandler, AdminIsAlwaysAuthorizedAuthori
 builder.Services.AddExceptionHandler<PgDbExceptionHandler>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
+builder.Services.UseHiTechPaySdk();
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
