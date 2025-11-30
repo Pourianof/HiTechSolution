@@ -3,13 +3,27 @@
 }
 @{
     Layout = "_Layout";
+    string callbackUrl = ViewBag.CallbackUrl;
+    string storeUrl = "http://localhost:5108";
 }
 
-<div class="flex flex-col gap-4 text-white">
-    <button>
-        Successful Payment
-    </button>
-    <button>
-        Failed Payment
-    </button>
-</div>
+@if (string.IsNullOrEmpty(callbackUrl)){
+    <div class="flex flex-col gap-4 text-white">
+        No callback URL or confirmation key provided.
+    </div>
+}else{
+    <div class="flex flex-col gap-4 text-white">
+        <a
+            href="@callbackUrl"
+            class="bg-sky-600 hover:bg-sky-800 text-white font-bold py-2 px-4 rounded" >
+            Successful Payment
+        </a>
+        <a 
+            href="@storeUrl"
+         class="text-red-600 opacity-70 hover:opacity-100" hre>
+            Failed Payment
+            <br />
+            <span class="text-xs">(Back to store)</span>
+        </a>
+    </div>
+}
