@@ -1,4 +1,5 @@
 using HiTechPay;
+using HiTechPay.Endpoints;
 using HiTechPay.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,5 +18,7 @@ app.UseRouting();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapApiEndpoints();
 
 app.Run();
