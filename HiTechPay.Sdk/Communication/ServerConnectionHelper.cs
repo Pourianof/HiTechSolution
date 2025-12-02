@@ -1,6 +1,6 @@
 using System.Web;
 
-namespace HiTechPay.Sdk.Connection;
+namespace HiTechPay.Sdk.Communication;
 
 public interface IServerConnectionHelper
 {

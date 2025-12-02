@@ -1,4 +1,4 @@
-using HiTechPay.Sdk.Connection;
+using HiTechPay.Sdk.Communication;
 using HiTechPay.Sdk.Keys;
 
 namespace HiTechPay.Sdk;

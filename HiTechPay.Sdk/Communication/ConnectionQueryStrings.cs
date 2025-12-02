@@ -1,4 +1,4 @@
-namespace HiTechPay.Sdk.Connection;
+namespace HiTechPay.Sdk.Communication;
 
 public static class ConnectionQueryStrings
 {
