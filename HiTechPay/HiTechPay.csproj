@@ -14,7 +14,11 @@
     <Watch Include="**/*.cshtml" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\HiTechPay.Sdk\HiTechPay.Sdk.csproj" />
+  </ItemGroup>
+
   <Target Name="Tailwind" BeforeTargets="Build">
-    <Exec Command="npm run watch"  WorkingDirectory="./frontend" />
+    <Exec Command="npm run watch" WorkingDirectory="./frontend" />
   </Target>
 </Project>

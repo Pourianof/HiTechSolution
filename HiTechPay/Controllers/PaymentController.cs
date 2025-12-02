@@ -1,5 +1,6 @@
 using System.Web;
 
+using HiTechPay.Sdk.Communication;
 using HiTechPay.Services;
 
 using Microsoft.AspNetCore.Mvc;
@@ -13,8 +14,8 @@ namespace HiTechPay.Controllers
 
         public IActionResult Index()
         {
-            var specifiedCallbackURL = HttpContext.Request.Query["callback"];
-            var key = HttpContext.Request.Query["key"];
+            var specifiedCallbackURL = HttpContext.Request.Query[ConnectionQueryStrings.CallbackUrl];
+            var key = HttpContext.Request.Query[ConnectionQueryStrings.Key];
 
             if (!string.IsNullOrEmpty(key) && !string.IsNullOrEmpty(specifiedCallbackURL))
             {
@@ -23,7 +24,7 @@ namespace HiTechPay.Controllers
 
                 var query = HttpUtility.ParseQueryString(callbackUrl.Query);
 
-                query["confirm_key"] = signedKey;
+                query[ConnectionQueryStrings.ConfirmKey] = signedKey;
 
                 callbackUrl.Query = query.ToString();
                 string finalCallbackUrl = callbackUrl.ToString();
