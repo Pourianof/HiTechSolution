@@ -11,7 +11,7 @@ internal class ServerConnectionHelper : IServerConnectionHelper
 {
     public Uri GetPaymentUrl(string key, string callbackUrl)
     {
-        var url = new UriBuilder("http://localhost:5035");
+        var url = new UriBuilder("http://localhost:5035/payment");
 
         var query = HttpUtility.ParseQueryString(url.Query);
         query[ConnectionQueryStrings.Key] = key;
