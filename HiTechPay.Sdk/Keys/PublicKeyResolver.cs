@@ -25,6 +25,8 @@ internal class PublicKeyResolver
             var response = await client.GetAsync("/api/keys/pub-key");
             var pubKey = await response.Content.ReadAsStringAsync();
 
+            await File.WriteAllTextAsync(_pubKeyPath, pubKey);
+
             var rsa = RSA.Create();
             rsa.ImportFromPem(pubKey);
 
