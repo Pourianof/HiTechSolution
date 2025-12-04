@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 
 namespace HiTechStore.Helpers.URLFilterQuery;
 
@@ -46,10 +47,16 @@ public class ToQueryModelBinderProvider : IModelBinderProvider
 {
     public IModelBinder GetBinder(ModelBinderProviderContext context)
     {
-        if (context.BindingInfo.BindingSource != null &&
-            context.BindingInfo.BindingSource.CanAcceptDataFrom(BindingSource.Query))
+        if (context.Metadata is DefaultModelMetadata metadata)
         {
-            return new BinderTypeModelBinder(typeof(ToQueryModelBinder));
+            var hasToQueryAttribute =
+                metadata.Attributes.ParameterAttributes?
+                    .Any(a => a is ToQueryAttribute) == true;
+
+            if (hasToQueryAttribute)
+            {
+                return new BinderTypeModelBinder(typeof(ToQueryModelBinder));
+            }
         }
 
         return null!;
