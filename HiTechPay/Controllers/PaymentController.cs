@@ -25,6 +25,7 @@ namespace HiTechPay.Controllers
                 var query = HttpUtility.ParseQueryString(callbackUrl.Query);
 
                 query[ConnectionQueryStrings.ConfirmKey] = signedKey;
+                query[ConnectionQueryStrings.Key] = key;
 
                 callbackUrl.Query = query.ToString();
                 string finalCallbackUrl = callbackUrl.ToString();
