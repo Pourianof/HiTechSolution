@@ -1,0 +1,25 @@
+using HiTechStore.Data.Seeders;
+using HiTechStore.Models;
+
+using Microsoft.AspNetCore.Identity;
+
+namespace HiTechStore.Core.Auth;
+
+public static class AuthConfiguration
+{
+    public static async Task ConfigueAuth(this WebApplication app)
+    {
+        using (var scope = app.Services.CreateScope())
+        {
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            foreach (var role in IdentityRoles.AllRoles)
+                if (!await roleManager.RoleExistsAsync(role))
+                    await roleManager.CreateAsync(new IdentityRole(role));
+
+            await AdminSeeder.SeedAsync(scope.ServiceProvider);
+        }
+
+        app.UseAuthentication();
+        app.UseAuthorization();
+    }
+}

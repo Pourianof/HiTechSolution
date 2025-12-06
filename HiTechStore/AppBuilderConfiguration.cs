@@ -1,0 +1,34 @@
+using HiTechStore.Controllers.ExceptionFilters;
+using HiTechStore.Core.Auth;
+using HiTechStore.Core.ExceptionHandlers;
+using HiTechStore.Data;
+using HiTechStore.Helpers.URLFilterQuery;
+
+namespace HiTechStore;
+
+public static class DependencyRegistration
+{
+    public static WebApplicationBuilder ConfigueBuilder(this WebApplicationBuilder builder)
+    {
+        builder.Services.AddControllers(
+            (options) =>
+            {
+                options.ModelBinderProviders.Insert(0, new ToQueryModelBinderProvider());
+            }
+        );
+
+        builder.UseDataAccess();
+
+        builder.Services.AddAutoMapper(typeof(MappingProfile));
+        builder.Services.AddQueryParser();
+
+        builder.AddAuth();
+
+        builder.Services.AddExceptionHandler<PgDbExceptionHandler>();
+        builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
+        builder.Services.UseHiTechPaySdk();
+
+        return builder;
+    }
+}

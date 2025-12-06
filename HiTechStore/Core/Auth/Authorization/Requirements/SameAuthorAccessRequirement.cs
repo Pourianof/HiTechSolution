@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 
-namespace Core.Authorization.Requirements
+namespace HiTechStore.Core.Auth.Authorization.Requirements
 {
     public class SameAuthorAccessRequirement : IAuthorizationRequirement
     {

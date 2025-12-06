@@ -1,10 +1,10 @@
 using System.Security.Claims;
 
-using Core.Authorization.Requirements;
+using HiTechStore.Core.Auth.Authorization.Requirements;
 
 using Microsoft.AspNetCore.Authorization;
 
-namespace Core.Authorization
+namespace HiTechStore.Core.Auth.Authorization
 {
     public class SameAuthorAccessAuthorization : AuthorizationHandler<SameAuthorAccessRequirement>
     {

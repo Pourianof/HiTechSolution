@@ -2,7 +2,7 @@ using HiTechStore.Models;
 
 using Microsoft.AspNetCore.Authorization;
 
-namespace Core.Authorization
+namespace HiTechStore.Core.Auth.Authorization
 {
     public class AdminIsAlwaysAuthorizedAuthorization : IAuthorizationHandler
     {
