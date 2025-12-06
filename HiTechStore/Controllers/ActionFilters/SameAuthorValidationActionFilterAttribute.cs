@@ -1,7 +1,6 @@
-using Core.Authorization.Requirements;
+using HiTechStore.Core.Auth.Authorization.Requirements;
 
 using HiTechStore.Core;
-using HiTechStore.Models;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
