@@ -117,7 +117,7 @@ namespace HiTechStore.Data.Repositories
             return queryBuilder;
         }
 
-        public async Task<IEnumerable<TProject>> GetProjected<TProject>(Q? queryParams)
+        private IQueryable<T> BuildQueryBuilderBasedOnQueryParams(Q? queryParams)
         {
             var query = GetAllQueryBuilder(_dbSet.AsQueryable(), queryParams);
 
@@ -144,11 +144,16 @@ namespace HiTechStore.Data.Repositories
                 query = query.Take(limit.Value);
             }
 
-            return await Project<TProject>(query).ToListAsync();
+            return query;
+        }
+
+        public async Task<IEnumerable<TProject>> GetAllProjected<TProject>(Q? queryParams)
+        {
+            return await Project<TProject>(BuildQueryBuilderBasedOnQueryParams(queryParams)).ToListAsync();
         }
         public virtual async Task<IEnumerable<O>> GetAllAsync(Q queryParams)
         {
-            return await GetProjected<O>(queryParams);
+            return await Project(BuildQueryBuilderBasedOnQueryParams(queryParams)).ToListAsync();
         }
 
         protected virtual IQueryable<TOut> Project<TOut>(IQueryable<T> queryable)
@@ -167,14 +172,20 @@ namespace HiTechStore.Data.Repositories
 
         public virtual async Task<IEnumerable<O>> GetAllAsync()
         {
-            return await Project<O>(GetAllQueryBuilder(_dbSet.AsQueryable()).Take(10)).ToListAsync();
+            return await Project(GetAllQueryBuilder(_dbSet.AsQueryable()).Take(10)).ToListAsync();
         }
 
 
         public virtual async Task<O?> GetByIdAsync(int id)
         {
             var query = GetByIdAsyncQueryBuilder(_dbSet);
-            return await Project<O>(query.FindById(id)).FirstOrDefaultAsync();
+            return await Project(query.FindById(id)).FirstOrDefaultAsync();
+        }
+
+        public Task<TProject?> GetByIdProjected<TProject>(int id)
+        {
+            var query = GetByIdAsyncQueryBuilder(_dbSet);
+            return Project<TProject>(query.FindById(id)).FirstOrDefaultAsync();
         }
     }
 

@@ -38,7 +38,8 @@ namespace HiTechStore.Core.Repositories
         where O : class
     {
         Task<IEnumerable<O>> GetAllAsync(Q query);
-        Task<IEnumerable<TProject>> GetProjected<TProject>(Q? query = default);
+        Task<IEnumerable<TProject>> GetAllProjected<TProject>(Q? query = default);
+        Task<TProject?> GetByIdProjected<TProject>(int id);
     }
 
     public interface IRepository<T, O> : IRepository<T, O, BaseQuery>
