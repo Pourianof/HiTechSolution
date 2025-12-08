@@ -117,11 +117,11 @@ namespace HiTechStore.Data.Repositories
             return queryBuilder;
         }
 
-        public virtual async Task<IEnumerable<O>> GetAllAsync(Q queryParams)
+        public async Task<IEnumerable<TProject>> GetProjected<TProject>(Q? queryParams)
         {
             var query = GetAllQueryBuilder(_dbSet.AsQueryable(), queryParams);
 
-            if (queryParams.SortBy is not null && queryParams.SortDir is not null)
+            if (queryParams?.SortBy is not null && queryParams.SortDir is not null)
             {
                 var sortDir = queryParams.SortDir.GetValue<string>(QueryOperator.Equal)?.ToLower();
                 if (sortDir == "des")
@@ -144,28 +144,37 @@ namespace HiTechStore.Data.Repositories
                 query = query.Take(limit.Value);
             }
 
-            return await Project(query).ToListAsync();
+            return await Project<TProject>(query).ToListAsync();
+        }
+        public virtual async Task<IEnumerable<O>> GetAllAsync(Q queryParams)
+        {
+            return await GetProjected<O>(queryParams);
+        }
+
+        protected virtual IQueryable<TOut> Project<TOut>(IQueryable<T> queryable)
+        {
+            if (typeof(O) == typeof(T))
+            {
+                return (IQueryable<TOut>)queryable;
+            }
+            return queryable.ProjectTo<TOut>(_mapper.ConfigurationProvider);
         }
 
         protected virtual IQueryable<O> Project(IQueryable<T> queryable)
         {
-            if (typeof(O) == typeof(T))
-            {
-                return (IQueryable<O>)queryable;
-            }
-            return queryable.ProjectTo<O>(_mapper.ConfigurationProvider);
+            return Project<O>(queryable);
         }
 
         public virtual async Task<IEnumerable<O>> GetAllAsync()
         {
-            return await Project(GetAllQueryBuilder(_dbSet.AsQueryable()).Take(10)).ToListAsync();
+            return await Project<O>(GetAllQueryBuilder(_dbSet.AsQueryable()).Take(10)).ToListAsync();
         }
 
 
         public virtual async Task<O?> GetByIdAsync(int id)
         {
             var query = GetByIdAsyncQueryBuilder(_dbSet);
-            return await Project(query.FindById(id)).FirstOrDefaultAsync();
+            return await Project<O>(query.FindById(id)).FirstOrDefaultAsync();
         }
     }
 
