@@ -21,4 +21,13 @@
   <Target Name="Tailwind" BeforeTargets="Build">
     <Exec Command="npm run watch" WorkingDirectory="./frontend" />
   </Target>
+
+    <!-- 
+    Bug of assembling static files in .NET 9.0.
+    https://github.com/dotnet/aspnetcore/issues/59625
+  -->
+  <Target Name="Clean" BeforeTargets="Build">
+    <RemoveDir Directories="$(BaseIntermediateOutputPath)" />
+    <RemoveDir Directories="$(BaseOutputPath)" />
+  </Target>
 </Project>
