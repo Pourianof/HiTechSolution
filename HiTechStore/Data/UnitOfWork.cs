@@ -17,7 +17,7 @@ namespace HiTechStore.Data
         public IBrandRepository BrandRepository { get; }
         public IBrandModelRepository BrandModelRepository { get; }
         public IFilterRepository FilterRepository { get; }
-
+        public ICartRepository CartRepository { get; }
 
         public UnitOfWork(HiTechStoreDbContext context, IMapper mapper)
         {
@@ -30,6 +30,7 @@ namespace HiTechStore.Data
             BrandRepository = new BrandRepository(_context, mapper);
             BrandModelRepository = new BrandModelRepository(_context, mapper);
             FilterRepository = new FilterRepository(_context);
+            CartRepository = new CartRepository(_context, mapper);
         }
 
         public async Task<int> Complete()

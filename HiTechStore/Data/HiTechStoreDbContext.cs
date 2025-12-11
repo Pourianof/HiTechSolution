@@ -40,7 +40,7 @@ namespace HiTechStore.Data
         public DbSet<ComponentType> ComponentType { get; set; }
         public DbSet<Brand> Brand { get; set; }
         public DbSet<BrandModel> BrandModel { get; set; }
-
+        public DbSet<Cart> Carts { get; set; }
     }
 
 }

@@ -9,6 +9,7 @@ using HiTechStore.Data.DTOs.Product;
 using HiTechStore.Data.DTOs.Component;
 using HiTechStore.DTOs.Category;
 using HiTechStore.Data.DTOs.Brand;
+using HiTechStore.Data.DTOs.Cart;
 
 public class MappingProfile : Profile
 {
@@ -20,11 +21,19 @@ public class MappingProfile : Profile
         UserMap();
         ComponentMap();
         BrandMap();
+        CartMap();
+    }
+
+    private void CartMap()
+    {
+        CreateMap<Cart, CartWithProductsDto>();
+        CreateMap<CartItem, CartItemWithProductDto>();
     }
 
     private void ProductMap()
     {
         CreateMap<Product, ProductCreationDto>();
+        CreateMap<Product, MinimalProductDto>();
         CreateMap<ProductCreationDto, Product>()
             .ForMember(dest => dest.Category, opt => opt.Ignore())
             .ForMember(dest => dest.Media, opt => opt.Ignore())
