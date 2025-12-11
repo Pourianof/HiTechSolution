@@ -30,9 +30,9 @@
     Bug of assembling static files in .NET 9.0.
     https://github.com/dotnet/aspnetcore/issues/59625
   -->
-  <Target Name="Clean" BeforeTargets="Build">
+  <Target Name="CustomClean" BeforeTargets="Restore">
+    <Message Text=">>> Custom clean is running" Importance="high" />
     <RemoveDir Directories="$(BaseIntermediateOutputPath)" />
     <RemoveDir Directories="$(BaseOutputPath)" />
   </Target>
-
 </Project>
