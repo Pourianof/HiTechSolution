@@ -9,5 +9,5 @@ public class CartItemDto
     [Required]
     public int ProductId { get; set; }
     [PositiveNumber]
-    public int Count { get; set; } = 1;
+    public int Amount { get; set; } = 1;
 }

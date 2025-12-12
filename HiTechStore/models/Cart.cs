@@ -18,5 +18,5 @@ public class CartItem : IModel
     public virtual Product? Product { get; set; }
     public int ProductId { get; set; }
     public virtual Cart? Cart { get; set; }
-    public int Count { get; set; }
+    public int Amount { get; set; }
 }

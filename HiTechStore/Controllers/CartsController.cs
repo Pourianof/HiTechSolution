@@ -56,7 +56,7 @@ public class CartsController(IUnitOfWork unitOfWork) : ControllerBase
                 .Select(
                     item => new CartItem()
                     {
-                        Count = item.Count,
+                        Amount = item.Amount,
                         ProductId = item.ProductId
                     }
                 );
@@ -65,13 +65,13 @@ public class CartsController(IUnitOfWork unitOfWork) : ControllerBase
                 item => new CartItem
                 {
                     ProductId = item.ProductId,
-                    Count = cartDto.Items!.Where(i => i.ProductId == item.ProductId).FirstOrDefault()?.Count ?? item.Count,
+                    Amount = cartDto.Items!.Where(i => i.ProductId == item.ProductId).FirstOrDefault()?.Amount ?? item.Amount,
                 }
             ).ToList();
             cart.Items.AddRange(newProductItems);
 
             // remove items with 0 count
-            cart.Items = cart.Items.Where(item => item.Count != 0).ToList();
+            cart.Items = cart.Items.Where(item => item.Amount != 0).ToList();
         }
         else
         {
@@ -82,7 +82,7 @@ public class CartsController(IUnitOfWork unitOfWork) : ControllerBase
                     ClientId = userId,
                     Items = cartDto.Items!.Select(item => new CartItem()
                     {
-                        Count = item.Count,
+                        Amount = item.Amount,
                         ProductId = item.ProductId
                     }).ToList()
                 }

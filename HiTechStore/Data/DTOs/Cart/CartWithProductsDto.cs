@@ -10,5 +10,5 @@ public class CartWithProductsDto
 public class CartItemWithProductDto
 {
     public MinimalProductDto? Product { get; set; }
-    public int Count { get; set; }
+    public int Amount { get; set; }
 }
