@@ -72,7 +72,19 @@ namespace HiTechStore.Controllers.ActionFilters
                 var expiration = DateTime.UtcNow.AddHours(1);
                 var role = roles.FirstOrDefault() ?? IdentityRoles.User;
                 var token = CreateToken(user, expiration, role);
-                context.HttpContext.Items["AuthData"] = new { Token = token, expires_at = expiration, User = new { user.UserName, user.FirstName, user.LastName, user.Email, role } };
+                context.HttpContext.Items["AuthData"] = new LoginResponseDto
+                {
+                    Token = token,
+                    ExpiresAt = expiration,
+                    User = new UserDto
+                    {
+                        UserName = user.UserName,
+                        FirstName = user.FirstName,
+                        LastName = user.LastName,
+                        Email = user.Email,
+                        Role = role
+                    }
+                };
                 return;
             }
         }
