@@ -75,24 +75,31 @@ public class CartsController(IUnitOfWork unitOfWork) : ControllerBase
         }
         else
         {
-            // create total new cart
-            await _unitOfWork.CartRepository.AddAsync(
-                new Cart()
+            cart = new Cart()
+            {
+                ClientId = userId,
+                Items = cartDto.Items!.Select(item => new CartItem()
                 {
-                    ClientId = userId,
-                    Items = cartDto.Items!.Select(item => new CartItem()
-                    {
-                        Amount = item.Amount,
-                        ProductId = item.ProductId
-                    }).ToList()
-                }
-            );
+                    Amount = item.Amount,
+                    ProductId = item.ProductId
+                }).ToList()
+            };
+            // create total new cart
+            await _unitOfWork.CartRepository.AddAsync(cart);
         }
 
         await _unitOfWork.Complete();
 
         // return cart with the products
-        return Ok(await _unitOfWork.CartRepository.GetAllProjected<CartWithProductsDto>());
+        return Ok(await _unitOfWork.CartRepository.GetByIdProjected<CartWithProductsDto>(cart.CartId));
+    }
+
+    public async Task<ActionResult<CartWithProductsDto>> GetUserCart()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var cart = await _unitOfWork.CartRepository.GetUserActiveCartWithProductAsync(userId);
+
+        return Ok(cart ?? new CartWithProductsDto() { Items = [] });
 
     }
 }
