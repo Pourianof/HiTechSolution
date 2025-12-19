@@ -10,6 +10,7 @@ using HiTechStore.Data.DTOs.Component;
 using HiTechStore.DTOs.Category;
 using HiTechStore.Data.DTOs.Brand;
 using HiTechStore.Data.DTOs.Cart;
+using HiTechStore.Data.DTOs.Order;
 
 public class MappingProfile : Profile
 {
@@ -22,6 +23,7 @@ public class MappingProfile : Profile
         ComponentMap();
         BrandMap();
         CartMap();
+        OrderMap();
     }
 
     private void CartMap()
@@ -29,7 +31,11 @@ public class MappingProfile : Profile
         CreateMap<Cart, CartWithProductsDto>();
         CreateMap<CartItem, CartItemWithProductDto>();
     }
-
+    private void OrderMap()
+    {
+        CreateMap<Order, OrderWithProductsDto>();
+        CreateMap<OrderItem, OrderItemWithProductDto>();
+    }
     private void ProductMap()
     {
         CreateMap<Product, ProductCreationDto>();
