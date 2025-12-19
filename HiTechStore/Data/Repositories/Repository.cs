@@ -158,6 +158,10 @@ namespace HiTechStore.Data.Repositories
 
         protected virtual IQueryable<TOut> Project<TOut>(IQueryable<T> queryable)
         {
+            if (typeof(TOut) == typeof(T))
+            {
+                return (IQueryable<TOut>)queryable;
+            }
             return queryable.ProjectTo<TOut>(_mapper.ConfigurationProvider);
         }
 

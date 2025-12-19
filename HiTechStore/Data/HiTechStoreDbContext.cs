@@ -32,6 +32,8 @@ namespace HiTechStore.Data
             BrandEntityBuilder.Build(modelBuilder);
             BrandModelEntityBuilder.Build(modelBuilder);
             CategoryComponentRelationEntityBuilder.Build(modelBuilder);
+            CartEntityBuilder.Build(modelBuilder);
+            OrderEntityBuilder.Build(modelBuilder);
         }
 
         public DbSet<Product> Products { get; set; }
@@ -41,6 +43,7 @@ namespace HiTechStore.Data
         public DbSet<Brand> Brand { get; set; }
         public DbSet<BrandModel> BrandModel { get; set; }
         public DbSet<Cart> Carts { get; set; }
+        public DbSet<Order> Orders { get; set; }
     }
 
 }

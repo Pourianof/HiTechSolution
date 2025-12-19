@@ -9,6 +9,6 @@ public class OrderItem : IModel
     public virtual Order? Order { get; set; }
     public virtual Product? Product { get; set; }
     public int Count { get; set; }
-    public int OrderPayTimePrice { get; set; }
+    public double OrderPayTimePrice { get; set; }
     public int? Discount { get; set; }
 }
