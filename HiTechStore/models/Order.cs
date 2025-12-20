@@ -5,7 +5,8 @@ namespace HiTechStore.Models;
 public enum OrderPaymentState
 {
     Paid,
-    Pending
+    Pending,
+    Failed
 }
 
 public class Order : IModel

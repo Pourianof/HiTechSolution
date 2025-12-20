@@ -174,4 +174,13 @@ public class OrdersController(IHiTechPaySdkFacade hiTechPaySdkFacade, IUnitOfWor
             PaymentCallbackUrl = callbackUrl
         });
     }
+
+    [HttpGet]
+    public async Task<ActionResult> GetOrders()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var orders = await _unitOfWork.OrderRepository.GetUserOrders(userId);
+
+        return Ok(orders);
+    }
 }

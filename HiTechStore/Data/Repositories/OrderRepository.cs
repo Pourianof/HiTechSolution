@@ -2,7 +2,10 @@
 using AutoMapper;
 
 using HiTechStore.Core.Repositories;
+using HiTechStore.Data.DTOs.Order;
 using HiTechStore.Models;
+
+using Microsoft.EntityFrameworkCore;
 
 namespace HiTechStore.Data.Repositories;
 
@@ -25,5 +28,12 @@ public class OrderRepository : Repository<Order>, IOrderRepository
                     order => order.Client!.Id == userId
                         && order.PaymentState != OrderPaymentState.Paid
                 ).ToList();
+    }
+
+    public async Task<IEnumerable<OrderWithProductsDto>?> GetUserOrders(string userId)
+    {
+        return await Project<OrderWithProductsDto>(_context.Orders.Where(
+                    order => order.Client!.Id == userId
+                )).ToListAsync();
     }
 }
