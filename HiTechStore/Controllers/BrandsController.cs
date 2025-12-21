@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace HiTechStore.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 [Authorize(Roles = $"{IdentityRoles.Admin},{IdentityRoles.Manager}")]
 public class BrandsController : ControllerBase
 {

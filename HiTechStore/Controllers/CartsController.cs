@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace HiTechStore.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 [Authorize]
 public class CartsController(IUnitOfWork unitOfWork) : ControllerBase
 {

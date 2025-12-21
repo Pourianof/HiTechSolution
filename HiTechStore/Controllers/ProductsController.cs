@@ -18,7 +18,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace HiTechStore.Controllers
 {
     [ApiController]
-    [Route("/[controller]")]
+    [Route("api/[controller]")]
     public class ProductsController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;

@@ -16,7 +16,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace HiTechStore.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 [Authorize]
 public class OrdersController(IHiTechPaySdkFacade hiTechPaySdkFacade, IUnitOfWork unitOfWork, IMapper mapper) : ControllerBase
 {

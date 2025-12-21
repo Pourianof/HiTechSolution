@@ -7,7 +7,7 @@ namespace HiTechStore.Controllers;
 
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public class FiltersController : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork;
