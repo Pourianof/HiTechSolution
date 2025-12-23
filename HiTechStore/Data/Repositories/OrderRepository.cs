@@ -16,18 +16,18 @@ public class OrderRepository : Repository<Order>, IOrderRepository
 
     public async Task<Order?> GetUserPendingOrder(string userId)
     {
-        return _context.Orders.Where(
+        return await _context.Orders.Where(
             order => order.Client!.Id == userId
                 && order.PaymentState != OrderPaymentState.Pending
-        ).FirstOrDefault();
+        ).FirstOrDefaultAsync();
     }
 
     public async Task<IEnumerable<Order>?> GetUserPaidOrders(string userId)
     {
-        return _context.Orders.Where(
+        return await _context.Orders.Where(
                     order => order.Client!.Id == userId
                         && order.PaymentState != OrderPaymentState.Paid
-                ).ToList();
+                ).ToListAsync();
     }
 
     public async Task<IEnumerable<OrderWithProductsDto>?> GetUserOrders(string userId)
