@@ -117,7 +117,7 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.BrandModels, opt => opt.MapFrom((src) => src.Models));
         CreateMap<BrandCreationDto, Brand>();
         CreateMap<BrandModelCreationDto, BrandModel>();
-
+        CreateMap<BaseBrandModelCreationDto, BrandModel>();
     }
 }
 

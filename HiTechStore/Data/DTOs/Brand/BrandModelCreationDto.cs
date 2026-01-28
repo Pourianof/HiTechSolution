@@ -1,17 +1,20 @@
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 
 namespace HiTechStore.Data.DTOs.Brand;
 
-public class BrandModelCreationDto : IValidatableObject
+public class BaseBrandModelCreationDto
 {
-    public BrandCreationDto? Brand { get; set; }
-    public int? BrandId { get; set; }
     [Required]
     [MinLength(2)]
     public string? Name { get; set; }
     [MinLength(5)]
     public string? Description { get; set; }
+}
+
+public class BrandModelCreationDto : BaseBrandModelCreationDto, IValidatableObject
+{
+    public BrandCreationDto? Brand { get; set; }
+    public int? BrandId { get; set; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {

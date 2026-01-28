@@ -98,7 +98,7 @@ public class BrandsController : ControllerBase
 
     [HttpPost("{brandId}/models")]
     [TypeFilter<ResourceExistenceActionFilterAttribute<Brand>>]
-    public async Task<ActionResult<BrandModelDto>> RegisterNewModel(int brandId, BrandModelCreationDto modelCreationDto)
+    public async Task<ActionResult<BrandModelDto>> RegisterNewModel(int brandId, BaseBrandModelCreationDto modelCreationDto)
     {
         var brand = await _unitOfWork.BrandRepository.GetModelByIdAsync(brandId);
 
