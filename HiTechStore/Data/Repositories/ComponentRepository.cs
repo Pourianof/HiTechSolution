@@ -40,4 +40,9 @@ public class ComponentRepository : Repository<ComponentType, ComponentTypeDto>, 
                         .ProjectTo<ComponentModelDto>(_mapper.ConfigurationProvider)
                         .ToListAsync();
     }
+
+    public async Task<IEnumerable<ComponentType>> GetByNameAsync(string name)
+    {
+        return await _dbSet.Where((c) => string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase)).ToListAsync();
+    }
 }
