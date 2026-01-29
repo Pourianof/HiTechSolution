@@ -5,5 +5,6 @@ namespace HiTechStore.Core.Repositories;
 
 public interface IBrandRepository : IRepository<Brand, BrandDto>
 {
-    Task<BrandDto?> GetBrandByName(string name);
+    Task<BrandDto?> GetByNameProjectedAsync(string name);
+    Task<Brand?> GetByNameAsync(string name);
 }

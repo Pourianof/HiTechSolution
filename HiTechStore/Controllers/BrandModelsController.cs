@@ -35,7 +35,7 @@ public class BrandModelsController : ControllerBase
         if (brandModelCreationDto.Brand is not null)
         {
             var brandName = brandModelCreationDto.Brand.name;
-            var dbBrand = _unitOfWork.BrandRepository.GetBrandByName(brandName!);
+            var dbBrand = _unitOfWork.BrandRepository.GetByNameAsync(brandName!);
 
             if (dbBrand is null)
             {

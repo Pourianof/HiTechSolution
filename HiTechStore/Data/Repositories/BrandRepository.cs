@@ -13,7 +13,14 @@ public class BrandRepository : Repository<Brand, BrandDto>, IBrandRepository
 {
     public BrandRepository(HiTechStoreDbContext context, IMapper mapper) : base(context, mapper) { }
 
-    public Task<BrandDto?> GetBrandByName(string name)
+    public async Task<Brand?> GetByNameAsync(string name)
+    {
+        return _dbSet.Where(
+            (b) => EF.Functions.Like(b.Name, name)
+        ).First();
+    }
+
+    public Task<BrandDto?> GetByNameProjectedAsync(string name)
     {
         return Project(_dbSet.Where(
             (b) => EF.Functions.Like(b.Name, name)
