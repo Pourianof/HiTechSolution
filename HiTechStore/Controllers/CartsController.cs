@@ -91,7 +91,7 @@ public class CartsController(IUnitOfWork unitOfWork) : ControllerBase
         await _unitOfWork.Complete();
 
         // return cart with the products
-        return Ok(await _unitOfWork.CartRepository.GetByIdProjected<CartWithProductsDto>(cart.CartId));
+        return Ok(await _unitOfWork.CartRepository.GetByIdProjectTo<CartWithProductsDto>(cart.CartId));
     }
 
     public async Task<ActionResult<CartWithProductsDto>> GetUserCart()

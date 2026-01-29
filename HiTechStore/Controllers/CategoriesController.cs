@@ -35,7 +35,7 @@ namespace HiTechStore.Controllers
         [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategories()
         {
-            var categories = await _unitOfWork.Categories.GetAllAsync();
+            var categories = await _unitOfWork.Categories.GetAllProjectedAsync();
             var categoryDtos = categories.Select(
                 (cat) =>
                 {
@@ -93,7 +93,7 @@ namespace HiTechStore.Controllers
             await _unitOfWork.Categories.AddAsync(category);
             await _unitOfWork.Complete();
 
-            var categoryDto = await _unitOfWork.Categories.GetByIdAsync(category.CategoryId);
+            var categoryDto = await _unitOfWork.Categories.GetByIdProjectedAsync(category.CategoryId);
 
             var writer = new CategoryAssetHelper(_unitOfWork, category.CategoryId)
             {
@@ -147,7 +147,7 @@ namespace HiTechStore.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<CategoryDTO>> DeleteCategory(int id)
         {
-            var category = await _unitOfWork.Categories.GetByIdAsync(id);
+            var category = await _unitOfWork.Categories.GetByIdProjectedAsync(id);
             if (category == null)
             {
                 return NotFound();
@@ -186,7 +186,7 @@ namespace HiTechStore.Controllers
                 // and we must fetch other data
                 if (isExisted)
                 {
-                    var component = await _unitOfWork.ComponentRepository.GetByIdAsync(componentDto.ComponentTypeId!.Value);
+                    var component = await _unitOfWork.ComponentRepository.GetByIdProjectedAsync(componentDto.ComponentTypeId!.Value);
                     var problem = new ProblemDetails
                     {
                         Status = (int)HttpStatusCode.Conflict,

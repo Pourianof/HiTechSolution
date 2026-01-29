@@ -36,7 +36,7 @@ public class OrdersController(IHiTechPaySdkFacade hiTechPaySdkFacade, IUnitOfWor
             // change order payment state from pending to paid
             if (int.TryParse(key, out int orderId))
             {
-                var order = await _unitOfWork.OrderRepository.GetByIdAsync(orderId);
+                var order = await _unitOfWork.OrderRepository.GetByIdProjectedAsync(orderId);
 
                 if (order is null)
                 {
@@ -101,7 +101,7 @@ public class OrdersController(IHiTechPaySdkFacade hiTechPaySdkFacade, IUnitOfWor
         // Fetch requested order
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
-        var order = await _unitOfWork.OrderRepository.GetByIdAsync(orderId);
+        var order = await _unitOfWork.OrderRepository.GetByIdProjectedAsync(orderId);
         if (order is null || order.ClientId != userId)
         {
             return NotFound();

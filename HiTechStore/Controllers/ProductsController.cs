@@ -33,7 +33,7 @@ namespace HiTechStore.Controllers
         [HttpGet]
         public async Task<IEnumerable<ProductDto>> GetProducts([ToQuery] ProductQuery query)
         {
-            var products = await _unitOfWork.Products.GetAllAsync(query);
+            var products = await _unitOfWork.Products.GetAllProjectedAsync(query);
             return products;
         }
 

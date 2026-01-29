@@ -30,7 +30,7 @@ public class ComponentsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ComponentTypeDto>>> GetAllComponents()
     {
-        var components = await _unitOfWork.ComponentRepository.GetAllAsync() ?? [];
+        var components = await _unitOfWork.ComponentRepository.GetAllProjectedAsync() ?? [];
 
         return Ok(components);
     }
@@ -63,7 +63,7 @@ public class ComponentsController : ControllerBase
     [TypeFilter<ResourceExistenceActionFilterAttribute<ComponentType>>]
     public async Task<ActionResult<ComponentTypeDto>> GetComponent(int id)
     {
-        var component = await _unitOfWork.ComponentRepository.GetByIdAsync(id);
+        var component = await _unitOfWork.ComponentRepository.GetByIdProjectedAsync(id);
 
         return component!;
     }
@@ -79,7 +79,7 @@ public class ComponentsController : ControllerBase
         BrandModelDto? brandModel = null;
         if (componentModelCreationDto.BrandModelId is not null)
         {
-            brandModel = await _unitOfWork.BrandModelRepository.GetByIdAsync(componentModelCreationDto.BrandModelId.Value);
+            brandModel = await _unitOfWork.BrandModelRepository.GetByIdProjectedAsync(componentModelCreationDto.BrandModelId.Value);
             if (brandModel is null)
             {
                 return BadRequest(

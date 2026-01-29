@@ -14,6 +14,7 @@ namespace HiTechStore.Core.Repositories
     {
         Task<TModel?> GetModelByIdAsync(int id);
         Task AddAsync(TModel entity);
+        Task AddAllAsync(IEnumerable<TModel> entities);
         Task Delete(TModel entity);
         Task Delete(int id);
         Task<int> DeleteImmediately(int id);
@@ -25,8 +26,8 @@ namespace HiTechStore.Core.Repositories
         where T : class, IModel
         where O : class
     {
-        Task<IEnumerable<O>> GetAllAsync();
-        Task<O?> GetByIdAsync(int id);
+        Task<IEnumerable<O>> GetAllProjectedAsync();
+        Task<O?> GetByIdProjectedAsync(int id);
     }
     public interface IRepositoryBase<T> : IRepositoryBase<T, T>
        where T : class, IModel
@@ -37,9 +38,9 @@ namespace HiTechStore.Core.Repositories
         where Q : BaseQuery
         where O : class
     {
-        Task<IEnumerable<O>> GetAllAsync(Q query);
-        Task<IEnumerable<TProject>> GetAllProjected<TProject>(Q? query = default);
-        Task<TProject?> GetByIdProjected<TProject>(int id);
+        Task<IEnumerable<O>> GetAllProjectedAsync(Q query);
+        Task<IEnumerable<TProject>> GetAllProjectToAsync<TProject>(Q? query = default);
+        Task<TProject?> GetByIdProjectTo<TProject>(int id);
     }
 
     public interface IRepository<T, O> : IRepository<T, O, BaseQuery>

@@ -24,7 +24,7 @@ namespace HiTechStore.Controllers.ActionFilters
             var user = context.HttpContext.User;
             if (int.TryParse(resourceId, out var resourceIdValue))
             {
-                var resource = UnitOfWork.Products.GetByIdAsync(resourceIdValue).Result;
+                var resource = UnitOfWork.Products.GetByIdProjectedAsync(resourceIdValue).Result;
                 if (resource is null)
                 {
                     context.Result = new NotFoundResult();

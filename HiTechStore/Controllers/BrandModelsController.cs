@@ -23,7 +23,7 @@ public class BrandModelsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<BrandModelDto>>> GetAllBrandModels()
     {
-        return Ok(await _unitOfWork.BrandModelRepository.GetAllAsync());
+        return Ok(await _unitOfWork.BrandModelRepository.GetAllProjectedAsync());
     }
 
     [HttpPost]
@@ -51,7 +51,7 @@ public class BrandModelsController : ControllerBase
         }
         else
         {
-            var brand = await _unitOfWork.BrandRepository.GetByIdAsync(brandModel.BrandId);
+            var brand = await _unitOfWork.BrandRepository.GetByIdProjectedAsync(brandModel.BrandId);
             if (brand is null)
             {
                 var problem = new ProblemDetails()

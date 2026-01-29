@@ -103,6 +103,11 @@ namespace HiTechStore.Data.Repositories
                  })
                  .ToList();
         }
+
+        public async Task AddAllAsync(IEnumerable<TModel> entities)
+        {
+            await _dbSet.AddRangeAsync(entities);
+        }
     }
     public class Repository<T, O, Q>(HiTechStoreDbContext context, IMapper mapper) :
         RepositoryCore<T>(context), IRepository<T, O, Q>
@@ -147,11 +152,11 @@ namespace HiTechStore.Data.Repositories
             return query;
         }
 
-        public async Task<IEnumerable<TProject>> GetAllProjected<TProject>(Q? queryParams)
+        public async Task<IEnumerable<TProject>> GetAllProjectToAsync<TProject>(Q? queryParams)
         {
             return await Project<TProject>(BuildQueryBuilderBasedOnQueryParams(queryParams)).ToListAsync();
         }
-        public virtual async Task<IEnumerable<O>> GetAllAsync(Q queryParams)
+        public virtual async Task<IEnumerable<O>> GetAllProjectedAsync(Q queryParams)
         {
             return await Project(BuildQueryBuilderBasedOnQueryParams(queryParams)).ToListAsync();
         }
@@ -170,19 +175,19 @@ namespace HiTechStore.Data.Repositories
             return Project<O>(queryable);
         }
 
-        public virtual async Task<IEnumerable<O>> GetAllAsync()
+        public virtual async Task<IEnumerable<O>> GetAllProjectedAsync()
         {
             return await Project(GetAllQueryBuilder(_dbSet.AsQueryable()).Take(10)).ToListAsync();
         }
 
 
-        public virtual async Task<O?> GetByIdAsync(int id)
+        public virtual async Task<O?> GetByIdProjectedAsync(int id)
         {
             var query = GetByIdAsyncQueryBuilder(_dbSet);
             return await Project(query.FindById(id)).FirstOrDefaultAsync();
         }
 
-        public Task<TProject?> GetByIdProjected<TProject>(int id)
+        public Task<TProject?> GetByIdProjectTo<TProject>(int id)
         {
             var query = GetByIdAsyncQueryBuilder(_dbSet);
             return Project<TProject>(query.FindById(id)).FirstOrDefaultAsync();

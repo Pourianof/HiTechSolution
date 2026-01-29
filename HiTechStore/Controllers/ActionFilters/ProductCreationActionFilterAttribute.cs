@@ -83,7 +83,7 @@ public class ProductCreationActionFilterAttribute : ModelAccessorBaseActionFilte
             var categoryId = product.CategoryValues.CategoryId!.Value;
             createdProduct.CategoryId = categoryId;
 
-            var productCategory = UnitOfWork.Categories.GetByIdAsync(categoryId).Result;
+            var productCategory = UnitOfWork.Categories.GetByIdProjectedAsync(categoryId).Result;
 
             if (productCategory is null)
             {
@@ -213,6 +213,6 @@ public class ProductCreationActionFilterAttribute : ModelAccessorBaseActionFilte
 
 
 
-        context.HttpContext.Items["createdProductDto"] = (Repo as IProductRepository)!.GetByIdAsync(createdProduct.ProductId).Result;
+        context.HttpContext.Items["createdProductDto"] = (Repo as IProductRepository)!.GetByIdProjectedAsync(createdProduct.ProductId).Result;
     }
 }

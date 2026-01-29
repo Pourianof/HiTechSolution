@@ -36,7 +36,7 @@ public class BrandsController : ControllerBase
     [AllowAnonymous]
     public async IAsyncEnumerable<BrandDto> GetBrands()
     {
-        var brands = await _unitOfWork.BrandRepository.GetAllAsync();
+        var brands = await _unitOfWork.BrandRepository.GetAllProjectedAsync();
         foreach (var brand in brands)
         {
             brand.Image = ProvideBrandImage(brand.Name);
@@ -48,7 +48,7 @@ public class BrandsController : ControllerBase
     [TypeFilter<ResourceExistenceActionFilterAttribute<Brand>>]
     public async Task<BrandDto> GetBrand(int id)
     {
-        var brand = await _unitOfWork.BrandRepository.GetByIdAsync(id)!;
+        var brand = await _unitOfWork.BrandRepository.GetByIdProjectedAsync(id)!;
         brand!.Image = ProvideBrandImage(brand.Name);
 
         return brand;
