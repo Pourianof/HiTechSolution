@@ -6,6 +6,7 @@ namespace HiTechStore.Core.Repositories
     public interface IRepositoryModelIndependent
     {
         Task<bool> IsExistsAsync(int id);
+        Task<bool> HasAnyAsync();
         Task<IEnumerable<ResourceExistenceResult>> CheckExistence(IEnumerable<int> ids);
     }
 

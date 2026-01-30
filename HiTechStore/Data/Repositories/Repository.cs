@@ -108,6 +108,11 @@ namespace HiTechStore.Data.Repositories
         {
             await _dbSet.AddRangeAsync(entities);
         }
+
+        public Task<bool> HasAnyAsync()
+        {
+            return _dbSet.AnyAsync();
+        }
     }
     public class Repository<T, O, Q>(HiTechStoreDbContext context, IMapper mapper) :
         RepositoryCore<T>(context), IRepository<T, O, Q>
