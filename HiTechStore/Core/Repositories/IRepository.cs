@@ -20,6 +20,7 @@ namespace HiTechStore.Core.Repositories
         Task Delete(int id);
         Task<int> DeleteImmediately(int id);
         Task<IEnumerable<TModel>> GetAll(IEnumerable<int> ids);
+        Task<IEnumerable<TModel>> GetAllAsync();
         Task<IEnumerable<ResourceExistenceResultWithModel<TModel>>> CheckExistence(IEnumerable<int> ids, bool includeModel = false);
     }
 

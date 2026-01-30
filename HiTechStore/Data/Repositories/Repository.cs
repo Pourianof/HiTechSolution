@@ -86,6 +86,11 @@ namespace HiTechStore.Data.Repositories
             return await _dbSet.WhereIdExists(ids).ToListAsync();
         }
 
+        public async Task<IEnumerable<TModel>> GetAllAsync()
+        {
+            return await _dbSet.ToListAsync();
+        }
+
         public async Task<IEnumerable<ResourceExistenceResultWithModel<TModel>>> CheckExistence(IEnumerable<int> ids, bool includeModel = false)
         {
             var existingResources = await _context.Set<TModel>()
