@@ -43,6 +43,6 @@ public class ComponentRepository : Repository<ComponentType, ComponentTypeDto>, 
 
     public async Task<IEnumerable<ComponentType>> GetByNameAsync(string name)
     {
-        return await _dbSet.Where((c) => string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase)).ToListAsync();
+        return await _dbSet.Where((c) => EF.Functions.ILike(c.Name!, name)).ToListAsync();
     }
 }

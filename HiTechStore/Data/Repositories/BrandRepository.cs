@@ -16,14 +16,14 @@ public class BrandRepository : Repository<Brand, BrandDto>, IBrandRepository
     public async Task<Brand?> GetByNameAsync(string name)
     {
         return _dbSet.Where(
-            (b) => EF.Functions.Like(b.Name, name)
+            (b) => EF.Functions.ILike(b.Name!, name)
         ).First();
     }
 
     public Task<BrandDto?> GetByNameProjectedAsync(string name)
     {
         return Project(_dbSet.Where(
-            (b) => EF.Functions.Like(b.Name, name)
+            (b) => EF.Functions.ILike(b.Name!, name)
         )).FirstOrDefaultAsync();
     }
 }
