@@ -14,7 +14,6 @@ namespace HiTechStore.Data.EntityBuilder
                     entity.ToTable("Products");
                     entity.HasKey(e => e.ProductId);
                     entity.Property(e => e.Title).IsRequired().HasMaxLength(100);
-                    entity.Property(e => e.Price).IsRequired().HasColumnType("decimal(18,2)");
                     entity.Property(e => e.Description).IsRequired().HasMaxLength(500);
                     entity.Property(e => e.CreatedAt)
                       .HasDefaultValueSql("CURRENT_TIMESTAMP"); // For Postgress

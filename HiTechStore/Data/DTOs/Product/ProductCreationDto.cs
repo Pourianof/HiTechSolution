@@ -5,6 +5,7 @@ using HiTechStore.Data.DTOs;
 using HiTechStore.Data.DTOs.Binders;
 using HiTechStore.Data.DTOs.Product;
 using HiTechStore.Data.DTOs.Product.Validations;
+using HiTechStore.Data.DTOs.Validations;
 
 namespace HiTechStore.DTOs.Product;
 
@@ -14,24 +15,42 @@ public class ProductCreationDto
     [MinLength(3)]
     [MaxLength(100)]
     public string? Title { get; set; }
-
-    [Required]
-    [Range(0, 10000000)]
-    public decimal? Price { get; set; }
     public int? BrandModel { get; set; }
 
     [MaxLength(500)]
     public string? Description { get; set; }
-    [ProductMediaValidation]
-    public IEnumerable<IFormFile>? Media { get; set; }
+
     [Required]
     [FromJson]
     public ProductCategoryValuesDto? CategoryValues { get; set; }
+
+    [Required]
+    [ProductVariationValidation]
     [FromJson]
-    public MediaMetaDataDto? MediaMetaData { get; set; }
+    [MinLength(1)]
+    public IEnumerable<ProductVariationCreationDto>? Variations { get; set; }
+    [ProductMediaValidation]
+    public IEnumerable<IFormFile>? Media { get; set; }
 }
 
-
+public class ProductVariationCreationDto
+{
+    [Required]
+    [PositiveNumber]
+    [JsonPropertyName("price")]
+    public double Price { get; set; }
+    [Required]
+    [JsonPropertyName("color")]
+    public int Color { get; set; }
+    [PositiveNumber]
+    [JsonPropertyName("inventory")]
+    [Required]
+    public int Inventory { get; set; }
+    [Required]
+    [MinLength(1)]
+    [JsonPropertyName("mediaMetaData")]
+    public IEnumerable<MediaMetaDataDto>? MediaMetaData { get; set; }
+}
 
 
 public class ProductCategoryValuesDto

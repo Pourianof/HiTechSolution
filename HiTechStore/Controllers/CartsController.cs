@@ -24,7 +24,7 @@ public class CartsController(IUnitOfWork unitOfWork) : ControllerBase
     [HttpPatch("items")]
     public async Task<IActionResult> SyncCart(CartDto cartDto)
     {
-        var specifiedProductIds = cartDto.Items!.Select(i => i.ProductId);
+        var specifiedProductIds = cartDto.Items!.Select(i => i.ProductVariationId);
         var addingCartItemProducts = await _unitOfWork.Products.GetAll(specifiedProductIds);
 
         if (addingCartItemProducts.Count() != specifiedProductIds.Count())
@@ -36,7 +36,7 @@ public class CartsController(IUnitOfWork unitOfWork) : ControllerBase
             foreach (var product in notExistedProducts)
             {
                 ModelState.AddModelError(
-                    $"{nameof(CartDto.Items)}.{product.Index}.{nameof(CartItemDto.ProductId)}",
+                    $"{nameof(CartDto.Items)}.{product.Index}.{nameof(CartItemDto.ProductVariationId)}",
                     "Specified product id does not exist"
                 );
 
@@ -52,20 +52,20 @@ public class CartsController(IUnitOfWork unitOfWork) : ControllerBase
         if (cart is not null)
         {
             var newProductItems = cartDto.Items!
-                .Where(item => !cart.Items.Any(i => i.ProductId == item.ProductId))
+                .Where(item => !cart.Items.Any(i => i.ProductVariationId == item.ProductVariationId))
                 .Select(
                     item => new CartItem()
                     {
                         Amount = item.Amount,
-                        ProductId = item.ProductId
+                        ProductVariationId = item.ProductVariationId
                     }
                 );
 
             cart.Items = cart.Items.Select(
                 item => new CartItem
                 {
-                    ProductId = item.ProductId,
-                    Amount = cartDto.Items!.Where(i => i.ProductId == item.ProductId).FirstOrDefault()?.Amount ?? item.Amount,
+                    ProductVariationId = item.ProductVariationId,
+                    Amount = cartDto.Items!.FirstOrDefault(i => i.ProductVariationId == item.ProductVariationId)?.Amount ?? item.Amount,
                 }
             ).ToList();
             cart.Items.AddRange(newProductItems);
@@ -81,7 +81,7 @@ public class CartsController(IUnitOfWork unitOfWork) : ControllerBase
                 Items = cartDto.Items!.Select(item => new CartItem()
                 {
                     Amount = item.Amount,
-                    ProductId = item.ProductId
+                    ProductVariationId = item.ProductVariationId
                 }).ToList()
             };
             // create total new cart

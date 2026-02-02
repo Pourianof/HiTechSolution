@@ -1,6 +1,8 @@
 using System.Linq.Expressions;
+using System.Reflection;
 
 using HiTechStore.Helpers.URLFilterQuery;
+using HiTechStore.Helpers.URLFilterQuery.QueryAppliers;
 using HiTechStore.Models;
 
 using Microsoft.EntityFrameworkCore;
@@ -10,17 +12,6 @@ namespace HiTechStore.Helpers.Repository;
 
 public static class ProductFilterApplier
 {
-
-
-
-    public static IQueryable<Product> ApplyFiltersTo<T>(
-        IQueryable<Product> queryable,
-        Expression<Func<Product, T>> to,
-        Dictionary<QueryOperator, OperatorValuePair> filters)
-    {
-        return FilterApplierHelper.ApplyFiltersTo(queryable, to, filters);
-    }
-
     private static Expression<Func<TItem, bool>> ProvideAppliedQueryFilterPropertyExpression<TItem>(PropertyFilter filter)
         where TItem : BaseItemPropertyValue
     {
@@ -76,9 +67,19 @@ public static class ProductFilterApplier
                 continue;
             }
 
+            var propertySpecifierLambdaExpression = Expression.Lambda(targetValueParam, param);
+
+            var applierType = typeof(SinglePropertyQueryApplier<,>)
+                .MakeGenericType(typeof(TItem), targetValueParam.Type);
+            var constructor = applierType.GetConstructors().First();
+
+            var applier = constructor.Invoke([propertySpecifierLambdaExpression]);
+
+            MethodInfo applierMethod = applierType.GetMethod(nameof(SinglePropertyQueryApplier<string, string>.ApplyOperator))!;
+
             lastCondition = Expression.Condition(
                                 Expression.Equal(propertyType, Expression.Constant(type)),
-                               FilterApplierHelper.CompareExpressionBuilder(op, val, targetValueParam),
+                                ((Expression<Func<TItem, bool>>)applierMethod!.Invoke(applier, [val, op])!).Body,
                                 lastCondition is null ? Expression.Constant(false) : lastCondition
                             );
         }

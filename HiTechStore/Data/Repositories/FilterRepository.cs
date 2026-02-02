@@ -50,8 +50,8 @@ public class FilterRepository : IFilterRepository
         .Select((g) => new
         ProductsPriceRangeDto
         {
-            Max = g.Max(p => p.Price),
-            Min = g.Min(p => p.Price)
+            Max = g.Max(p => p.Variations.Max(v => v.Price)),
+            Min = g.Min(p => p.Variations.Min(v => v.Price))
         }).FirstOrDefaultAsync();
     }
     public async Task<FilterDto> GetCategoryFiltersAsync(int categoryId)

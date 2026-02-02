@@ -19,6 +19,7 @@ namespace HiTechStore.Data
         public IFilterRepository FilterRepository { get; }
         public ICartRepository CartRepository { get; }
         public IOrderRepository OrderRepository { get; }
+        public IColorRepository ColorRepository { get; }
 
         public UnitOfWork(HiTechStoreDbContext context, IMapper mapper)
         {
@@ -33,6 +34,12 @@ namespace HiTechStore.Data
             FilterRepository = new FilterRepository(_context);
             CartRepository = new CartRepository(_context, mapper);
             OrderRepository = new OrderRepository(_context, mapper);
+            ColorRepository = new ColorRepository(_context, mapper);
+        }
+
+        public HiTechStoreDbContext Context()
+        {
+            return _context;
         }
 
         public async Task<int> Complete()

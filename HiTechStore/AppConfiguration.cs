@@ -1,4 +1,5 @@
 using HiTechStore.Core.Auth;
+using HiTechStore.Data.Seeders;
 
 namespace HiTechStore;
 
@@ -28,5 +29,6 @@ public static class AppConfiguration
         app.MapControllers();
         app.UseExceptionHandler();
 
+        await app.SeedDatabase();
     }
 }

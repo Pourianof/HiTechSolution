@@ -151,8 +151,8 @@ public class OrdersController(IHiTechPaySdkFacade hiTechPaySdkFacade, IUnitOfWor
                 item => new OrderItem()
                 {
                     Count = item.Amount,
-                    Product = item.Product,
-                    OrderPayTimePrice = item.Product!.Price
+                    ProductVariation = item.ProductVariation,
+                    OrderPayTimePrice = item.ProductVariation!.Price
                 }
             ).ToList()
         };

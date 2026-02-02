@@ -11,6 +11,7 @@ using HiTechStore.Data.DTOs.Product;
 using HiTechStore.Data.Queries;
 using HiTechStore.Helpers.Repository;
 using HiTechStore.Helpers.URLFilterQuery;
+using HiTechStore.Helpers.URLFilterQuery.QueryAppliers;
 using HiTechStore.Models;
 
 using Microsoft.EntityFrameworkCore;
@@ -49,6 +50,13 @@ namespace HiTechStore.Data.Repositories
                                 : 0.0,
                 ScoreCounts = p.Scores.Count(),
                 AuthorId = p.AuthorId,
+                BrandModel = new BrandModelDto
+                {
+                    BrandName = p.BrandModel!.Brand!.Name,
+                    ModelName = p.BrandModel.Name,
+                    Descriotion = p.BrandModel.Description,
+                    ModelId = p.BrandModel.BrandModelId
+                },
                 Components = p.Category!.Components!.Select(
                     (c) => new ProductComponentDto()
                     {
@@ -84,16 +92,21 @@ namespace HiTechStore.Data.Repositories
                         )
                     }
                 ).ToList(),
-                Price = p.Price,
+                Variations = p.Variations.Select(pv => new ProductVariationDto()
+                {
+                    Color = pv.Color,
+                    Inventory = pv.Inventory,
+                    Media = pv.Media.Select(m => new ProductMediaDto()
+                    {
+                        IsMain = m.IsMain,
+                        ProductMediaId = m.ProductMediaId,
+                        Url = m.FilePath,
+                        Type = m.Type == MediaType.Image ? "Image" : "Video"
+                    }).ToList(),
+                    Price = pv.Price
+                }).ToList(),
                 CategoryId = p.CategoryId,
                 Description = p.Description,
-                Media = p.Media.Select(m => new ProductMediaDto()
-                {
-                    IsMain = m.IsMain,
-                    ProductMediaId = m.ProductMediaId,
-                    Url = m.FilePath,
-                    Type = m.Type == MediaType.Image ? "Image" : "Video"
-                }).ToList(),
                 Properties = p.Properties.Select(
                     (prop) => new PropertyValueDto()
                     {
@@ -128,8 +141,12 @@ namespace HiTechStore.Data.Repositories
                  );
                 if (priceFilters is not null && priceFilters.Count() > 0)
                 {
-                    queryBuilder = ProductFilterApplier.ApplyFiltersTo(
-                            queryBuilder, (Product product) => product.Price, priceFilters
+                    queryBuilder = queryBuilder.ApplyFiltersTo<Product, double>(
+                            priceFilters,
+                            new CollectionQueryApplier<Product, double, ProductVariation>(
+                                (Product product) => product.Variations,
+                                pv => pv.Price
+                            )
                     );
                 }
 
@@ -139,8 +156,10 @@ namespace HiTechStore.Data.Repositories
                  );
                 if (brandFilters is not null && brandFilters.Count() > 0)
                 {
-                    queryBuilder = ProductFilterApplier.ApplyFiltersTo(
-                            queryBuilder, (Product product) => product.BrandModel!.Brand!.Name, brandFilters
+                    queryBuilder = queryBuilder.ApplyFiltersTo<Product, string>(
+                            brandFilters, new SinglePropertyQueryApplier<Product, string>(
+                                (Product product) => product.BrandModel!.Brand!.Name!
+                            )
                     );
                 }
 
@@ -154,7 +173,11 @@ namespace HiTechStore.Data.Repositories
                     Expression<Func<Product, object>> sorter = sortBy switch
                     {
                         "created_at" => (Product p) => p.CreatedAt,
-                        "price" => (Product p) => p.Price,
+                        "price" => productQueryParams.SortDir?.GetValue<string>(QueryOperator.Equal) == "des" ?
+                                (Product p) =>
+                                    p.Variations.Max(pv => pv.Price) :
+                                (Product p) =>
+                                    p.Variations.Min(pv => pv.Price),
                         _ => (Product p) => p.CreatedAt
                     };
                     queryBuilder = queryBuilder.OrderBy(sorter);

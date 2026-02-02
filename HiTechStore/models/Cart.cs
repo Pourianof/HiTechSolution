@@ -15,8 +15,8 @@ public class Cart : IModel
 public class CartItem : IModel
 {
     public int CartItemId { get; set; }
-    public virtual Product? Product { get; set; }
-    public int ProductId { get; set; }
+    public virtual ProductVariation? ProductVariation { get; set; }
+    public int ProductVariationId { get; set; }
     public virtual Cart? Cart { get; set; }
     public int Amount { get; set; }
 }

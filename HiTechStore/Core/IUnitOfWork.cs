@@ -13,6 +13,7 @@ namespace HiTechStore.Core
         IFilterRepository FilterRepository { get; }
         ICartRepository CartRepository { get; }
         IOrderRepository OrderRepository { get; }
+        IColorRepository ColorRepository { get; }
         IRepositoryModelBase<TModel> RespositoryOf<TModel>() where TModel : class, IModel;
         Task<int> Complete();
     }

@@ -141,7 +141,7 @@ namespace HiTechStore.Data.Repositories
                 var sortDir = queryParams.SortDir.GetValue<string>(QueryOperator.Equal)?.ToLower();
                 if (sortDir == "des")
                 {
-                    query = query.OrderDescending();
+                    query = query.Reverse();
                 }
             }
 

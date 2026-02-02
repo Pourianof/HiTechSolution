@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using HiTechStore.Helpers.Types;
 using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace HiTechStore.Controllers.ActionFilters;
 
@@ -107,7 +108,7 @@ public class ProductCreationActionFilterAttribute : ModelAccessorBaseActionFilte
                 for (var index = 0; index < componentModelIds.Count(); index++)
                 {
                     var modelId = componentModelIds.ElementAt(index);
-                    var componentModel = categoryValidModels.Where((cvm) => cvm.ComponentModelId == modelId).FirstOrDefault();
+                    var componentModel = categoryValidModels.FirstOrDefault((cvm) => cvm.ComponentModelId == modelId);
 
                     if (componentModel is null)
                     {
@@ -182,26 +183,38 @@ public class ProductCreationActionFilterAttribute : ModelAccessorBaseActionFilte
 
         createdProduct.AuthorId = userId;
 
-        var productMedia = product.Media!;
         UnitOfWork.Products.AddAsync(createdProduct).Wait();
         CompleteDbWork().Wait();
 
         try
         {
-            var isMainSpecified = false;
-            for (int index = 0; index < productMedia.Count(); index++)
+            foreach (var variation in product.Variations!)
             {
-                var media = productMedia.ElementAt(index);
-                var isImage = MediaTypeHelper.IsImage(media.FileName);
+                var variationMedia = variation.MediaMetaData!.Select(
+                    (meta) => new
+                    {
+                        File = product.Media!.First(m => meta.FileName!.Contains(m.FileName, StringComparison.OrdinalIgnoreCase)),
+                        meta.IsMain
+                    }
+                );
 
-                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(media.FileName);
-                string fileRelativePath = $"images/products/{createdProduct.ProductId}/${fileName}";
-                PublicAssetsHelper.WriteIFormFile(media, fileRelativePath).Wait();
-                bool isMain = product.MediaMetaData is null && isImage && !isMainSpecified ? true : index == product.MediaMetaData?.MainIndex;
-                if (isMain) isMainSpecified = true;
-                createdProduct.Media.Add(new ProductMedia { FilePath = $"/{fileRelativePath}", IsMain = isMain, Type = MediaTypeHelper.GetMediaType(fileRelativePath), });
+                for (int index = 0; index < variationMedia.Count(); index++)
+                {
+                    var media = variationMedia.ElementAt(index);
+                    var isImage = MediaTypeHelper.IsImage(media.File.FileName);
 
+                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(media.File.FileName);
+                    string fileRelativePath = $"images/products/{createdProduct.ProductId}/${fileName}";
+                    PublicAssetsHelper.WriteIFormFile(media.File, fileRelativePath).Wait();
+
+                    var createdVariation = createdProduct.Variations.First(
+                        v => v.ColorId == variation.Color
+                    );
+                    createdVariation.Media.Add(new ProductMedia { FilePath = $"/{fileRelativePath}", IsMain = media.IsMain, Type = MediaTypeHelper.GetMediaType(fileRelativePath) });
+
+                }
             }
+
         }
         catch
         {

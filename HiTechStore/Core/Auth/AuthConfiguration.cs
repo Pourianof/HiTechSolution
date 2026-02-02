@@ -15,8 +15,6 @@ public static class AuthConfiguration
             foreach (var role in IdentityRoles.AllRoles)
                 if (!await roleManager.RoleExistsAsync(role))
                     await roleManager.CreateAsync(new IdentityRole(role));
-
-            await AdminSeeder.SeedAsync(scope.ServiceProvider);
         }
 
         app.UseAuthentication();

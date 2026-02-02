@@ -7,12 +7,11 @@ namespace HiTechStore.Data.Seeders
 {
     public static class AdminSeeder
     {
-        public static async Task SeedAsync(IServiceProvider serviceProvider)
+        public static async Task SeedAsync(UserManager<User> userManager, IConfiguration configuration)
         {
-            var userManager = serviceProvider.GetService<UserManager<User>>();
 
-            var adminEmail = serviceProvider.GetRequiredService<IConfiguration>()["AdminEmail"];
-            var adminPassword = serviceProvider.GetRequiredService<IConfiguration>()["AdminPassword"];
+            var adminEmail = configuration["AdminEmail"];
+            var adminPassword = configuration["AdminPassword"];
 
             if (string.IsNullOrEmpty(adminEmail))
             {

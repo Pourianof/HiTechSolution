@@ -7,7 +7,7 @@ namespace HiTechStore.Data.DTOs.Cart;
 public class CartItemDto
 {
     [Required]
-    public int ProductId { get; set; }
+    public int ProductVariationId { get; set; }
     [PositiveNumber]
     public int Amount { get; set; } = 1;
 }

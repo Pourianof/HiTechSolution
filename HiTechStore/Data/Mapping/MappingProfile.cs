@@ -17,6 +17,7 @@ public class MappingProfile : Profile
     public MappingProfile()
     {
         ProductMap();
+        ProductVariationMap();
         CategoryMap();
         PropertyMap();
         UserMap();
@@ -36,13 +37,22 @@ public class MappingProfile : Profile
         CreateMap<Order, OrderWithProductsDto>();
         CreateMap<OrderItem, OrderItemWithProductDto>();
     }
+
+    private void ProductVariationMap()
+    {
+        CreateMap<ProductVariationCreationDto, ProductVariation>()
+            .ForMember(dest => dest.Media, opt => opt.Ignore())
+            .ForMember(dest => dest.Color, opt => opt.Ignore())
+            .ForMember(dest => dest.ColorId, opt => opt.MapFrom(src => src.Color));
+        CreateMap<ProductVariation, ProductVariationDto>()
+            .ForMember(dest => dest.Media, opt => opt.Ignore());
+    }
     private void ProductMap()
     {
         CreateMap<Product, ProductCreationDto>();
         CreateMap<Product, MinimalProductDto>();
         CreateMap<ProductCreationDto, Product>()
             .ForMember(dest => dest.Category, opt => opt.Ignore())
-            .ForMember(dest => dest.Media, opt => opt.Ignore())
             .ForMember(dest => dest.CategoryId, opt => opt.Ignore())
             .ForMember(dest => dest.BrandModel, opt => opt.Ignore());
         CreateMap<ProductPatchDTO, Product>().MapOnlyNonNull();

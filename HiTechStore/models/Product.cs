@@ -2,12 +2,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 using HiTechStore.Core;
 
+using Microsoft.EntityFrameworkCore;
+
 namespace HiTechStore.Models
 {
     public class Product : IModel
     {
         public int ProductId { get; set; }
-        public double Price { get; set; }
         public string? Title { get; set; }
         public string? Description { get; set; }
         public string? AuthorId { get; set; }
@@ -15,7 +16,6 @@ namespace HiTechStore.Models
         public virtual User? Author { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public bool? IsDeleled { get; set; } = false;
-        public virtual List<ProductMedia> Media { get; set; } = new();
         public virtual int CategoryId { get; set; }
         public virtual Category? Category { get; set; }
         public virtual ICollection<ProductScore> Scores { get; set; } = new List<ProductScore>();
@@ -27,6 +27,7 @@ namespace HiTechStore.Models
         public int? MyScore { get; set; }
         public virtual List<ProductPropertyValue> Properties { get; set; } = new();
         public virtual List<ComponentModel> ComponentModels { get; set; } = new();
+        public virtual List<ProductVariation> Variations { get; set; } = new();
     }
 
     public class ProductPropertyValue : BaseItemPropertyValue
@@ -35,5 +36,16 @@ namespace HiTechStore.Models
         public virtual Product? Product { get; set; }
         [ForeignKey("ProductPropertyValue")]
         public override PropertyValue? Value { get; set; }
+    }
+
+    public class ProductVariation : IModel
+    {
+        public int ProductVariationId { get; set; }
+        public double Price { get; set; }
+        public int ColorId { get; set; }
+        public virtual Color? Color { get; set; }
+        public int Inventory { get; set; }
+        public virtual List<ProductMedia> Media { get; set; } = new();
+        public virtual Product? Product { get; set; }
     }
 }
