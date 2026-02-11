@@ -34,6 +34,9 @@ namespace HiTechStore.Data
             CategoryComponentRelationEntityBuilder.Build(modelBuilder);
             CartEntityBuilder.Build(modelBuilder);
             OrderEntityBuilder.Build(modelBuilder);
+            DiscountCodeEntityBuilder.Build(modelBuilder);
+            DiscountEntityEntityBuilder.Build(modelBuilder);
+            DiscountRuleEntityBuilder.Build(modelBuilder);
         }
 
         public DbSet<Product> Products { get; set; }
@@ -44,6 +47,8 @@ namespace HiTechStore.Data
         public DbSet<BrandModel> BrandModel { get; set; }
         public DbSet<Cart> Carts { get; set; }
         public DbSet<Order> Orders { get; set; }
+        public DbSet<DiscountCode> DiscountCodes { get; set; }
+        public DbSet<DiscountEntity> DiscountEntities { get; set; }
     }
 
 }

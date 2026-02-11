@@ -20,6 +20,8 @@ namespace HiTechStore.Data
         public ICartRepository CartRepository { get; }
         public IOrderRepository OrderRepository { get; }
         public IColorRepository ColorRepository { get; }
+        public IDiscountCodeRepository DiscountCodeRepository { get; }
+        public IDiscountEntityRepository DiscountEntityRepository { get; }
 
         public UnitOfWork(HiTechStoreDbContext context, IMapper mapper)
         {
@@ -35,6 +37,8 @@ namespace HiTechStore.Data
             CartRepository = new CartRepository(_context, mapper);
             OrderRepository = new OrderRepository(_context, mapper);
             ColorRepository = new ColorRepository(_context, mapper);
+            DiscountCodeRepository = new DiscountCodeRepository(_context, mapper);
+            DiscountEntityRepository = new DiscountEntityRepository(_context, mapper);
         }
 
         public HiTechStoreDbContext Context()

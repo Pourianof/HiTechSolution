@@ -14,6 +14,9 @@ namespace HiTechStore.Core
         ICartRepository CartRepository { get; }
         IOrderRepository OrderRepository { get; }
         IColorRepository ColorRepository { get; }
+        IDiscountEntityRepository DiscountEntityRepository { get; }
+        IDiscountCodeRepository DiscountCodeRepository { get; }
+
         IRepositoryModelBase<TModel> RespositoryOf<TModel>() where TModel : class, IModel;
         Task<int> Complete();
     }
