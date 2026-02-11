@@ -26,6 +26,10 @@
     <ProjectReference Include="..\HiTechPay.Sdk\HiTechPay.Sdk.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Data\DTOs\DiscountEntity\" />
+  </ItemGroup>
+
   <!-- 
     Bug of assembling static files in .NET 9.0.
     https://github.com/dotnet/aspnetcore/issues/59625

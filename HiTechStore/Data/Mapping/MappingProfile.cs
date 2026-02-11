@@ -11,6 +11,7 @@ using HiTechStore.DTOs.Category;
 using HiTechStore.Data.DTOs.Brand;
 using HiTechStore.Data.DTOs.Cart;
 using HiTechStore.Data.DTOs.Order;
+using HiTechStore.Data.DTOs.DiscountEntity;
 
 public class MappingProfile : Profile
 {
@@ -25,6 +26,7 @@ public class MappingProfile : Profile
         BrandMap();
         CartMap();
         OrderMap();
+        DiscountMap();
     }
 
     private void CartMap()
@@ -128,6 +130,15 @@ public class MappingProfile : Profile
         CreateMap<BrandCreationDto, Brand>();
         CreateMap<BrandModelCreationDto, BrandModel>();
         CreateMap<BaseBrandModelCreationDto, BrandModel>();
+    }
+
+    private void DiscountMap()
+    {
+        CreateMap<DiscountEntityProperty, DiscountEntityPropertyDto>();
+        CreateMap<DiscountEntityProperty, DiscountEntityPropertyLevel2Dto>();
+
+        CreateMap<DiscountEntity, DiscountEntityDto>();
+        CreateMap<DiscountEntity, DiscountEntityLevel2Dto>();
     }
 }
 
