@@ -134,11 +134,15 @@ public class MappingProfile : Profile
 
     private void DiscountMap()
     {
-        CreateMap<DiscountEntityProperty, DiscountEntityPropertyDto>();
-        CreateMap<DiscountEntityProperty, DiscountEntityPropertyLevel2Dto>();
+        CreateMap<DiscountEntityProperty, DiscountEntityPropertyDto>()
+            .ForMember((des) => des.Id, opt => opt.MapFrom((src) => src.DiscountEntityPropertyId));
+        CreateMap<DiscountEntityProperty, DiscountEntityPropertyLevel2Dto>()
+            .ForMember((des) => des.Id, opt => opt.MapFrom((src) => src.DiscountEntityPropertyId));
 
-        CreateMap<DiscountEntity, DiscountEntityDto>();
-        CreateMap<DiscountEntity, DiscountEntityLevel2Dto>();
+        CreateMap<DiscountEntity, DiscountEntityDto>()
+            .ForMember(des => des.Id, opt => opt.MapFrom(src => src.DiscountEntityId));
+        CreateMap<DiscountEntity, DiscountEntityLevel2Dto>()
+            .ForMember(des => des.Id, opt => opt.MapFrom(src => src.DiscountEntityId));
     }
 }
 
