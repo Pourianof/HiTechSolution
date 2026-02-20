@@ -1,5 +1,6 @@
 namespace HiTechStore.Core.Services;
 
-public interface IDisountService {
-    
+public interface IDiscountService
+{
+    string GenerateRanomCode(int length = 10);
 }

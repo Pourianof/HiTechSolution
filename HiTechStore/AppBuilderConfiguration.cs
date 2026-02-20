@@ -1,6 +1,7 @@
 using HiTechStore.Controllers.ExceptionFilters;
 using HiTechStore.Core.Auth;
 using HiTechStore.Core.ExceptionHandlers;
+using HiTechStore.Core.Services;
 using HiTechStore.Data;
 using HiTechStore.Helpers.URLFilterQuery;
 
@@ -21,6 +22,7 @@ public static class DependencyRegistration
 
         builder.Services.AddAutoMapper(typeof(MappingProfile));
         builder.Services.AddQueryParser();
+        builder.Services.AddAppServices();
 
         builder.AddAuth();
 

@@ -27,6 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Data\DTOs\DiscountCode\" />
     <Folder Include="Data\DTOs\DiscountEntity\" />
   </ItemGroup>
 
