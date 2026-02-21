@@ -11,5 +11,5 @@ public class DiscountCode : IModel
     public DateTime? StartTime { get; set; }
     public DateTime? EndTime { get; set; }
 
-    virtual public ICollection<DiscountRule>? Rule { get; set; }
+    virtual public ICollection<DiscountRule>? Rules { get; set; }
 }

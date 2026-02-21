@@ -22,6 +22,7 @@ public class DiscountConditionGroup
 public class DiscountCondition
 {
     public int DiscountConditionId { get; set; }
+    public int EntityPropertyId { get; set; }
     virtual public DiscountEntityProperty? EntityProperty { get; set; }
     public int Priority { get; set; }
     public DiscountOperation Operation { get; set; }
