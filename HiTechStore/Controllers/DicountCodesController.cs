@@ -1,5 +1,9 @@
+using AutoMapper;
+
 using HiTechStore.Core;
+using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Services;
+using HiTechStore.Data.DTOs.DiscountCode;
 using HiTechStore.Models;
 
 using Microsoft.AspNetCore.Authorization;
@@ -10,10 +14,14 @@ namespace HiTechStore.Controllers;
 [Route("api/discounts/codes")]
 [ApiController]
 [Authorize]
-public class DicountCodesController(IUnitOfWork unitOfWork, IDiscountService disountService) : ControllerBase
+public class DicountCodesController(
+    IUnitOfWork unitOfWork,
+    IDiscountService disountService,
+    IMapper mapper) : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly IDiscountService _disountService = disountService;
+    private readonly IMapper _mapper = mapper;
 
     [HttpGet("random-code")]
     public IActionResult GetRandomCode()
@@ -36,6 +44,40 @@ public class DicountCodesController(IUnitOfWork unitOfWork, IDiscountService dis
         return Ok(discountCode);
     }
 
+    [HttpPost]
+    public async Task<ActionResult> CreateCode([FromBody] DiscountCodeCreationDto discountCodeCreationDto)
+    {
+        if (discountCodeCreationDto.StartTime > discountCodeCreationDto.EndTime)
+        {
+            ModelState.AddModelError(nameof(DiscountCodeCreationDto.StartTime), "StartTime cannot be greater than EndTime");
+
+            return ValidationProblem(ModelState);
+        }
+
+        try
+        {
+            var newDiscountModel = _mapper.Map<DiscountCode>(discountCodeCreationDto);
+            var discountCode = await _disountService.RegisterDiscountCode(
+                newDiscountModel
+            );
+
+            return Ok(discountCode);
+        }
+        catch (ModelException ex)
+        {
+            ModelState.AddModelError(ex.FieldName, ex.Message);
+
+            return ValidationProblem(ModelState);
+        }
+        catch (Core.Exceptions.ApplicationException ex)
+        {
+            var problemDetails = new ProblemDetails
+            {
+                Title = ex.Title,
+                Detail = ex.Message
+            };
+            return BadRequest(problemDetails);
+        }
+    }
 
 }
-
