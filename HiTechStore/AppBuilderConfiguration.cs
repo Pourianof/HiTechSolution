@@ -1,8 +1,11 @@
+using System.Reflection;
+
 using HiTechStore.Controllers.ExceptionFilters;
 using HiTechStore.Core.Auth;
 using HiTechStore.Core.ExceptionHandlers;
 using HiTechStore.Core.Services;
 using HiTechStore.Data;
+using HiTechStore.Helpers.AutoMapper;
 using HiTechStore.Helpers.URLFilterQuery;
 
 namespace HiTechStore;
@@ -20,7 +23,11 @@ public static class DependencyRegistration
 
         builder.UseDataAccess();
 
-        builder.Services.AddAutoMapper(typeof(MappingProfile));
+        builder.Services.AddAutoMapper((cfg) =>
+        {
+            cfg.RegisterAttributeMaps(Assembly.GetExecutingAssembly());
+            cfg.AddProfile(typeof(MappingProfile));
+        });
         builder.Services.AddQueryParser();
         builder.Services.AddAppServices();
 
