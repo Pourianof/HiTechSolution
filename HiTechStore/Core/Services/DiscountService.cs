@@ -1,8 +1,6 @@
-using System.Security.Cryptography;
-using System.Text;
-
 using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Helpers;
+using HiTechStore.Data.DTOs.DiscountCode;
 using HiTechStore.Models;
 
 namespace HiTechStore.Core.Services;
@@ -26,6 +24,11 @@ public class DiscountService(IUnitOfWork unitOfWork, IDiscountCodeGenerator code
         }
 
         return code!;
+    }
+
+    public Task<IEnumerable<DiscountCodeDto>> GetAllDiscountCodes()
+    {
+        return _unitOfWork.DiscountCodeRepository.GetAllProjectedAsync();
     }
 
     public async Task<DiscountCode> RegisterDiscountCode(DiscountCode discountCode)
