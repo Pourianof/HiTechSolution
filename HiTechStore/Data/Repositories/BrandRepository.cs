@@ -15,9 +15,9 @@ public class BrandRepository : Repository<Brand, BrandDto>, IBrandRepository
 
     public async Task<Brand?> GetByNameAsync(string name)
     {
-        return _dbSet.Where(
+        return await _dbSet.Where(
             (b) => EF.Functions.ILike(b.Name!, name)
-        ).First();
+        ).FirstOrDefaultAsync();
     }
 
     public Task<BrandDto?> GetByNameProjectedAsync(string name)
