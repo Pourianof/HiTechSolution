@@ -34,7 +34,7 @@ public class DicountCodesController(
     [HttpGet("{name:required}")]
     public async Task<ActionResult<DiscountCode>> GetDiscountCode(string name)
     {
-        var discountCode = await _unitOfWork.DiscountCodeRepository.GetDiscountCodeByNameAsync(name);
+        var discountCode = await _unitOfWork.DiscountCodeRepository.GetDiscountCodeByNameProjectedAsync(name);
 
         if (discountCode is null)
         {
@@ -51,8 +51,19 @@ public class DicountCodesController(
     }
 
     [HttpPost]
-    public async Task<ActionResult> CreateCode([FromBody] DiscountCodeCreationDto discountCodeCreationDto)
+    public async Task<ActionResult> CreateCode([FromBody] DiscountCodeCreationDto? discountCodeCreationDto)
     {
+        if (discountCodeCreationDto is null)
+        {
+            return BadRequest(
+                new ProblemDetails
+                {
+                    Title = "Empty body",
+                    Detail = "No discount model specified",
+                }
+            );
+        }
+
         if (discountCodeCreationDto.StartTime > discountCodeCreationDto.EndTime)
         {
             ModelState.AddModelError(nameof(DiscountCodeCreationDto.StartTime), "StartTime cannot be greater than EndTime");
