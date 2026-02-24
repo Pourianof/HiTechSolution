@@ -15,6 +15,8 @@ public class DiscountCodeCreationDto
     [MinLength(3)]
     [MaxLength(12)]
     public string? Code { get; set; }
+    [MinLength(5)]
+    public string? Description { get; set; }
     [Required]
     [JsonConverter(typeof(UnixDateTimeConverter))]
     public DateTime StartTime { get; set; }
