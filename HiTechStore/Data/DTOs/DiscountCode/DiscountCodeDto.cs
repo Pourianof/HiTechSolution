@@ -11,6 +11,8 @@ public class DiscountCodeDto
     public string? Description { get; set; }
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public bool IsDeactivated { get; set; }
     public ICollection<DiscountRuleDto>? Rules { get; set; }
 }
 
