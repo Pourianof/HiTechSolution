@@ -58,7 +58,7 @@ public class QueryFilterItem
 
         return filters;
     }
-    public void AddOperatorValuePair(QueryOperator @operator, StringValues value)
+    public QueryFilterItem AddOperatorValuePair(QueryOperator @operator, StringValues value)
     {
         if (_opValuePairs.ContainsKey(@operator))
         {
@@ -86,6 +86,8 @@ public class QueryFilterItem
                 opMap(@operator)
             );
         }
+
+        return this;
     }
 
     public IEnumerable<OperatorValuePair> AllFilters => _opValuePairs.Values;
