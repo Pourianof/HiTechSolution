@@ -32,10 +32,23 @@ public class DicountCodesController(
         return Ok(new { Code = code });
     }
 
-    [HttpGet("{name:required}")]
+    [HttpGet("{name:alpha}")]
     public async Task<ActionResult<DiscountCode>> GetDiscountCode(string name)
     {
         var discountCode = await _unitOfWork.DiscountCodeRepository.GetDiscountCodeByNameProjectedAsync(name);
+
+        if (discountCode is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(discountCode);
+    }
+
+    [HttpGet("{id:int}")]
+    public async Task<ActionResult<DiscountCode>> GetDiscountCodeByID(int id)
+    {
+        var discountCode = await _unitOfWork.DiscountCodeRepository.GetByIdProjectedAsync(id);
 
         if (discountCode is null)
         {
