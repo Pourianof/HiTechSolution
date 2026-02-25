@@ -14,6 +14,7 @@ public class DiscountCodeEntityBuilder
                  entity.ToTable("DiscountCodes");
                  entity.Property(dc => dc.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
                  entity.Property(dc => dc.IsDeactivated).HasDefaultValue(false);
+                 entity.HasOne(dc => dc.Creator).WithMany().HasForeignKey(dc => dc.CreatorId);
              }
          );
     }
