@@ -1,7 +1,11 @@
 using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Helpers;
 using HiTechStore.Data.DTOs.DiscountCode;
+using HiTechStore.Data.Queries;
+using HiTechStore.Helpers.URLFilterQuery;
 using HiTechStore.Models;
+
+using Microsoft.Extensions.Primitives;
 
 namespace HiTechStore.Core.Services;
 
@@ -26,9 +30,14 @@ public class DiscountService(IUnitOfWork unitOfWork, IDiscountCodeGenerator code
         return code!;
     }
 
-    public Task<IEnumerable<DiscountCodeDto>> GetAllDiscountCodes()
+    public Task<IEnumerable<DiscountCodeDto>> GetAllDiscountCodes(DiscountQuery? discountQuery)
     {
-        return _unitOfWork.DiscountCodeRepository.GetAllProjectedAsync();
+        var query = discountQuery ?? new();
+
+        query.SortBy ??= new QueryFilterItem("sortBy")
+            .AddOperatorValuePair(QueryOperator.Equal, new StringValues("id,endTime"));
+
+        return _unitOfWork.DiscountCodeRepository.GetAllProjectedAsync(query);
     }
 
     public async Task<DiscountCode> RegisterDiscountCode(DiscountCode discountCode)

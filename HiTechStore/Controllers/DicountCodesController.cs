@@ -4,6 +4,7 @@ using HiTechStore.Core;
 using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Services;
 using HiTechStore.Data.DTOs.DiscountCode;
+using HiTechStore.Data.Queries;
 using HiTechStore.Models;
 
 using Microsoft.AspNetCore.Authorization;
@@ -45,9 +46,9 @@ public class DicountCodesController(
     }
 
     [HttpGet]
-    public async Task<ActionResult<DiscountCode>> GetAllDiscountCodes()
+    public async Task<ActionResult<DiscountCode>> GetAllDiscountCodes([FromQuery] DiscountQuery discountQuery)
     {
-        return Ok(await _disountService.GetAllDiscountCodes());
+        return Ok(await _disountService.GetAllDiscountCodes(discountQuery));
     }
 
     [HttpPost]
