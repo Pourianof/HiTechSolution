@@ -1,3 +1,5 @@
+using System.Security.Claims;
+
 using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Helpers;
 using HiTechStore.Data.DTOs.DiscountCode;
@@ -9,7 +11,10 @@ using Microsoft.Extensions.Primitives;
 
 namespace HiTechStore.Core.Services;
 
-public class DiscountService(IUnitOfWork unitOfWork, IDiscountCodeGenerator codeGenerator) : IDiscountService
+public class DiscountService(
+    IUnitOfWork unitOfWork,
+    IDiscountCodeGenerator codeGenerator)
+    : IDiscountService
 {
     private IUnitOfWork _unitOfWork = unitOfWork;
     private IDiscountCodeGenerator _codeGenerator = codeGenerator;
@@ -64,6 +69,48 @@ public class DiscountService(IUnitOfWork unitOfWork, IDiscountCodeGenerator code
             return discountCode;
         }
 
-        throw new Exceptions.ApplicationException("Failed to save", "");
+        throw new Exceptions.ApplicationException("Failed to save", "Something went wrong to save database");
+    }
+
+    async public Task<DiscountCodeDto?> UpdateDiscountCode(int id, DiscountCodeUpdateDto discountCodeUpdateDto, ClaimsPrincipal claims)
+    {
+        var discountCode = await _unitOfWork.DiscountCodeRepository.GetModelByIdAsync(id);
+
+        if (discountCode is null)
+        {
+            return null;
+        }
+
+        if (discountCodeUpdateDto.Description is not null)
+        {
+            discountCode.Description = discountCodeUpdateDto.Description;
+        }
+
+        // Not totally clean arch. I did not take it so hard. 
+        // it upto infra to handle auth stuff
+        if (discountCodeUpdateDto.IsDeactivated is not null)
+        {
+            var roles = claims.FindFirst(ClaimTypes.Role)?.Value;
+
+            if (roles is null || !IdentityRoles.PrivilagedRoles.Any(r => roles.Contains(r)))
+            {
+                throw new NotAllowedException(detail: "You have not required access");
+            }
+
+            discountCode.IsDeactivated = discountCodeUpdateDto.IsDeactivated.Value;
+        }
+
+        await _unitOfWork.Complete();
+
+        return new DiscountCodeDto()
+        {
+            Code = discountCode.Code,
+            CreatedAt = discountCode.CreatedAt,
+            CreatorId = discountCode.CreatorId,
+            Description = discountCode.Description,
+            EndTime = discountCode.EndTime!.Value,
+            StartTime = discountCode.StartTime!.Value,
+            IsDeactivated = discountCode.IsDeactivated
+        };
     }
 }

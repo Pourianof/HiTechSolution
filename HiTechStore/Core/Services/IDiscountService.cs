@@ -9,4 +9,5 @@ public interface IDiscountService
     string GenerateRanomCode(int length = 10);
     Task<DiscountCode> RegisterDiscountCode(DiscountCode discountCode);
     Task<IEnumerable<DiscountCodeDto>> GetAllDiscountCodes(DiscountQuery? query);
+    Task<DiscountCodeDto?> UpdateDiscountCode(int id, DiscountCodeUpdateDto discountCodeUpdateDto, System.Security.Claims.ClaimsPrincipal user);
 }

@@ -33,6 +33,7 @@ public static class DependencyRegistration
 
         builder.AddAuth();
 
+        builder.Services.AddExceptionHandler<ApplicationExceptionHandler>();
         builder.Services.AddExceptionHandler<PgDbExceptionHandler>();
         builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 

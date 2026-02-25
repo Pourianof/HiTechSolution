@@ -98,4 +98,17 @@ public class DicountCodesController(
         }
     }
 
+    [HttpPatch("{id}")]
+    public async Task<ActionResult<DiscountCodeDto>> UpdateDiscountCode(int id, [FromBody] DiscountCodeUpdateDto discountCodeUpdateDto)
+    {
+        var discountCode = await _disountService.UpdateDiscountCode(id, discountCodeUpdateDto, User);
+
+        if (discountCode is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(discountCode);
+    }
+
 }
