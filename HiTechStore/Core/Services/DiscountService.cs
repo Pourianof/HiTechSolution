@@ -42,6 +42,8 @@ public class DiscountService(
 
         query.SortBy ??= new QueryFilterItem("sortBy")
             .AddOperatorValuePair(QueryOperator.Equal, new StringValues("id,endTime"));
+        query.Limit ??= new QueryFilterItem("limit")
+            .AddOperatorValuePair(QueryOperator.Equal, new StringValues("10"));
 
         return _unitOfWork.DiscountCodeRepository.GetAllProjectedAsync(query);
     }
