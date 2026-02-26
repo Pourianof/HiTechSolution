@@ -29,7 +29,7 @@ namespace HiTechStore.Core.Repositories
         where T : class, IModel
         where O : class
     {
-        Task<PagedResultDto<O>> GetAllProjectedAsync();
+        Task<PagedResultDto<O>> GetAllProjectedAsync(int limit = 10);
         Task<O?> GetByIdProjectedAsync(int id);
     }
     public interface IRepositoryBase<T> : IRepositoryBase<T, T>
