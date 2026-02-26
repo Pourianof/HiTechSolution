@@ -6,6 +6,7 @@ using AutoMapper;
 using HiTechStore.Controllers.ActionFilters;
 using HiTechStore.Controllers.ExceptionFilters;
 using HiTechStore.Core;
+using HiTechStore.Data.DTOs;
 using HiTechStore.Data.DTOs.Product;
 using HiTechStore.Data.Queries;
 using HiTechStore.DTOs.Product;
@@ -31,7 +32,7 @@ namespace HiTechStore.Controllers
         }
 
         [HttpGet]
-        public async Task<IEnumerable<ProductDto>> GetProducts([ToQuery] ProductQuery query)
+        public async Task<PagedResultDto<ProductDto>> GetProducts([ToQuery] ProductQuery query)
         {
             var products = await _unitOfWork.Products.GetAllProjectedAsync(query);
             return products;

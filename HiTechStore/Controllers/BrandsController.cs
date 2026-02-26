@@ -37,7 +37,7 @@ public class BrandsController : ControllerBase
     public async IAsyncEnumerable<BrandDto> GetBrands()
     {
         var brands = await _unitOfWork.BrandRepository.GetAllProjectedAsync();
-        foreach (var brand in brands)
+        foreach (var brand in brands.Items)
         {
             brand.Image = ProvideBrandImage(brand.Name);
             yield return brand;

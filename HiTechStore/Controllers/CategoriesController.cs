@@ -36,16 +36,16 @@ namespace HiTechStore.Controllers
         public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategories()
         {
             var categories = await _unitOfWork.Categories.GetAllProjectedAsync();
-            var categoryDtos = categories.Select(
-                (cat) =>
-                {
-                    var categoryDto = _mapper.Map<CategoryDTO>(cat);
-                    categoryDto.Image = CategoryAssetHelper.GetCategoryImagePathIfExist(cat.CategoryId);
-                    categoryDto.Icon = CategoryAssetHelper.GetCategoryIconPathIfExist(cat.CategoryId);
-                    return categoryDto;
-                }
-            );
-            return Ok(categoryDtos);
+            categories.Items = categories.Items.Select(
+               (cat) =>
+               {
+                   var categoryDto = _mapper.Map<CategoryDTO>(cat);
+                   categoryDto.Image = CategoryAssetHelper.GetCategoryImagePathIfExist(cat.CategoryId);
+                   categoryDto.Icon = CategoryAssetHelper.GetCategoryIconPathIfExist(cat.CategoryId);
+                   return categoryDto;
+               }
+           );
+            return Ok(categories);
         }
 
 

@@ -2,6 +2,7 @@ using System.Security.Claims;
 
 using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Helpers;
+using HiTechStore.Data.DTOs;
 using HiTechStore.Data.DTOs.DiscountCode;
 using HiTechStore.Data.Queries;
 using HiTechStore.Helpers.URLFilterQuery;
@@ -35,7 +36,7 @@ public class DiscountService(
         return code!;
     }
 
-    public Task<IEnumerable<DiscountCodeDto>> GetAllDiscountCodes(DiscountQuery? discountQuery)
+    public Task<PagedResultDto<DiscountCodeDto>> GetAllDiscountCodes(DiscountQuery? discountQuery)
     {
         var query = discountQuery ?? new();
 

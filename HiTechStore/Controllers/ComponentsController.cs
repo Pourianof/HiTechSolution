@@ -3,6 +3,7 @@ using AutoMapper;
 using HiTechStore.Controllers.ActionFilters;
 using HiTechStore.Core;
 using HiTechStore.Core.Exceptions;
+using HiTechStore.Data.DTOs;
 using HiTechStore.Data.DTOs.Brand;
 using HiTechStore.Data.DTOs.Component;
 using HiTechStore.Helpers.Types;
@@ -28,9 +29,9 @@ public class ComponentsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ComponentTypeDto>>> GetAllComponents()
+    public async Task<ActionResult<PagedResultDto<ComponentTypeDto>>> GetAllComponents()
     {
-        var components = await _unitOfWork.ComponentRepository.GetAllProjectedAsync() ?? [];
+        var components = await _unitOfWork.ComponentRepository.GetAllProjectedAsync() ?? PagedResultDto<ComponentTypeDto>.Empty();
 
         return Ok(components);
     }

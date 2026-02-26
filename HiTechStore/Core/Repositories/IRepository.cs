@@ -1,3 +1,4 @@
+using HiTechStore.Data.DTOs;
 using HiTechStore.Data.Queries;
 
 namespace HiTechStore.Core.Repositories
@@ -28,7 +29,7 @@ namespace HiTechStore.Core.Repositories
         where T : class, IModel
         where O : class
     {
-        Task<IEnumerable<O>> GetAllProjectedAsync();
+        Task<PagedResultDto<O>> GetAllProjectedAsync();
         Task<O?> GetByIdProjectedAsync(int id);
     }
     public interface IRepositoryBase<T> : IRepositoryBase<T, T>
@@ -40,8 +41,8 @@ namespace HiTechStore.Core.Repositories
         where Q : BaseQuery
         where O : class
     {
-        Task<IEnumerable<O>> GetAllProjectedAsync(Q query);
-        Task<IEnumerable<TProject>> GetAllProjectToAsync<TProject>(Q? query = default);
+        Task<PagedResultDto<O>> GetAllProjectedAsync(Q query);
+        Task<PagedResultDto<TProject>> GetAllProjectToAsync<TProject>(Q? query = default);
         Task<TProject?> GetByIdProjectTo<TProject>(int id);
     }
 

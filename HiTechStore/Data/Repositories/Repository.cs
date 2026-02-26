@@ -3,6 +3,7 @@ using AutoMapper.QueryableExtensions;
 
 using HiTechStore.Core;
 using HiTechStore.Core.Repositories;
+using HiTechStore.Data.DTOs;
 using HiTechStore.Data.Queries;
 using HiTechStore.Helpers.Types;
 using HiTechStore.Helpers.URLFilterQuery;
@@ -132,9 +133,18 @@ namespace HiTechStore.Data.Repositories
             return queryBuilder;
         }
 
-        private IQueryable<T> BuildQueryBuilderBasedOnQueryParams(Q? queryParams)
+        private class QueryParamAppliedQuery
         {
-            var query = GetAllQueryBuilder(_dbSet.AsQueryable(), queryParams);
+            required public IQueryable<T>? BaseQuery { get; set; }
+            required public IQueryable<T>? AppliedQuery { get; set; }
+            required public int PageSize { get; set; }
+            required public int Page { get; set; }
+        }
+
+        private QueryParamAppliedQuery BuildQueryBuilderBasedOnQueryParams(Q? queryParams)
+        {
+            var baseQuery = GetAllQueryBuilder(_dbSet.AsQueryable(), queryParams);
+            var query = baseQuery;
 
             if (queryParams?.SortBy is not null && queryParams.SortDir is not null)
             {
@@ -159,16 +169,48 @@ namespace HiTechStore.Data.Repositories
                 query = query.Take(limit.Value);
             }
 
-            return query;
+            return new()
+            {
+                BaseQuery = baseQuery,
+                AppliedQuery = query,
+                Page = page ?? 1,
+                PageSize = limit ?? 0,
+            };
         }
 
-        public async Task<IEnumerable<TProject>> GetAllProjectToAsync<TProject>(Q? queryParams)
+        private async Task<PagedResultDto<TOut>> BaseGetAll<TOut>(Q? queryParams)
         {
-            return await Project<TProject>(BuildQueryBuilderBasedOnQueryParams(queryParams)).ToListAsync();
+            var query = BuildQueryBuilderBasedOnQueryParams(queryParams);
+            return new PagedResultDto<TOut>()
+            {
+                Items = await Project<TOut>(query.AppliedQuery!).ToListAsync(),
+                PageNumber = query.Page,
+                PageSize = query.PageSize,
+                TotalCount = await query.BaseQuery!.CountAsync()
+            };
         }
-        public virtual async Task<IEnumerable<O>> GetAllProjectedAsync(Q queryParams)
+
+        public async Task<PagedResultDto<TProject>> GetAllProjectToAsync<TProject>(Q? queryParams)
         {
-            return await Project(BuildQueryBuilderBasedOnQueryParams(queryParams)).ToListAsync();
+            var query = BuildQueryBuilderBasedOnQueryParams(queryParams);
+            return new PagedResultDto<TProject>()
+            {
+                Items = await Project<TProject>(query.AppliedQuery!).ToListAsync(),
+                PageNumber = query.Page,
+                PageSize = query.PageSize,
+                TotalCount = await query.BaseQuery!.CountAsync()
+            };
+        }
+        public virtual async Task<PagedResultDto<O>> GetAllProjectedAsync(Q queryParams)
+        {
+            var query = BuildQueryBuilderBasedOnQueryParams(queryParams);
+            return new PagedResultDto<O>()
+            {
+                Items = await Project(query.AppliedQuery!).ToListAsync(),
+                PageNumber = query.Page,
+                PageSize = query.PageSize,
+                TotalCount = await query.BaseQuery!.CountAsync()
+            };
         }
 
         protected virtual IQueryable<TOut> Project<TOut>(IQueryable<T> queryable)
@@ -185,9 +227,20 @@ namespace HiTechStore.Data.Repositories
             return Project<O>(queryable);
         }
 
-        public virtual async Task<IEnumerable<O>> GetAllProjectedAsync()
+        public virtual async Task<PagedResultDto<O>> GetAllProjectedAsync()
         {
-            return await Project(GetAllQueryBuilder(_dbSet.AsQueryable()).Take(10)).ToListAsync();
+            var query = GetAllQueryBuilder(_dbSet.AsQueryable());
+            var counts = await query.CountAsync();
+            int limit = 10;
+            var projectedQuery = await Project(query.Take(limit)).ToListAsync();
+
+            return new PagedResultDto<O>()
+            {
+                Items = projectedQuery,
+                PageNumber = 1,
+                PageSize = limit,
+                TotalCount = counts
+            };
         }
 
 

@@ -1,3 +1,4 @@
+using HiTechStore.Data.DTOs;
 using HiTechStore.Data.DTOs.DiscountCode;
 using HiTechStore.Data.Queries;
 using HiTechStore.Models;
@@ -8,6 +9,6 @@ public interface IDiscountService
 {
     string GenerateRanomCode(int length = 10);
     Task<DiscountCode> RegisterDiscountCode(DiscountCode discountCode);
-    Task<IEnumerable<DiscountCodeDto>> GetAllDiscountCodes(DiscountQuery? query);
+    Task<PagedResultDto<DiscountCodeDto>> GetAllDiscountCodes(DiscountQuery? query);
     Task<DiscountCodeDto?> UpdateDiscountCode(int id, DiscountCodeUpdateDto discountCodeUpdateDto, System.Security.Claims.ClaimsPrincipal user);
 }
