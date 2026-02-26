@@ -1,4 +1,5 @@
 using HiTechStore.Core;
+using HiTechStore.Data.DTOs;
 using HiTechStore.Data.DTOs.DiscountEntity;
 
 using Microsoft.AspNetCore.Mvc;
@@ -12,7 +13,7 @@ public class DiscountEntitiesController(IUnitOfWork unitOfWork) : ControllerBase
     private IUnitOfWork _unitOfWork = unitOfWork;
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<DiscountEntityDto>>> GetDiscountEntities()
+    public async Task<ActionResult<PagedResultDto<DiscountEntityDto>>> GetDiscountEntities()
     {
         return Ok(await _unitOfWork.DiscountEntityRepository.GetAllProjectedAsync(0));
     }
