@@ -5,6 +5,7 @@ using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Services;
 using HiTechStore.Data.DTOs.DiscountCode;
 using HiTechStore.Data.Queries;
+using HiTechStore.Helpers.URLFilterQuery;
 using HiTechStore.Models;
 
 using Microsoft.AspNetCore.Authorization;
@@ -59,7 +60,7 @@ public class DicountCodesController(
     }
 
     [HttpGet]
-    public async Task<ActionResult<DiscountCode>> GetAllDiscountCodes([FromQuery] DiscountQuery discountQuery)
+    public async Task<ActionResult<DiscountCode>> GetAllDiscountCodes([ToQuery] DiscountQuery discountQuery)
     {
         return Ok(await _disountService.GetAllDiscountCodes(discountQuery));
     }
@@ -122,6 +123,19 @@ public class DicountCodesController(
         }
 
         return Ok(discountCode);
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> DeleteDiscountCode(int id)
+    {
+        var deleted = await _disountService.DeleteDiscountCode(id);
+
+        if (!deleted)
+        {
+            return NotFound();
+        }
+
+        return Ok();
     }
 
 }

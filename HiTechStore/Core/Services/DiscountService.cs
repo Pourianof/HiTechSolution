@@ -19,6 +19,21 @@ public class DiscountService(
 {
     private IUnitOfWork _unitOfWork = unitOfWork;
     private IDiscountCodeGenerator _codeGenerator = codeGenerator;
+
+    public async Task<bool> DeleteDiscountCode(int id)
+    {
+        var discountCode = await _unitOfWork.DiscountCodeRepository.GetModelByIdAsync(id);
+
+        if (discountCode is null)
+        {
+            return false;
+        }
+
+        await _unitOfWork.DiscountCodeRepository.Delete(discountCode);
+
+        return true;
+    }
+
     public string GenerateRanomCode(int length = 10)
     {
         var hasGenerated = false;
