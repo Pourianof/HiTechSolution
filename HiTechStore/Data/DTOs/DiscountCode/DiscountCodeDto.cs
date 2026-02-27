@@ -21,6 +21,7 @@ public class DiscountCodeDto
 [MapFrom<DiscountRule>]
 public class DiscountRuleDto
 {
+    public int DiscountRuleId { get; set; }
     public string? Name { get; set; }
     public string? Description { get; set; }
     public List<DiscountConditionGroupDto> Conditions { get; set; } = new();
@@ -37,12 +38,14 @@ public class DiscountActionDto
 [MapFrom<DiscountConditionGroup>]
 public class DiscountConditionGroupDto
 {
+    public int DiscountConditionGroupId { get; set; }
     public ICollection<DiscountConditionDto>? Conditions { get; set; }
 }
 
 [MapFrom<DiscountCondition>]
 public class DiscountConditionDto
 {
+    public int DiscountConditionId { get; set; }
     public DiscountEntityPropertyDto? EntityProperty { get; set; }
     public int? Priority { get; set; }
     public DiscountOperation? Operation { get; set; }
