@@ -3,7 +3,7 @@ using HiTechStore.Data.DTOs.DiscountCode;
 using HiTechStore.Data.Queries;
 using HiTechStore.Models;
 
-namespace HiTechStore.Core.Services;
+namespace HiTechStore.Core.Services.Discount;
 
 public interface IDiscountService
 {

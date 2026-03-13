@@ -10,7 +10,7 @@ using HiTechStore.Models;
 
 using Microsoft.Extensions.Primitives;
 
-namespace HiTechStore.Core.Services;
+namespace HiTechStore.Core.Services.Discount;
 
 public class DiscountService(
     IUnitOfWork unitOfWork,
