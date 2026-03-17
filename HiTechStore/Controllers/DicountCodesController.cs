@@ -2,7 +2,7 @@ using AutoMapper;
 
 using HiTechStore.Core;
 using HiTechStore.Core.Exceptions;
-using HiTechStore.Core.Services;
+using HiTechStore.Core.Services.Discount;
 using HiTechStore.Data.DTOs.DiscountCode;
 using HiTechStore.Data.Queries;
 using HiTechStore.Helpers.URLFilterQuery;

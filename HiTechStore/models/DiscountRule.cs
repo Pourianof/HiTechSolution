@@ -11,10 +11,17 @@ public class DiscountRule
     virtual public DiscountAction? DiscountAction { get; set; }
 }
 
+public enum DiscountConditionGroupType
+{
+    Cart,
+    Product
+}
+
 public class DiscountConditionGroup
 {
     public int DiscountConditionGroupId { get; set; }
     public int DiscountRuleId { get; set; }
+    public DiscountConditionGroupType Type { get; set; } = DiscountConditionGroupType.Product;
 
     virtual public ICollection<DiscountCondition>? Conditions { get; set; } // cond1 AND cond2
 }

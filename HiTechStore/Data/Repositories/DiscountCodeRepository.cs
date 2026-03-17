@@ -16,20 +16,20 @@ public class DiscountCodeRepository : Repository<DiscountCode, DiscountCodeDto>,
     {
     }
 
-    public Task<DiscountCode?> GetDiscountCodeByNameAsync(string name)
+    public async Task<IEnumerable<DiscountCode?>> GetDiscountCodeByNameAsync(string name)
     {
-        return _dbSet.FirstOrDefaultAsync(
+        return await _dbSet.Where(
             (code) => EF.Functions.ILike(name, code.Code!)
-        );
+        ).ToListAsync();
     }
 
-    public Task<DiscountCodeDto?> GetDiscountCodeByNameProjectedAsync(string name)
+    public async Task<IEnumerable<DiscountCodeDto?>> GetDiscountCodeByNameProjectedAsync(string name)
     {
-        return Project(
+        return await Project(
             _dbSet.Where(
                 (code) => EF.Functions.ILike(name, code.Code!)
             )
-        ).FirstOrDefaultAsync();
+        ).ToListAsync();
     }
 
     protected override IQueryable<DiscountCode> GetAllQueryBuilder(IQueryable<DiscountCode> queryBuilder, BaseQuery? queryParams = null)

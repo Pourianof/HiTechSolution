@@ -1,8 +1,10 @@
 using System.Security.Claims;
 
 using HiTechStore.Core;
+using HiTechStore.Core.Services.Discount;
 using HiTechStore.Data.DTOs;
 using HiTechStore.Data.DTOs.Cart;
+using HiTechStore.Data.DTOs.DiscountCode;
 using HiTechStore.Models;
 
 using Microsoft.AspNetCore.Authorization;
@@ -100,6 +102,15 @@ public class CartsController(IUnitOfWork unitOfWork) : ControllerBase
         var cart = await _unitOfWork.CartRepository.GetUserActiveCartWithProductAsync(userId);
 
         return Ok(cart ?? new CartWithProductsDto() { Items = [] });
+
+    }
+
+    [HttpGet("discount/state")]
+    public async Task<ActionResult<DiscountResultDto>> GetDiscountAppliableState([FromQuery] string discountCode, [FromServices] IDiscountService discountService)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+
+        return Ok(await discountService.CheckDiscountCodeUsability(discountCode, userId));
 
     }
 }

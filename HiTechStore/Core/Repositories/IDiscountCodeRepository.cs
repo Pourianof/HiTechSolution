@@ -5,6 +5,6 @@ namespace HiTechStore.Core.Repositories;
 
 public interface IDiscountCodeRepository : IRepository<DiscountCode, DiscountCodeDto>
 {
-    public Task<DiscountCode?> GetDiscountCodeByNameAsync(string name);
-    public Task<DiscountCodeDto?> GetDiscountCodeByNameProjectedAsync(string name);
+    public Task<IEnumerable<DiscountCode?>> GetDiscountCodeByNameAsync(string name);
+    public Task<IEnumerable<DiscountCodeDto?>> GetDiscountCodeByNameProjectedAsync(string name);
 }
