@@ -94,6 +94,7 @@ namespace HiTechStore.Data.Repositories
                 ).ToList(),
                 Variations = p.Variations.Select(pv => new ProductVariationDto()
                 {
+                    ProductVariationId = pv.ProductVariationId,
                     Color = pv.Color,
                     Inventory = pv.Inventory,
                     Media = pv.Media.Select(m => new ProductMediaDto()
@@ -222,6 +223,13 @@ namespace HiTechStore.Data.Repositories
             product.IsDeleled = true;
             _context.Entry(product).Property((p) => p.IsDeleled).IsModified = true;
             return Task.CompletedTask;
+        }
+
+        public async Task<IEnumerable<ProductVariation>> GetAllVariations(IEnumerable<int> variationIds)
+        {
+            return await _context.Set<ProductVariation>().Where(
+                (pv) => variationIds.Contains(pv.ProductVariationId)
+            ).Include(pv => pv.Product).ToListAsync();
         }
     }
 }

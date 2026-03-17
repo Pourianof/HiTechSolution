@@ -5,6 +5,7 @@ namespace HiTechStore.Data.DTOs;
 
 public class ProductVariationDto
 {
+    public int ProductVariationId { get; set; }
     public double Price { get; set; }
     public Color? Color { get; set; }
     public int Inventory { get; set; }

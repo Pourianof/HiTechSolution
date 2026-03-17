@@ -1,10 +1,15 @@
 using HiTechStore.Data.DTOs;
-using HiTechStore.Data.DTOs.Product;
 
 public class MinimalProductDto
 {
     public int ProductId { get; set; }
     public string? Title { get; set; }
     public string? Description { get; set; }
-    public List<ProductVariationDto> Variations { get; set; } = new();
+    public IEnumerable<ProductVariationWithCartAmount> Variations { get; set; } = new List<ProductVariationWithCartAmount>();
+}
+
+public class ProductVariationWithCartAmount
+{
+    public int Amount { get; set; }
+    public ProductVariationDto? Variation { get; set; }
 }

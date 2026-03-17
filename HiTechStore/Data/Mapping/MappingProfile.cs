@@ -31,8 +31,6 @@ public class MappingProfile : Profile
 
     private void CartMap()
     {
-        CreateMap<Cart, CartWithProductsDto>();
-        CreateMap<CartItem, CartItemWithProductDto>();
     }
     private void OrderMap()
     {

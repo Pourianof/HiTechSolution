@@ -25,12 +25,12 @@ public class CartsController(IUnitOfWork unitOfWork) : ControllerBase
     public async Task<IActionResult> SyncCart(CartDto cartDto)
     {
         var specifiedProductIds = cartDto.Items!.Select(i => i.ProductVariationId);
-        var addingCartItemProducts = await _unitOfWork.Products.GetAll(specifiedProductIds);
+        var addingCartItemProducts = await _unitOfWork.Products.GetAllVariations(specifiedProductIds);
 
         if (addingCartItemProducts.Count() != specifiedProductIds.Count())
         {
             var notExistedProducts = specifiedProductIds.Select((p, i) => new { ProductId = p, Index = i }).Where(
-                indexedProd => !addingCartItemProducts.Any(p => p.ProductId == indexedProd.ProductId)
+                indexedProd => !addingCartItemProducts.Any(p => p.Product!.ProductId == indexedProd.ProductId)
             );
 
             foreach (var product in notExistedProducts)
@@ -91,7 +91,7 @@ public class CartsController(IUnitOfWork unitOfWork) : ControllerBase
         await _unitOfWork.Complete();
 
         // return cart with the products
-        return Ok(await _unitOfWork.CartRepository.GetByIdProjectTo<CartWithProductsDto>(cart.CartId));
+        return Ok(await _unitOfWork.CartRepository.GetUserActiveCartWithProductAsync(userId));
     }
 
     public async Task<ActionResult<CartWithProductsDto>> GetUserCart()

@@ -7,5 +7,6 @@ namespace HiTechStore.Core.Repositories
     public interface IProductRepository : IRepository<Product, ProductDto, ProductQuery>
     {
         Task<ProductDto?> GetByIdAsync(int id, string? userId);
+        Task<IEnumerable<ProductVariation>> GetAllVariations(IEnumerable<int> variationIds);
     }
 }
