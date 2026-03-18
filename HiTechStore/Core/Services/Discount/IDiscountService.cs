@@ -13,4 +13,5 @@ public interface IDiscountService
     Task<DiscountCodeDto?> UpdateDiscountCode(int id, DiscountCodeUpdateDto discountCodeUpdateDto, System.Security.Claims.ClaimsPrincipal user);
     Task<bool> DeleteDiscountCode(int id);
     Task<DiscountResultDto> CheckDiscountCodeUsability(string discountCode, string userId);
+    Task<DiscountCode?> GetActiveDiscountCodeOf(string discountCode);
 }

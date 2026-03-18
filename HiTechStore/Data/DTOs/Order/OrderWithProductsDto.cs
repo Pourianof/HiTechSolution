@@ -1,5 +1,7 @@
 using System.Text.Json.Serialization;
 
+using HiTechStore.Data.DTOs.Product;
+using HiTechStore.Helpers.AutoMapper;
 using HiTechStore.Models;
 
 namespace HiTechStore.Data.DTOs.Order;
@@ -10,14 +12,32 @@ public class OrderWithProductsDto
     public DateTime CreatedAt { get; set; }
     [JsonConverter(typeof(JsonStringEnumConverter<OrderPaymentState>))]
     public OrderPaymentState PaymentState { get; set; } = OrderPaymentState.Pending;
-    public virtual List<OrderItemWithProductDto>? Items { get; set; }
+    public List<OrderItemWithProductDto>? Items { get; set; }
 }
 
 public class OrderItemWithProductDto
 {
     public int Id { get; set; }
-    public virtual MinimalProductDto? Product { get; set; }
+    public OrderItemProductVariationDto? ProductVariation { get; set; }
     public int Count { get; set; }
     public double OrderPayTimePrice { get; set; }
-    public int? Discount { get; set; }
+    public double? Discount { get; set; }
+}
+
+[MapFrom<ProductVariation>]
+public class OrderItemProductVariationDto
+{
+    public int ProductVariationId { get; set; }
+    public double Price { get; set; }
+    public Color? Color { get; set; }
+    public List<ProductMediaDto> Media { get; set; } = new();
+    public ProductSummaryDto? Product { get; set; }
+}
+
+[MapFrom<Models.Product>]
+public class ProductSummaryDto
+{
+    public int ProductId { get; set; }
+    public string? Title { get; set; }
+    public string? Description { get; set; }
 }

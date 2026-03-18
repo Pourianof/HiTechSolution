@@ -10,5 +10,5 @@ public class OrderItem : IModel
     public virtual ProductVariation? ProductVariation { get; set; }
     public int Count { get; set; }
     public double OrderPayTimePrice { get; set; }
-    public int? Discount { get; set; }
+    public double? Discount { get; set; }
 }

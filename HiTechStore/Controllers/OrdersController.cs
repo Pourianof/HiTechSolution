@@ -6,7 +6,9 @@ using HiTechPay.Sdk;
 using HiTechPay.Sdk.Communication;
 
 using HiTechStore.Core;
+using HiTechStore.Core.Services.Discount;
 using HiTechStore.Data.DTOs;
+using HiTechStore.Data.DTOs.DiscountCode;
 using HiTechStore.Data.DTOs.Order;
 using HiTechStore.Models;
 
@@ -126,7 +128,9 @@ public class OrdersController(IHiTechPaySdkFacade hiTechPaySdkFacade, IUnitOfWor
     }
 
     [HttpPost]
-    public async Task<ActionResult> CreateOrder(CreateOrderDto createOrderDto)
+    public async Task<ActionResult> CreateOrder(CreateOrderDto createOrderDto,
+        [FromQuery] string? discountCode,
+        [FromServices] IDiscountService discountService)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
@@ -142,9 +146,43 @@ public class OrdersController(IHiTechPaySdkFacade hiTechPaySdkFacade, IUnitOfWor
             return BadRequest(problem);
         }
 
+        DiscountCode? appliedDiscountCode = default;
+        DiscountResultDto? checkResult = default;
+
+        if (discountCode is not null)
+        {
+            checkResult = await discountService.CheckDiscountCodeUsability(discountCode, userId);
+
+            if (!checkResult.IsDiscountAppliable)
+            {
+                ModelState.AddModelError(nameof(discountCode), $"Specified discount code({discountCode}) is not appliable to your cart, ensure you are in right place");
+                var validationProblem = new ValidationProblemDetails(ModelState);
+                return BadRequest(validationProblem);
+            }
+
+            // for less database fetching, maybe its better to just include discountCodeId in checkResult
+            // and use it in "Order.DiscountCodeId"
+            appliedDiscountCode = await discountService.GetActiveDiscountCodeOf(discountCode)!;
+        }
+
+
+        var calculateOrderDiscountedPrice = (double orderItemPrice, int itemProductVariationId, DiscountResultDto discountCheckResult) =>
+        {
+            return (DiscountTarget)Enum.Parse(typeof(DiscountTarget), discountCheckResult!.AppliedTo!) == DiscountTarget.Cart ?
+                            discountCheckResult.Discount!.Type == DiscountActionType.Percent ?
+                            orderItemPrice * (double)discountCheckResult.Discount.Value / 100 :
+                            (double)discountCheckResult.Discount.Value
+                             :
+                     discountCheckResult.DiscountedProducts!.Any((p) => p.ProductVariationId == itemProductVariationId) ?
+                               discountCheckResult.Discount!.Type == DiscountActionType.Percent ? orderItemPrice * (double)discountCheckResult.Discount!.Value / 100 :
+                                 (double)discountCheckResult.Discount!.Value
+                    : 0.0;
+        };
+
 
         var order = new Order
         {
+            DiscountCode = appliedDiscountCode,
             ClientId = userId,
             CreatedAt = DateTime.UtcNow,
             Items = usersCart.Items.Select(
@@ -152,7 +190,8 @@ public class OrdersController(IHiTechPaySdkFacade hiTechPaySdkFacade, IUnitOfWor
                 {
                     Count = item.Amount,
                     ProductVariation = item.ProductVariation,
-                    OrderPayTimePrice = item.ProductVariation!.Price
+                    OrderPayTimePrice = item.ProductVariation!.Price,
+                    Discount = checkResult is null ? 0.0 : calculateOrderDiscountedPrice(item.ProductVariation.Price, item.ProductVariationId, checkResult)
                 }
             ).ToList()
         };

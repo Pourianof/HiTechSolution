@@ -139,12 +139,7 @@ public class DiscountService(
 
     async public Task<DiscountResultDto> CheckDiscountCodeUsability(string discountCode, string userId)
     {
-        var now = DateTime.Now;
-        var discounts = await unitOfWork.DiscountCodeRepository.GetDiscountCodeByNameAsync(discountCode);
-        var availableDiscount = discounts.FirstOrDefault(
-            (d) => d!.EndTime > now && d.StartTime < now
-        );
-
+        var availableDiscount = await GetActiveDiscountCodeOf(discountCode);
 
         if (availableDiscount is null || availableDiscount.IsDeactivated)
         {
@@ -225,15 +220,25 @@ public class DiscountService(
                     AppliedTo = productsWhichPassedCondition.Any() ? DiscountTarget.Products.ToString() : DiscountTarget.Cart.ToString(),
                     DiscountedProducts = mapper.Map<IEnumerable<ProductVariationDto>>(productsWhichPassedCondition),
                     Discount = discountAction
-                }
-                ;
+                };
             }
         }
 
         return new DiscountResultDto
         {
             IsDiscountAppliable = false,
-        }
-        ;
+        };
+    }
+
+    public async Task<DiscountCode?> GetActiveDiscountCodeOf(string discountCode)
+    {
+        var now = DateTime.Now;
+
+        var discounts = await unitOfWork.DiscountCodeRepository.GetDiscountCodeByNameAsync(discountCode);
+        var availableDiscount = discounts.FirstOrDefault(
+            (d) => d!.EndTime > now && d.StartTime < now
+        );
+
+        return availableDiscount;
     }
 }
