@@ -35,7 +35,7 @@ namespace HiTechStore.Controllers
         [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategories()
         {
-            var categories = await _unitOfWork.Categories.GetAllProjectedAsync();
+            var categories = await _unitOfWork.Categories.GetPagedProjectedAsync();
             categories.Items = categories.Items.Select(
                (cat) =>
                {

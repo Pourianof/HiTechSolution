@@ -36,7 +36,7 @@ public class BrandsController : ControllerBase
     [AllowAnonymous]
     public async IAsyncEnumerable<BrandDto> GetBrands()
     {
-        var brands = await _unitOfWork.BrandRepository.GetAllProjectedAsync();
+        var brands = await _unitOfWork.BrandRepository.GetPagedProjectedAsync();
         foreach (var brand in brands.Items)
         {
             brand.Image = ProvideBrandImage(brand.Name);

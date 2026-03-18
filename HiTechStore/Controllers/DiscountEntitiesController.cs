@@ -15,6 +15,6 @@ public class DiscountEntitiesController(IUnitOfWork unitOfWork) : ControllerBase
     [HttpGet]
     public async Task<ActionResult<PagedResultDto<DiscountEntityDto>>> GetDiscountEntities()
     {
-        return Ok(await _unitOfWork.DiscountEntityRepository.GetAllProjectedAsync(0));
+        return Ok(await _unitOfWork.DiscountEntityRepository.GetPagedProjectedAsync(0));
     }
 }

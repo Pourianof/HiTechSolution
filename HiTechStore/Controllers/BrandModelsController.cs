@@ -23,7 +23,7 @@ public class BrandModelsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<BrandModelDto>>> GetAllBrandModels()
     {
-        return Ok(await _unitOfWork.BrandModelRepository.GetAllProjectedAsync());
+        return Ok(await _unitOfWork.BrandModelRepository.GetPagedProjectedAsync());
     }
 
     [HttpPost]

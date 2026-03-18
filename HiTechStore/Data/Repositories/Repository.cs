@@ -227,7 +227,13 @@ namespace HiTechStore.Data.Repositories
             return Project<O>(queryable);
         }
 
-        public virtual async Task<PagedResultDto<O>> GetAllProjectedAsync(int limit = 10)
+        public async Task<IEnumerable<O>> GetAllProjectedAsync()
+        {
+            return await Project(GetAllQueryBuilder(_dbSet.AsQueryable())).ToListAsync();
+
+        }
+
+        public virtual async Task<PagedResultDto<O>> GetPagedProjectedAsync(int limit = 10)
         {
             var query = GetAllQueryBuilder(_dbSet.AsQueryable());
             var counts = await query.CountAsync();

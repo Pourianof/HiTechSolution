@@ -29,9 +29,9 @@ public class ComponentsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<PagedResultDto<ComponentTypeDto>>> GetAllComponents()
+    public async Task<ActionResult<IEnumerable<ComponentTypeDto>>> GetAllComponents()
     {
-        var components = await _unitOfWork.ComponentRepository.GetAllProjectedAsync() ?? PagedResultDto<ComponentTypeDto>.Empty();
+        var components = await _unitOfWork.ComponentRepository.GetAllProjectedAsync();
 
         return Ok(components);
     }
