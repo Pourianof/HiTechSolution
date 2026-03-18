@@ -180,6 +180,28 @@ public class OrdersController(IHiTechPaySdkFacade hiTechPaySdkFacade, IUnitOfWor
         };
 
 
+        foreach (var cartItem in usersCart.Items)
+        {
+            var productVariation = cartItem.ProductVariation!;
+            if (productVariation.Inventory < cartItem.Amount)
+            {
+                ModelState.AddModelError(
+                    $"cart[variationId:{productVariation.ProductVariationId}]", $"Specified variation of product item with id \"{productVariation.ProductVariationId}\" has not enough inventory({productVariation.Inventory}) to cover your {cartItem.Amount} request"
+                );
+            }
+            else
+            {
+                productVariation.Inventory -= cartItem.Amount;
+            }
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(
+                new ValidationProblemDetails(ModelState)
+            );
+        }
+
         var order = new Order
         {
             DiscountCode = appliedDiscountCode,
@@ -195,6 +217,8 @@ public class OrdersController(IHiTechPaySdkFacade hiTechPaySdkFacade, IUnitOfWor
                 }
             ).ToList()
         };
+
+
 
         await _unitOfWork.OrderRepository.AddAsync(order);
 

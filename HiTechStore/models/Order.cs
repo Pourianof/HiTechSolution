@@ -6,7 +6,7 @@ public enum OrderPaymentState
 {
     Paid,
     Pending,
-    Failed
+    Cancelled
 }
 
 public class Order : IModel

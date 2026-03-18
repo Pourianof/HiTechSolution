@@ -2,6 +2,7 @@ using System.Reflection;
 
 using HiTechStore.Controllers.ExceptionFilters;
 using HiTechStore.Core.Auth;
+using HiTechStore.Core.BackgroundJobs;
 using HiTechStore.Core.ExceptionHandlers;
 using HiTechStore.Core.Services;
 using HiTechStore.Data;
@@ -14,6 +15,10 @@ public static class DependencyRegistration
 {
     public static WebApplicationBuilder ConfigueBuilder(this WebApplicationBuilder builder)
     {
+        builder.Services.AddLogging();
+
+        builder.Services.AddBackroundJobs();
+
         builder.Services.AddControllers(
             (options) =>
             {
