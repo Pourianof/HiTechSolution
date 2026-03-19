@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
+using HiTechStore.Data.DTOs.Binders;
+
 namespace HiTechStore.Data.DTOs.Brand;
 
 public class BaseBrandModelCreationDto
@@ -13,6 +15,7 @@ public class BaseBrandModelCreationDto
 
 public class BrandModelCreationDto : BaseBrandModelCreationDto, IValidatableObject
 {
+    [FromJson]
     public BrandCreationDto? Brand { get; set; }
     public int? BrandId { get; set; }
 
