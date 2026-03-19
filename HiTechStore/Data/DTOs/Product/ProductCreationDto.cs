@@ -15,6 +15,7 @@ public class ProductCreationDto
     [MinLength(3)]
     [MaxLength(100)]
     public string? Title { get; set; }
+    [Required]
     public int? BrandModel { get; set; }
 
     [MaxLength(500)]
