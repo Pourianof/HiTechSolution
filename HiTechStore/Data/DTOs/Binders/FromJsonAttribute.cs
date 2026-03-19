@@ -21,12 +21,17 @@ public class JsonModelBinder : IModelBinder
             try
             {
                 var valueAsString = valueProviderResult.FirstValue;
-                var result = JsonSerializer.Deserialize(valueAsString!, bindingContext.ModelType);
+
+                var result = JsonSerializer.Deserialize(valueAsString!, bindingContext.ModelType, new JsonSerializerOptions() { NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString });
                 bindingContext.Result = ModelBindingResult.Success(result);
             }
-            catch (Exception ex)
+            catch (JsonException ex)
             {
-                Console.WriteLine(ex.Message);
+                bindingContext.ModelState.AddModelError($"{bindingContext.ModelName}{string.Join(".",
+                    ex.Path?.Substring(1).Split(".").Select(
+                    p => $"{char.ToUpper(p.First())}{p.Substring(1)}"
+                    ) ?? []
+                )}", ex.Message);
                 bindingContext.Result = ModelBindingResult.Failed();
             }
         }
