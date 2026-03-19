@@ -193,7 +193,7 @@ public class ProductCreationActionFilterAttribute : ModelAccessorBaseActionFilte
                 var variationMedia = variation.MediaMetaData!.Select(
                     (meta) => new
                     {
-                        File = product.Media!.First(m => meta.FileName!.Contains(m.FileName, StringComparison.OrdinalIgnoreCase)),
+                        File = product.Media!.ElementAt(meta.Index),
                         meta.IsMain
                     }
                 );
@@ -204,7 +204,7 @@ public class ProductCreationActionFilterAttribute : ModelAccessorBaseActionFilte
                     var isImage = MediaTypeHelper.IsImage(media.File.FileName);
 
                     string fileName = Guid.NewGuid().ToString() + Path.GetExtension(media.File.FileName);
-                    string fileRelativePath = $"images/products/{createdProduct.ProductId}/${fileName}";
+                    string fileRelativePath = Path.Combine("images", "products", createdProduct.ProductId.ToString(), fileName);
                     PublicAssetsHelper.WriteIFormFile(media.File, fileRelativePath).Wait();
 
                     var createdVariation = createdProduct.Variations.First(

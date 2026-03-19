@@ -8,6 +8,6 @@ public class MediaMetaDataDto
     [JsonPropertyName("isMain")]
     public bool IsMain { get; set; } = false;
     [Required]
-    [JsonPropertyName("fileName")]
-    public string? FileName { get; set; }
+    [JsonPropertyName("index")]
+    public int Index { get; set; }
 }
