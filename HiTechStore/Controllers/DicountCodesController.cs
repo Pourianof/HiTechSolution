@@ -79,37 +79,9 @@ public class DicountCodesController(
             );
         }
 
-        if (discountCodeCreationDto.StartTime > discountCodeCreationDto.EndTime)
-        {
-            ModelState.AddModelError(nameof(DiscountCodeCreationDto.StartTime), "StartTime cannot be greater than EndTime");
+        var createdDiscountCode = await _disountService.RegisterDiscountCode(discountCodeCreationDto);
 
-            return ValidationProblem(ModelState);
-        }
-
-        try
-        {
-            var newDiscountModel = _mapper.Map<DiscountCode>(discountCodeCreationDto);
-            var discountCode = await _disountService.RegisterDiscountCode(
-                newDiscountModel
-            );
-
-            return Ok(discountCode);
-        }
-        catch (ModelException ex)
-        {
-            ModelState.AddModelError(ex.FieldName, ex.Message);
-
-            return ValidationProblem(ModelState);
-        }
-        catch (Core.Exceptions.ApplicationException ex)
-        {
-            var problemDetails = new ProblemDetails
-            {
-                Title = ex.Title,
-                Detail = ex.Message
-            };
-            return BadRequest(problemDetails);
-        }
+        return Ok(createdDiscountCode);
     }
 
     [HttpPatch("{id}")]

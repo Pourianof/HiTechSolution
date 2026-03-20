@@ -8,7 +8,7 @@ namespace HiTechStore.Core.Services.Discount;
 public interface IDiscountService
 {
     string GenerateRanomCode(int length = 10);
-    Task<DiscountCode> RegisterDiscountCode(DiscountCode discountCode);
+    Task<DiscountCode> RegisterDiscountCode(DiscountCodeCreationDto discountCode);
     Task<PagedResultDto<DiscountCodeDto>> GetAllDiscountCodes(DiscountQuery? query);
     Task<DiscountCodeDto?> UpdateDiscountCode(int id, DiscountCodeUpdateDto discountCodeUpdateDto, System.Security.Claims.ClaimsPrincipal user);
     Task<bool> DeleteDiscountCode(int id);

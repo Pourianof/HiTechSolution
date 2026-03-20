@@ -64,8 +64,16 @@ public class DiscountService(
         return unitOfWork.DiscountCodeRepository.GetAllProjectedAsync(query);
     }
 
-    public async Task<DiscountCode> RegisterDiscountCode(DiscountCode discountCode)
+    public async Task<DiscountCode> RegisterDiscountCode(DiscountCodeCreationDto discountCodeCreationDto)
     {
+
+        if (discountCodeCreationDto.StartTime > discountCodeCreationDto.EndTime)
+        {
+            throw new ModelException("Invalid state", "StartTime cannot be greater than EndTime", nameof(DiscountCodeCreationDto.StartTime));
+        }
+
+        var discountCode = mapper.Map<DiscountCode>(discountCodeCreationDto);
+
         var dbDiscountCodes = await unitOfWork.DiscountCodeRepository.GetDiscountCodeByNameAsync(discountCode.Code!);
 
         if (dbDiscountCodes is not null)
