@@ -6,4 +6,5 @@ namespace HiTechStore.Core.Repositories;
 public interface IDiscountEntityRepository : IRepository<DiscountEntity, DiscountEntityDto>
 {
     Task<DiscountEntityProperty?> GetPropertyById(int propertyId);
+    Task AddAllSafeAsync(IEnumerable<DiscountEntity> discountEntities);
 }
