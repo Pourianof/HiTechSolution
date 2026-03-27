@@ -43,24 +43,50 @@ public static class UserDiscountEntity
             return new()
             {
                 IsProductBase = false,
-                IsConditionPassed = Comaprator.Compare(orderCounts.ToString(), conditionValue, operation),
+                IsConditionPassed = Comaprator.Compare(orderCounts, conditionValue, operation),
             };
         }
     }
 
     public static class LastOrder
     {
+        public const string Path = $"{UserDiscountEntity.Path}/Last order";
         public static class OrderDiscountEntity
         {
-            public class PurchaseDate { }
+            public const string Path = "Order";
+            public class PurchaseDate
+            {
+                public const string Path = $"{OrderDiscountEntity.Path}/Purchase date";
+            }
 
-            public class ItemsCount { }
+            public class ItemsCount
+            {
+                public const string Path = $"{OrderDiscountEntity.Path}/Items counts";
 
-            public class Price { }
+            }
+
+            public class Price
+            {
+                public const string Path = $"{OrderDiscountEntity.Path}/Price";
+
+            }
         }
     }
 }
 
+
+/*
+    Note about interpreting product discount:
+    The way that a discount(code or product-base) conditions get applied to
+    some products, is somehow ambigiuos. Because each product may have mul-
+    tiple variations which some of them pass the conditions but some of th-
+    em not. For example the condition is Product.Price > 500, and one of t-
+    he variation have 450$ price and another have 550$.
+    The business rule i choosen for this problem, is the simplified one w-
+    hic if any of variations pass the conditions then the whole product g-
+    etting the discount. But it is more rational which some business expe-
+    rt give some advice and change this rule.
+*/
 public static class ProductDiscountEntity
 {
     public const string Path = "Product";
@@ -122,13 +148,45 @@ public static class ProductDiscountEntity
         }
     }
 
+    [DiscountEntityMap(Path)]
+    public class Category : BaseProductPropertiesInterpreter
+    {
+        public const string Path = $"{ProductDiscountEntity.Path}/Category";
+
+        public Category(IDiscountConditionValueComaprator comaprator) : base(comaprator)
+        {
+        }
+
+        protected override Task<string> ProvideValue(ProductVariation productVariation)
+        {
+            return Task.FromResult(productVariation.Product!.CategoryId.ToString());
+        }
+    }
+
+    [DiscountEntityMap(Path)]
+    public class Inventory : BaseProductPropertiesInterpreter
+    {
+        public const string Path = $"{ProductDiscountEntity.Path}/Inventory";
+
+        public Inventory(IDiscountConditionValueComaprator comaprator) : base(comaprator)
+        {
+        }
+
+        protected override Task<string> ProvideValue(ProductVariation productVariation)
+        {
+            return Task.FromResult(productVariation.Product!.CategoryId.ToString());
+        }
+    }
+
 }
 
 
 public static class CartDiscountEntity
 {
+    public const string Path = "cart";
     public class Price
     {
-
+        public const string Path = $"{CartDiscountEntity.Path}/Price";
     }
 }
+

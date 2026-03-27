@@ -43,7 +43,8 @@ public enum DiscountOperation
     LessThan,
     LessThanOrEqual,
     Equal,
-    Contains
+    Contains, // <multiple-value[]> Contains <single-value>
+    In // <single value> In <multiple-value[]>
 }
 
 public class DiscountAction : IModel
