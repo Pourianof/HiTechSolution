@@ -37,6 +37,7 @@ namespace HiTechStore.Data
             DiscountCodeEntityBuilder.Build(modelBuilder);
             DiscountEntityEntityBuilder.Build(modelBuilder);
             DiscountRuleEntityBuilder.Build(modelBuilder);
+            modelBuilder.BuildConditionComponentModels();
         }
 
         public DbSet<Product> Products { get; set; }
@@ -49,6 +50,7 @@ namespace HiTechStore.Data
         public DbSet<Order> Orders { get; set; }
         public DbSet<DiscountCode> DiscountCodes { get; set; }
         public DbSet<DiscountEntity> DiscountEntities { get; set; }
+        public DbSet<ConditionComponent> ConditionComponents { get; set; }
     }
 
 }

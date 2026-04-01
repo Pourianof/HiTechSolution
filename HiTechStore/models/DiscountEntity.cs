@@ -31,5 +31,6 @@ public enum DiscountEntityPropertyType
     Float,
     String,
     Date,
+    Array,
     Object
 }

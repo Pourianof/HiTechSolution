@@ -24,7 +24,7 @@ public class DiscountRuleDto
     public int DiscountRuleId { get; set; }
     public string? Name { get; set; }
     public string? Description { get; set; }
-    public List<DiscountConditionGroupDto> Conditions { get; set; } = new();
+    public ConditionComponentDto Condition { get; set; } = new();
     public DiscountActionDto? DiscountAction { get; set; }
 }
 
@@ -35,19 +35,31 @@ public class DiscountActionDto
     public decimal Value { get; set; }
 }
 
-[MapFrom<DiscountConditionGroup>]
-public class DiscountConditionGroupDto
+
+[MapFrom<ConditionComponent>]
+public class ConditionComponentDto
 {
-    public int DiscountConditionGroupId { get; set; }
-    public ICollection<DiscountConditionDto>? Conditions { get; set; }
+    public int ConditionComponentId { get; set; }
+    public string? Value { get; set; }
+    public string? Type { get; set; }
+    public DiscountEntityPropertyDto? Property { get; set; }
+    public IEnumerable<ConditionComponentDto>? SubConditions { get; set; }
+    public ConditionLambda? Method { get; set; }
 }
 
-[MapFrom<DiscountCondition>]
-public class DiscountConditionDto
+[MapFrom<ConditionLambda>]
+public class ConditionLambdaDto
 {
-    public int DiscountConditionId { get; set; }
-    public DiscountEntityPropertyDto? EntityProperty { get; set; }
-    public int? Priority { get; set; }
-    public DiscountOperation? Operation { get; set; }
-    public string? Value { get; set; }
+    public int ConditionLambdaId { get; set; }
+    public ConditionMethodDto? Method { get; set; }
+    virtual public ConditionComponentDto? Body { get; set; }
 }
+
+[MapFrom<ConditionMethod>]
+public class ConditionMethodDto
+{
+    public int ConditionMethodId { get; set; }
+    public string? Name { get; set; }
+    public DiscountEntityPropertyType ReturnType { get; set; }
+}
+

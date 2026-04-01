@@ -7,7 +7,7 @@ public class DiscountRule
     public int DiscountRuleId { get; set; }
     public string? Name { get; set; }
     public string? Description { get; set; }
-    virtual public List<DiscountConditionGroup> Conditions { get; set; } = new(); // condGroup1 OR condGroup2
+    virtual public List<ConditionComponent> Conditions { get; set; } = new(); // condGroup1 OR condGroup2
     virtual public DiscountAction? DiscountAction { get; set; }
 }
 
@@ -17,23 +17,64 @@ public enum DiscountConditionGroupType
     Product
 }
 
-public class DiscountConditionGroup
+public class ConditionComponent
 {
-    public int DiscountConditionGroupId { get; set; }
-    public int DiscountRuleId { get; set; }
-    public DiscountConditionGroupType Type { get; set; } = DiscountConditionGroupType.Product;
-
-    virtual public ICollection<DiscountCondition>? Conditions { get; set; } // cond1 AND cond2
+    public int ConditionComponentId { get; set; }
+    public string? Value { get; set; }
+    virtual public ConditionComponentType? Type { get; set; }
+    virtual public DiscountEntityProperty? Property { get; set; }
+    public int? ParentId { get; set; }
+    virtual public ConditionComponent? Parent { get; set; }
+    virtual public IEnumerable<ConditionComponent>? SubConditions { get; set; }
+    virtual public ConditionLambda? Lambda { get; set; }
 }
 
-public class DiscountCondition
+public class ConditionLambda
 {
-    public int DiscountConditionId { get; set; }
-    public int EntityPropertyId { get; set; }
-    virtual public DiscountEntityProperty? EntityProperty { get; set; }
-    public int Priority { get; set; }
-    public DiscountOperation Operation { get; set; }
-    public string? Value { get; set; }
+    public int ConditionLambdaId { get; set; }
+    virtual public ConditionMethod? Method { get; set; }
+    public int OwnerConditionId { get; set; }
+    virtual public ConditionComponent? OwnerCondition { get; set; }
+    public int? BodyId { get; set; }
+    virtual public ConditionComponent? Body { get; set; }
+}
+
+/*
+    Any -> bool
+    All -> bool
+    Count -> number
+*/
+public class ConditionMethod
+{
+    public int ConditionMethodId { get; set; }
+    public string? Name { get; set; }
+    public DiscountEntityPropertyType ReturnType { get; set; }
+}
+
+public enum ConditionComponentType
+{
+    And,
+    Or,
+    GreaterThan,
+    GreaterThanOrEqual,
+    LessThan,
+    LessThanOrEqual,
+    Equality,
+    NotEquality,
+    Value,
+    Not,
+    Method,
+}
+
+public static class ConditionComponentTypeExtensions
+{
+    public static bool IsSizeComparator(this ConditionComponentType type)
+    {
+        return type == ConditionComponentType.GreaterThan &&
+            type != ConditionComponentType.GreaterThanOrEqual &&
+            type != ConditionComponentType.LessThan &&
+            type != ConditionComponentType.LessThanOrEqual;
+    }
 }
 
 public enum DiscountOperation

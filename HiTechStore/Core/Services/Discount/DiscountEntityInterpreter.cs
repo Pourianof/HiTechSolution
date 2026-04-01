@@ -133,6 +133,19 @@ public static class ProductDiscountEntity
             };
         }
     }
+
+    public class Variations
+    {
+        public const string Name = "ProductVariation";
+        public const string Path = $"{ProductDiscountEntity.Path}/Variations";
+
+        public class Orders
+        {
+            public const string Name = "Orders";
+        }
+
+    }
+
     [DiscountEntityMap(Path)]
     public class Price : BaseProductPropertiesInterpreter
     {

@@ -35,9 +35,9 @@ public class DiscountRuleCreationDto
     [MinLength(3)]
     public string? Name { get; set; }
     public string? Description { get; set; }
-    [Required]
-    [MinLength(1)]
-    public List<DiscountConditionGroupCreationDto> Conditions { get; set; } = new();
+    // [Required]
+    // [MinLength(1)]
+    // public List<DiscountConditionGroupCreationDto> Conditions { get; set; } = new();
     [Required]
     public DiscountActionCreationDto? DiscountAction { get; set; }
 }
@@ -52,23 +52,3 @@ public class DiscountActionCreationDto
     public decimal Value { get; set; }
 }
 
-[MapTo<DiscountConditionGroup>]
-public class DiscountConditionGroupCreationDto
-{
-    [Required]
-    [MinLength(1)]
-    public ICollection<DiscountConditionCreationDto>? Conditions { get; set; }
-}
-
-[MapTo<DiscountCondition>]
-public class DiscountConditionCreationDto
-{
-    [Required]
-    public int? EntityPropertyId { get; set; }
-    [PositiveNumber]
-    public int? Priority { get; set; }
-    [Required]
-    public DiscountOperation? Operation { get; set; }
-    [Required]
-    public string? Value { get; set; }
-}

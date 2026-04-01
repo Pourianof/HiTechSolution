@@ -43,7 +43,7 @@ public class DiscountEntityRepository : Repository<DiscountEntity, DiscountEntit
 
         foreach (var entityProperty in entityProperties)
         {
-            var dbEntityProperty = await _context.Set<DiscountEntityProperty>().FirstOrDefaultAsync(ep => EF.Functions.ILike(ep.Path!, entityProperty.Path!));
+            var dbEntityProperty = await GetPropertyByPathAsync(entityProperty.Path!);
             var propertySubEntity = entityProperty.SubEntity;
             entityProperty.SubEntity = null;
 
@@ -78,6 +78,18 @@ public class DiscountEntityRepository : Repository<DiscountEntity, DiscountEntit
     {
         return await _context.Set<DiscountEntityProperty>().FirstOrDefaultAsync(
             (p) => p.DiscountEntityPropertyId == propertyId
+        );
+    }
+
+    public async Task<DiscountEntityProperty?> GetPropertyByPathAsync(string path)
+    {
+        return await _context.Set<DiscountEntityProperty>().FirstOrDefaultAsync(ep => EF.Functions.ILike(ep.Path!, path));
+    }
+
+    public async Task<ConditionMethod?> GetConditionMethodByNameAsync(string methodName)
+    {
+        return await _context.Set<ConditionMethod>().FirstOrDefaultAsync(
+            m => EF.Functions.ILike(m.Name!, methodName)
         );
     }
 }

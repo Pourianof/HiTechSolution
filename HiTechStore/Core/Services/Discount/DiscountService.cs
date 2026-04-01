@@ -163,47 +163,47 @@ public class DiscountService(
             foreach (var condGroup in rule.Conditions)
             {
                 var isConditionGroupEstablished = true;
-                foreach (var condition in condGroup.Conditions!)
-                {
-                    // check condition
-                    var criteria = condition.EntityProperty;
-                    string conditionValue = condition.Value!; // discount creator specify that
+                // foreach (var condition in condGroup.Conditions!)
+                // {
+                //     // check condition
+                //     var criteria = condition.EntityProperty;
+                //     string conditionValue = condition.Value!; // discount creator specify that
 
-                    // how extract criteriaValue?
-                    // in discountCode: Cart
-                    // in normal discount: just product table
+                //     // how extract criteriaValue?
+                //     // in discountCode: Cart
+                //     // in normal discount: just product table
 
-                    // get the criteria value
-                    var entityPath = (await unitOfWork.DiscountEntityRepository.GetPropertyById(criteria!.DiscountEntityPropertyId))?.Path;
-                    if (entityPath is null)
-                    {
-                        throw new NotFoundException("The specified discount code cannot get handle");
-                    }
+                //     // get the criteria value
+                //     var entityPath = (await unitOfWork.DiscountEntityRepository.GetPropertyById(criteria!.DiscountEntityPropertyId))?.Path;
+                //     if (entityPath is null)
+                //     {
+                //         throw new NotFoundException("The specified discount code cannot get handle");
+                //     }
 
-                    // compare to condition value based on operator
-                    var criteriaValue = await discountEntityResolver.GetDiscountEntityInterpreter(entityPath!)
-                                                    .Interpret(condition.Operation, conditionValue, new DiscountEntityResolverContext()
-                                                    {
-                                                        Cart = userCart,
-                                                        MatchedProducts = productsWhichPassedCondition,
-                                                        UnitOfWork = unitOfWork,
-                                                        User = new User() { Id = userId }
-                                                    });
+                //     // compare to condition value based on operator
+                //     var criteriaValue = await discountEntityResolver.GetDiscountEntityInterpreter(entityPath!)
+                //                                     .Interpret(condition.Operation, conditionValue, new DiscountEntityResolverContext()
+                //                                     {
+                //                                         Cart = userCart,
+                //                                         MatchedProducts = productsWhichPassedCondition,
+                //                                         UnitOfWork = unitOfWork,
+                //                                         User = new User() { Id = userId }
+                //                                     });
 
-                    // if comparation return false then the condition group
-                    // will short circuit and fail
-                    if (!criteriaValue.IsConditionPassed)
-                    {
-                        isConditionGroupEstablished = false;
-                        // condition -> false -> condGroup -> false ->  circuit break
-                        break;
-                    }
+                //     // if comparation return false then the condition group
+                //     // will short circuit and fail
+                //     if (!criteriaValue.IsConditionPassed)
+                //     {
+                //         isConditionGroupEstablished = false;
+                //         // condition -> false -> condGroup -> false ->  circuit break
+                //         break;
+                //     }
 
-                    if (criteriaValue.IsProductBase)
-                    {
-                        productsWhichPassedCondition.AddRange(criteriaValue.ConditionMatchedProducts!);
-                    }
-                }
+                //     if (criteriaValue.IsProductBase)
+                //     {
+                //         productsWhichPassedCondition.AddRange(criteriaValue.ConditionMatchedProducts!);
+                //     }
+                // }
 
                 if (isConditionGroupEstablished)
                 {
