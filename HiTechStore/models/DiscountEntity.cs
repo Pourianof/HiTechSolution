@@ -15,8 +15,6 @@ public class DiscountEntityProperty : IModel
 {
     public int DiscountEntityPropertyId { get; set; }
     public string? Name { get; set; }
-    private string? _path = "";
-    public string? Path { get { return _path ?? $"{Entity!.Name}/{Name}"; } set { _path = value; } }
     public string? Description { get; set; }
     public int EntityId { get; set; }
     virtual public DiscountEntity? Entity { get; set; }

@@ -21,18 +21,13 @@ public class RoslynConditionScriptParserTest
     {
         var discountEntityRepositoryMock = new Mock<IDiscountEntityRepository>();
         discountEntityRepositoryMock.Setup(
-            repo => repo.GetPropertyByPathAsync(It.IsAny<string>())
+            repo => repo.GetPropertyByEntityAsync(It.IsAny<string>(), It.IsAny<string>())
         ).Returns(
-           async (string path) =>
+           async (string entityName, string propertyName) =>
             {
-                var pathParts = path.Split('/');
-                var entityName = pathParts.First();
-                var propertyName = pathParts.ElementAt(1);
-
                 return new DiscountEntityProperty()
                 {
                     Name = propertyName,
-                    Path = path,
                     Type = propertyName switch
                     {
                         "Price" => DiscountEntityPropertyType.Float,

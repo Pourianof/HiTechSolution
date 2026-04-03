@@ -88,9 +88,7 @@ public class RoslynExpressionVisitorBase(IUnitOfWork unitOfWork) : CSharpSyntaxV
         var propertyName = fullPath.ElementAt(1);
         // var method = fullPath.ElementAtOrDefault(2);
 
-        var propertyPath = $"{entityName}/{propertyName}";
-
-        var property = unitOfWork.DiscountEntityRepository.GetPropertyByPathAsync(propertyPath).Result;
+        var property = unitOfWork.DiscountEntityRepository.GetPropertyByEntityAsync(entityName, propertyName).Result;
 
         if (property is null)
         {

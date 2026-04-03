@@ -30,8 +30,6 @@ public class DiscountEntityEntityBuilder
                     .WithMany()
                     .HasForeignKey(dep => dep.SubEntityId)
                     .IsRequired(false);
-
-                entity.HasIndex(dep => dep.Path).IsUnique();
             }
         );
     }
