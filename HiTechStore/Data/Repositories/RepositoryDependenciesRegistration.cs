@@ -1,0 +1,25 @@
+using HiTechStore.Core.Repositories;
+
+namespace HiTechStore.Data.Repositories;
+
+public static class RepositoryDependenciesRegistration
+{
+    public static IServiceCollection AddRepositories(this IServiceCollection services)
+    {
+        services.AddTransient<IProductRepository, ProductRepository>();
+        services.AddTransient<IBrandRepository, BrandRepository>();
+        services.AddTransient<IBrandModelRepository, BrandModelRepository>();
+        services.AddTransient<ICartRepository, CartRepository>();
+        services.AddTransient<ICategoryRepository, CategoryRepository>();
+        services.AddTransient<IColorRepository, ColorRepository>();
+        services.AddTransient<IComponentRepository, ComponentRepository>();
+        services.AddTransient<IConditionMethodRepository, ConditionMethodRepository>();
+        services.AddTransient<IDiscountCodeRepository, DiscountCodeRepository>();
+        services.AddTransient<IDiscountEntityRepository, DiscountEntityRepository>();
+        services.AddTransient<IFilterRepository, FilterRepository>();
+        services.AddTransient<IOrderRepository, OrderRepository>();
+        services.AddTransient<IProductScoresRepository, ProductScoresRepository>();
+
+        return services;
+    }
+}

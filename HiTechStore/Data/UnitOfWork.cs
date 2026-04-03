@@ -24,23 +24,39 @@ namespace HiTechStore.Data
         public IDiscountEntityRepository DiscountEntityRepository { get; }
         public IConditionMethodRepository ConditionMethodRepository { get; }
 
-        public UnitOfWork(HiTechStoreDbContext context, IMapper mapper)
+        public UnitOfWork(
+            HiTechStoreDbContext context,
+            IMapper mapper,
+            IProductRepository productRepository,
+            ICategoryRepository categoryRepository,
+            IProductScoresRepository productScoresRepository,
+            IComponentRepository componentRepository,
+            IBrandRepository brandRepository,
+            IBrandModelRepository brandModelRepository,
+            IFilterRepository filterRepository,
+            IColorRepository colorRepository,
+            ICartRepository cartRepository,
+            IOrderRepository orderRepository,
+            IDiscountCodeRepository discountCodeRepository,
+            IDiscountEntityRepository discountEntityRepository,
+            IConditionMethodRepository conditionMethodRepository
+        )
         {
             _context = context;
             _mapper = mapper;
-            Products = new ProductRepository(_context, mapper);
-            Categories = new CategoryRepository(_context, mapper);
-            ProductScores = new ProductScoresRepository(_context, mapper);
-            ComponentRepository = new ComponentRepository(_context, mapper);
-            BrandRepository = new BrandRepository(_context, mapper);
-            BrandModelRepository = new BrandModelRepository(_context, mapper);
-            FilterRepository = new FilterRepository(_context);
-            CartRepository = new CartRepository(_context, mapper);
-            OrderRepository = new OrderRepository(_context, mapper);
-            ColorRepository = new ColorRepository(_context, mapper);
-            DiscountCodeRepository = new DiscountCodeRepository(_context, mapper);
-            DiscountEntityRepository = new DiscountEntityRepository(_context, mapper);
-            ConditionMethodRepository = new ConditionMethodRepository(_context, mapper);
+            Products = productRepository;
+            Categories = categoryRepository;
+            ProductScores = productScoresRepository;
+            ComponentRepository = componentRepository;
+            BrandRepository = brandRepository;
+            BrandModelRepository = brandModelRepository;
+            FilterRepository = filterRepository;
+            CartRepository = cartRepository;
+            OrderRepository = orderRepository;
+            ColorRepository = colorRepository;
+            DiscountCodeRepository = discountCodeRepository;
+            DiscountEntityRepository = discountEntityRepository;
+            ConditionMethodRepository = conditionMethodRepository;
         }
 
         public HiTechStoreDbContext Context()

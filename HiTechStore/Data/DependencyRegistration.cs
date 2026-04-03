@@ -1,4 +1,5 @@
 using HiTechStore.Core;
+using HiTechStore.Data.Repositories;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -19,6 +20,7 @@ public static class DataDependencyRegistration
             );
 
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+        builder.Services.AddRepositories();
 
         return builder;
     }
