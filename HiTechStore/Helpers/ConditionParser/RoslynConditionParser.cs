@@ -110,6 +110,12 @@ public class RoslynExpressionVisitorBase(IUnitOfWork unitOfWork) : CSharpSyntaxV
             Value = node.Token.Value?.ToString()
         };
     }
+    public override ConditionComponent? VisitParenthesizedExpression(ParenthesizedExpressionSyntax node)
+    {
+        var innerExpr = node.Expression;
+
+        return Visit(innerExpr);
+    }
 
     public override ConditionComponent? VisitBinaryExpression(BinaryExpressionSyntax node)
     {
