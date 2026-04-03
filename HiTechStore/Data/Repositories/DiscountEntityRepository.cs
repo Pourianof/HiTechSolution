@@ -59,8 +59,8 @@ class DiscountEntitySafelyRegisterer(IDiscountEntityRepository Repo, HiTechStore
         {
             await Repo.AddAsync(discountEntity);
             dbEntity = discountEntity;
-            ReachedEntities.Add(dbEntity.Name!);
         }
+        ReachedEntities.Add(dbEntity.Name!);
 
         var entityProperties = new List<DiscountEntityProperty>(discountEntity.Properties ?? []);
         dbEntity.Properties ??= new List<DiscountEntityProperty>();
