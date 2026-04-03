@@ -18,60 +18,13 @@ public class DiscountEntityRepository : Repository<DiscountEntity, DiscountEntit
     }
 
 
-    private async Task<DiscountEntity> AddEntitySafeAsync(DiscountEntity discountEntity)
-    {
-        var dbEntity = await _dbSet.FirstOrDefaultAsync(e => e.Name == discountEntity.Name);
-
-        var entityProperties = discountEntity.Properties;
-        discountEntity.Properties = [];
-
-        if (dbEntity is null)
-        {
-            await AddAsync(discountEntity);
-            await _context.SaveChangesAsync();
-        }
-        else
-        {
-            discountEntity = dbEntity;
-        }
-
-
-        if (entityProperties is null || !entityProperties.Any())
-        {
-            return discountEntity;
-        }
-
-        foreach (var entityProperty in entityProperties)
-        {
-            var dbEntityProperty = await GetPropertyByPathAsync(entityProperty.Path!);
-            var propertySubEntity = entityProperty.SubEntity;
-            entityProperty.SubEntity = null;
-
-            if (dbEntityProperty is null)
-            {
-                entityProperty.Entity = discountEntity;
-                await _context.AddAsync(entityProperty);
-                await _context.SaveChangesAsync();
-            }
-
-            if (propertySubEntity is not null)
-            {
-                var entity = await AddEntitySafeAsync(propertySubEntity);
-                entityProperty.SubEntity = entity;
-                await _context.SaveChangesAsync();
-            }
-        }
-        return discountEntity;
-    }
 
     public async Task AddAllSafeAsync(IEnumerable<DiscountEntity> discountEntities)
     {
-        // await Task.Delay(TimeSpan.FromSeconds(30));
+        var registerer = new DiscountEntitySafelyRegisterer(this, _context);
+        await registerer.AddAllSafeAsync(discountEntities);
+        await _context.SaveChangesAsync();
 
-        foreach (var entity in discountEntities)
-        {
-            await AddEntitySafeAsync(entity);
-        }
     }
 
     public async Task<DiscountEntityProperty?> GetPropertyById(int propertyId)
@@ -81,9 +34,9 @@ public class DiscountEntityRepository : Repository<DiscountEntity, DiscountEntit
         );
     }
 
-    public async Task<DiscountEntityProperty?> GetPropertyByPathAsync(string path)
+    public async Task<DiscountEntityProperty?> GetPropertyByEntityAsync(string entityName, string propertyName)
     {
-        return await _context.Set<DiscountEntityProperty>().FirstOrDefaultAsync(ep => EF.Functions.ILike(ep.Path!, path));
+        return await _context.Set<DiscountEntityProperty>().FirstOrDefaultAsync(ep => ep.Name == propertyName && ep.Entity!.Name == entityName);
     }
 
     public async Task<ConditionMethod?> GetConditionMethodByNameAsync(string methodName)
@@ -91,5 +44,58 @@ public class DiscountEntityRepository : Repository<DiscountEntity, DiscountEntit
         return await _context.Set<ConditionMethod>().FirstOrDefaultAsync(
             m => EF.Functions.ILike(m.Name!, methodName)
         );
+    }
+}
+
+// A class which has guard to don't stuck in a property->entity->property infinite cycle
+class DiscountEntitySafelyRegisterer(IDiscountEntityRepository Repo, HiTechStoreDbContext Context)
+{
+    private List<string> ReachedEntities { get; set; } = new();
+    private async Task<DiscountEntity> AddEntitySafeAsync(DiscountEntity discountEntity)
+    {
+        var dbEntity = await Context.Set<DiscountEntity>().FirstOrDefaultAsync(e => e.Name == discountEntity.Name);
+
+        if (dbEntity is null)
+        {
+            await Repo.AddAsync(discountEntity);
+            dbEntity = discountEntity;
+            ReachedEntities.Add(dbEntity.Name!);
+        }
+
+        var entityProperties = new List<DiscountEntityProperty>(discountEntity.Properties ?? []);
+        dbEntity.Properties ??= new List<DiscountEntityProperty>();
+
+        if (entityProperties is null || !entityProperties.Any())
+        {
+            return dbEntity;
+        }
+
+        foreach (var entityProperty in entityProperties)
+        {
+            var dbEntityProperty = await Repo.GetPropertyByEntityAsync(dbEntity!.Name!, entityProperty.Name!);
+            var propertySubEntity = entityProperty.SubEntity;
+
+
+            if (propertySubEntity is not null && !ReachedEntities.Contains(propertySubEntity.Name!))
+            {
+                var entity = await AddEntitySafeAsync(propertySubEntity);
+                entityProperty.SubEntity = entity;
+            }
+
+
+            if (dbEntityProperty is null)
+            {
+                dbEntity.Properties.Add(entityProperty);
+            }
+        }
+        return dbEntity;
+    }
+
+    public async Task AddAllSafeAsync(IEnumerable<DiscountEntity> discountEntities)
+    {
+        foreach (var entity in discountEntities)
+        {
+            await AddEntitySafeAsync(entity);
+        }
     }
 }

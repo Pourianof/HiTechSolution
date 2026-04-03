@@ -72,17 +72,17 @@ public static class DiscountEntitySeeder
 
         var productEntity = new DiscountEntity()
         {
-            Name = "Product",
+            Name = nameof(Product),
             Description = "Discount based on product entities",
             Properties = [
                 new DiscountEntityProperty{
-                    Name = "Variations",
+                    Name = nameof(Product.Variations),
                     Description ="Variations of a product",
                     Type = DiscountEntityPropertyType.Array,
                     SubEntity = productVariationEntity
                 },
                 new (){
-                    Name = "Category",
+                    Name = nameof(Product.CategoryId),
                     Description ="Category of product",
                     Type = DiscountEntityPropertyType.Int,
                 },
