@@ -14,10 +14,10 @@ namespace HiTechStore.UnitTests.Core.Helpers.ConditionParser;
 
 
 
-public class RoslynConditionParserTest
+public class RoslynConditionScriptParserTest
 {
-    protected IDiscountConditionParser sut;
-    public RoslynConditionParserTest()
+    protected IDiscountConditionScriptParser sut;
+    public RoslynConditionScriptParserTest()
     {
         var discountEntityRepositoryMock = new Mock<IDiscountEntityRepository>();
         discountEntityRepositoryMock.Setup(
@@ -93,7 +93,7 @@ public class RoslynConditionParserTest
             discountEntityRepositoryMock.Object
         );
 
-        sut = new RoslynConditionParser(new RoslynExpressionVisitorBase(unitOfWorkmock.Object));
+        sut = new RoslynConditionScriptParser(new RoslynExpressionVisitorBase(unitOfWorkmock.Object));
     }
 
     [Fact(Skip = "")]

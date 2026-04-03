@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace HiTechStore.Helpers.ConditionParser;
 
-public class RoslynConditionParser(IRosylnDiscountConditionMapper mapper) : IDiscountConditionParser
+public class RoslynConditionScriptParser(IRosylnDiscountConditionMapper mapper) : IDiscountConditionScriptParser
 {
     public ConditionComponent? Parse(string conditionString)
     {

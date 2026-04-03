@@ -2,7 +2,7 @@ using HiTechStore.Models;
 
 namespace HiTechStore.Core.Helpers;
 
-public interface IDiscountConditionParser
+public interface IDiscountConditionScriptParser
 {
     ConditionComponent? Parse(string conditionString);
 }
