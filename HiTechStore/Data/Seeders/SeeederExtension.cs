@@ -16,7 +16,8 @@ public static class SeederExtension
 
         await AdminSeeder.SeedAsync(userManager, configs);
         await ColorSeeder.SeedAsync(uow);
-        await DiscountEntitySeeder.SeedAsync(uow);
+        await uow.SeedDiscountEntitiesAsync();
+        await uow.SeedConditionMethodssAsync();
 
         if (app.Environment.IsDevelopment())
         {

@@ -22,6 +22,7 @@ namespace HiTechStore.Data
         public IColorRepository ColorRepository { get; }
         public IDiscountCodeRepository DiscountCodeRepository { get; }
         public IDiscountEntityRepository DiscountEntityRepository { get; }
+        public IConditionMethodRepository ConditionMethodRepository { get; }
 
         public UnitOfWork(HiTechStoreDbContext context, IMapper mapper)
         {
@@ -39,6 +40,7 @@ namespace HiTechStore.Data
             ColorRepository = new ColorRepository(_context, mapper);
             DiscountCodeRepository = new DiscountCodeRepository(_context, mapper);
             DiscountEntityRepository = new DiscountEntityRepository(_context, mapper);
+            ConditionMethodRepository = new ConditionMethodRepository(_context, mapper);
         }
 
         public HiTechStoreDbContext Context()

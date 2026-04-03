@@ -17,7 +17,6 @@ namespace HiTechStore.Core.Services.Discount;
 public class DiscountService(
     IUnitOfWork unitOfWork,
     IDiscountCodeGenerator codeGenerator,
-    IDiscountEntityResolver discountEntityResolver,
     IMapper mapper)
     : IDiscountService
 {

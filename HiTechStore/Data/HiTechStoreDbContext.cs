@@ -51,6 +51,7 @@ namespace HiTechStore.Data
         public DbSet<DiscountCode> DiscountCodes { get; set; }
         public DbSet<DiscountEntity> DiscountEntities { get; set; }
         public DbSet<ConditionComponent> ConditionComponents { get; set; }
+        public DbSet<ConditionMethod> ConditionMethods { get; set; }
     }
 
 }

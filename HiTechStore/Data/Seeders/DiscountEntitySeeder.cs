@@ -1,96 +1,177 @@
 using HiTechStore.Core;
-using HiTechStore.Core.Services.Discount;
+using HiTechStore.Models;
 
 namespace HiTechStore.Data.Seeders;
 
 
-public class DiscountEntitySeeder
+public static class DiscountEntitySeeder
 {
-    public static async Task SeedAsync(IUnitOfWork unitOfWork)
+    public static async Task<IUnitOfWork> SeedDiscountEntitiesAsync(this IUnitOfWork unitOfWork)
     {
-        await unitOfWork.DiscountEntityRepository.AddAllSafeAsync(
-            [
-                new()
-                {
-                    Name = "user",
-                    Description = "Targeting user",
-                    Properties= [
-                        new (){
-                            Name = "Total orders",
-                            Description = "Total orders which the user has purchased",
-                            Type = Models.DiscountEntityPropertyType.Int,
-                            Path = UserDiscountEntity.TotalOrders.Path
-                        },
-                        new (){
-                            Name = "Last order",
-                            Description = "Last orders which the user has purchased",
-                            Type = Models.DiscountEntityPropertyType.Object,
-                            Path = UserDiscountEntity.LastOrder.Path,
-                            SubEntity = new (){
-                                Name = "Order",
-                                Description = "User order item",
-                                Properties = [
-                                    new (){
-                                        Name = "Purchase date",
-                                        Description= "The date user purchased the order",
-                                        Type = Models.DiscountEntityPropertyType.Date,
-                                        Path = UserDiscountEntity.LastOrder.OrderDiscountEntity.PurchaseDate.Path,
-                                    },
-                                    new (){
-                                        Name = "Items counts",
-                                        Description= "The total items in the orders cart",
-                                        Type = Models.DiscountEntityPropertyType.Int,
-                                        Path = UserDiscountEntity.LastOrder.OrderDiscountEntity.ItemsCount.Path,
-                                    },
-                                    new (){
-                                        Name = "Price",
-                                        Description= "Total price of order",
-                                        Type = Models.DiscountEntityPropertyType.Float,
-                                        Path = UserDiscountEntity.LastOrder.OrderDiscountEntity.Price.Path,
-                                    },
-                                ]
-                            }
-                        }
-                    ]
+        var orderItemEntity = new DiscountEntity
+        {
+            Name = nameof(OrderItem),
+            Description = "Items of an order",
+            Properties = [
+                new(){
+                    Name = nameof(OrderItem.Count),
+                    Description = "The amount of an item ordered",
+                    Type = DiscountEntityPropertyType.Int,
                 },
-                new()
-                {
-                    Name = "cart",
-                    Description = "Targeting active cart of user",
-                    Properties= [
-                        new (){
-                            Name = "Price",
-                            Description = "Price of the cart",
-                            Path = CartDiscountEntity.Price.Path,
-                        }
-                    ]
+                new(){
+                    Name = nameof(OrderItem.OrderPayTimePrice),
+                    Description = "Final price which paid for single item",
+                    Type= DiscountEntityPropertyType.Float
+                },
+            ]
+        };
+
+        var orderEntity = new DiscountEntity()
+        {
+            Name = nameof(Order),
+            Description = "User order item",
+            Properties = [
+                new (){
+                    Name = nameof(Order.CreatedAt),
+                    Description= "The date user purchased the order",
+                    Type = DiscountEntityPropertyType.Date,
                 },
                 new (){
-                    Name = "Product",
-                    Description = "Discount based on product entities",
-                    Properties=[
-                        new Models.DiscountEntityProperty{
-                            Name = "Price",
-                            Description ="Product selling price",
-                            Path = ProductDiscountEntity.Price.Path,
-                            Type = Models.DiscountEntityPropertyType.Float,
-                        },
-                        new (){
-                            Name = "Category",
-                            Description ="Category of product",
-                            Path = ProductDiscountEntity.Category.Path,
-                            Type = Models.DiscountEntityPropertyType.Int,
-                        },
-                        new (){
-                            Name = "Inventory",
-                            Description ="Product selling price",
-                            Path = ProductDiscountEntity.Inventory.Path,
-                            Type = Models.DiscountEntityPropertyType.Int,
-                        }
-                    ]
+                    Name = nameof(Order.Items),
+                    Description= "Items of order",
+                    Type = DiscountEntityPropertyType.Array,
+                    SubEntity = orderItemEntity
+                },
+            ]
+
+        };
+
+        var productVariationEntity = new DiscountEntity()
+        {
+            Name = nameof(ProductVariation),
+            Description = "Defining variations of products",
+            Properties = [
+                new (){
+                    Name = nameof(ProductVariation.Price),
+                    Description ="Product selling price",
+                    Type = DiscountEntityPropertyType.Float,
+                },
+                new (){
+                    Name = nameof(ProductVariation.Inventory),
+                    Description ="Product variation selling price",
+                    Type = DiscountEntityPropertyType.Int,
+                },
+                new (){
+                    Name = nameof(ProductVariation.Orders),
+                    Description = "Order items which targeting this variation",
+                    Type = DiscountEntityPropertyType.Array,
+                    SubEntity = orderItemEntity
                 }
             ]
+        };
+
+        var productEntity = new DiscountEntity()
+        {
+            Name = "Product",
+            Description = "Discount based on product entities",
+            Properties = [
+                new DiscountEntityProperty{
+                    Name = "Variations",
+                    Description ="Variations of a product",
+                    Type = DiscountEntityPropertyType.Array,
+                    SubEntity = productVariationEntity
+                },
+                new (){
+                    Name = "Category",
+                    Description ="Category of product",
+                    Type = DiscountEntityPropertyType.Int,
+                },
+
+            ]
+        };
+
+        productVariationEntity.Properties.Add(
+            new()
+            {
+                Name = nameof(ProductVariation.Product),
+                Description = "The product which this variation belongs to",
+                Type = DiscountEntityPropertyType.Object,
+                SubEntity = productEntity
+            }
         );
+        orderItemEntity.Properties.Add(
+            new()
+            {
+                Name = nameof(OrderItem.ProductVariation),
+                Description = "Product variation which order item targetting",
+                Type = DiscountEntityPropertyType.Object,
+                SubEntity = productVariationEntity
+            }
+        );
+
+
+        var cartEntity = new DiscountEntity
+        {
+            Name = nameof(Cart),
+            Description = "Active cart of user",
+            Properties = [
+                new (){
+                    Name = nameof(Cart.Items),
+                    Description = "Items in cart",
+                    Type = DiscountEntityPropertyType.Array,
+                    SubEntity = new(){
+                        Name = nameof(CartItem),
+                        Description = "Item in a cart",
+                        Properties= [
+                            new(){
+                                Name = nameof(CartItem.Amount),
+                                Description = "Amount of items user added to its cart",
+                                Type =DiscountEntityPropertyType.Int
+                            },
+                            new(){
+                                Name = nameof(CartItem.ProductVariation),
+                                Description = "The product variation user selected",
+                                Type =DiscountEntityPropertyType.Object,
+                                SubEntity = productVariationEntity
+                            }
+                        ]
+                    }
+                }
+            ]
+        };
+
+        var userEntity = new DiscountEntity
+        {
+            Name = nameof(User),
+            Description = "Targeting user",
+            Properties = [
+                new (){
+                    Name = nameof(User.Orders),
+                    Description = "All orders which belongs to user",
+                    Type = DiscountEntityPropertyType.Array,
+                    SubEntity = orderEntity,
+                },
+                new (){
+                    Name = nameof(User.ActiveCart),
+                    Description = "User's active cart",
+                    Type = DiscountEntityPropertyType.Object,
+                    SubEntity = cartEntity,
+                }
+            ]
+        };
+
+        await unitOfWork.DiscountEntityRepository.AddAllSafeAsync(
+            [
+                orderItemEntity,
+                orderEntity,
+                productVariationEntity,
+                productEntity,
+                cartEntity,
+                userEntity,
+            ]
+        );
+
+        return unitOfWork;
     }
 
 }

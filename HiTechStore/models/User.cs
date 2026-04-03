@@ -6,5 +6,7 @@ namespace HiTechStore.Models
     {
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
+        virtual public IEnumerable<Order>? Orders { get; set; }
+        virtual public Cart? ActiveCart { get; set; }
     }
 }

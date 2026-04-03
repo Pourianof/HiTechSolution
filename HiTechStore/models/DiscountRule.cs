@@ -44,7 +44,7 @@ public class ConditionLambda
     All -> bool
     Count -> number
 */
-public class ConditionMethod
+public class ConditionMethod : IModel
 {
     public int ConditionMethodId { get; set; }
     public string? Name { get; set; }

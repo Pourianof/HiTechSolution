@@ -16,6 +16,7 @@ namespace HiTechStore.Core
         IColorRepository ColorRepository { get; }
         IDiscountEntityRepository DiscountEntityRepository { get; }
         IDiscountCodeRepository DiscountCodeRepository { get; }
+        IConditionMethodRepository ConditionMethodRepository { get; }
 
         IRepositoryModelBase<TModel> RespositoryOf<TModel>() where TModel : class, IModel;
         Task<int> Complete();

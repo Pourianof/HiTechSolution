@@ -47,5 +47,6 @@ namespace HiTechStore.Models
         public int Inventory { get; set; }
         public virtual List<ProductMedia> Media { get; set; } = new();
         public virtual Product? Product { get; set; }
+        public virtual IEnumerable<OrderItem>? Orders { get; set; }
     }
 }

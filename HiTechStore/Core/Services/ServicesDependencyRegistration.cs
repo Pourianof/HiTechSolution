@@ -9,7 +9,6 @@ public static class ServicesDependencyRegistration
     {
         services.AddScoped<IDiscountCodeGenerator, DiscountCodeGenerator>();
         services.AddScoped<IDiscountService, DiscountService>();
-        services.AddScoped<IDiscountEntityResolver, AttributeBaseDiscountEntityResolver>();
         services.AddScoped<IDiscountConditionValueComaprator, DiscountConditionValueComaprator>();
 
         return services;
