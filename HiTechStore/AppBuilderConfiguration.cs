@@ -4,9 +4,12 @@ using HiTechStore.Controllers.ExceptionFilters;
 using HiTechStore.Core.Auth;
 using HiTechStore.Core.BackgroundJobs;
 using HiTechStore.Core.ExceptionHandlers;
+using HiTechStore.Core.Helpers;
 using HiTechStore.Core.Services;
 using HiTechStore.Data;
+using HiTechStore.Data.Mapping;
 using HiTechStore.Helpers.AutoMapper;
+using HiTechStore.Helpers.ConditionParser;
 using HiTechStore.Helpers.URLFilterQuery;
 
 namespace HiTechStore;
@@ -27,6 +30,8 @@ public static class DependencyRegistration
         );
 
         builder.UseDataAccess();
+
+        builder.Services.AddMapping();
 
         builder.Services.AddAutoMapper((cfg) =>
         {
