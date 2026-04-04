@@ -196,17 +196,17 @@ public class ConditionComponentTreeToExpression : ConditionComponentTreeVisitor<
                 return p.IsGenericType &&
                        p.GetGenericTypeDefinition() == typeof(Func<,>);
             });
+        }
 
-            if (callingMethod.GetGenericArguments().Length == 2)
-            {
+        if (callingMethod.GetGenericArguments().Length == 2)
+        {
 
-                callingMethod = callingMethod.MakeGenericMethod(parameterType, method!.ReturnType.GetCSharpType());
-            }
-            else
-            {
-                callingMethod = callingMethod.MakeGenericMethod(parameterType);
+            callingMethod = callingMethod.MakeGenericMethod(parameterType, method!.ReturnType.GetCSharpType());
+        }
+        else
+        {
+            callingMethod = callingMethod.MakeGenericMethod(parameterType);
 
-            }
         }
 
         if (body is not null && lambdaBodyExpr is null)
@@ -228,7 +228,7 @@ public class ConditionComponentTreeToExpression : ConditionComponentTreeVisitor<
                 lambdaBodyExpr,
                 lambdaParameter
             )
-        ) : Expression.Call(callingMethod);
+        ) : Expression.Call(callingMethod, propertyMethodCalledOn);
 
         return methodCallExpression;
     }
