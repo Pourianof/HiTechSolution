@@ -27,5 +27,6 @@ public class ConditionMethodRepository : Repository<ConditionMethod>, ICondition
 
             await AddAsync(condMethod);
         }
+        await _context.SaveChangesAsync();
     }
 }
