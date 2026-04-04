@@ -1,20 +1,14 @@
-using HiTechStore.Core.Helpers;
-using HiTechStore.Data;
+using HiTechStore.Core.Services.Discount;
 using HiTechStore.Data.DTOs.Discount;
-using HiTechStore.Data.Mapping;
-using HiTechStore.Models;
 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace HiTechStore.Controllers;
 
 [ApiController]
 [Route("api/discounts/script")]
 public class DiscountScriptController(
-    IDiscountConditionScriptParser scriptParser,
-    IConditionComponentTreeToLambdaExpression conditionToExpressionMapper,
-    HiTechStoreDbContext dbContext
+    IDiscountService discountService
 ) : ControllerBase
 {
     [HttpPost("check")]
@@ -22,13 +16,21 @@ public class DiscountScriptController(
     {
         var script = scriptDto.Script!;
 
-        var conditonTree = scriptParser.Parse(script);
-        var conditionExpression = conditionToExpressionMapper.Map<Product>(conditonTree!);
+        var parseResult = await discountService.GetConditionScriptProducts(script);
+        if (!parseResult.Succeed)
+        {
+            var promblem = new ProblemDetails
+            {
+                Title = "Failed interpreting scripts",
+                Detail = parseResult.Message
+            };
+
+            return BadRequest(promblem);
+        }
+
 
         return Ok(
-            await dbContext.Products.Where(
-                conditionExpression
-            ).ToListAsync()
+            parseResult.ResultedProducts
         );
     }
 }

@@ -14,4 +14,5 @@ public interface IDiscountService
     Task<bool> DeleteDiscountCode(int id);
     Task<DiscountResultDto> CheckDiscountCodeUsability(string discountCode, string userId);
     Task<DiscountCode?> GetActiveDiscountCodeOf(string discountCode);
+    Task<ConditionParseResult> GetConditionScriptProducts(string conditionScript);
 }

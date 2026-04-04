@@ -6,6 +6,7 @@ using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Helpers;
 using HiTechStore.Data.DTOs;
 using HiTechStore.Data.DTOs.DiscountCode;
+using HiTechStore.Data.DTOs.Product;
 using HiTechStore.Data.Queries;
 using HiTechStore.Helpers.URLFilterQuery;
 using HiTechStore.Models;
@@ -17,6 +18,7 @@ namespace HiTechStore.Core.Services.Discount;
 public class DiscountService(
     IUnitOfWork unitOfWork,
     IDiscountCodeGenerator codeGenerator,
+    IDiscountConditionScriptParser scriptParser,
     IMapper mapper)
     : IDiscountService
 {
@@ -248,4 +250,27 @@ public class DiscountService(
 
         return availableDiscount;
     }
+
+    public async Task<ConditionParseResult> GetConditionScriptProducts(string conditionScript)
+    {
+        var conditionTree = scriptParser.Parse(conditionScript);
+
+        if (conditionTree is null)
+        {
+            return new ConditionParseResult()
+            {
+                Message = "Could not interpret script to well-defined internal models"
+            };
+        }
+
+        var discountedProducts = await unitOfWork.Products.GetDiscountedProducts(conditionTree);
+
+        return new ConditionParseResult()
+        {
+            ResultedProducts = discountedProducts,
+            Succeed = true
+        }
+        ;
+    }
 }
+
