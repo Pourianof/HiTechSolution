@@ -8,5 +8,6 @@ namespace HiTechStore.Core.Repositories
     {
         Task<ProductDto?> GetByIdAsync(int id, string? userId);
         Task<IEnumerable<ProductVariation>> GetAllVariations(IEnumerable<int> variationIds);
+        Task<IEnumerable<ProductDto>> GetDiscountedProducts(ConditionComponent componentTree);
     }
 }

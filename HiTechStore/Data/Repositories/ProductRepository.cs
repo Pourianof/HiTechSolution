@@ -8,6 +8,7 @@ using HiTechStore.Data.DTOs;
 using HiTechStore.Data.DTOs.Brand;
 using HiTechStore.Data.DTOs.Component;
 using HiTechStore.Data.DTOs.Product;
+using HiTechStore.Data.Mapping;
 using HiTechStore.Data.Queries;
 using HiTechStore.Helpers.Repository;
 using HiTechStore.Helpers.URLFilterQuery;
@@ -20,9 +21,10 @@ namespace HiTechStore.Data.Repositories
 {
     public class ProductRepository : Repository<Product, ProductDto, ProductQuery>, IProductRepository
     {
-        public ProductRepository(HiTechStoreDbContext context, IMapper mapper) : base(context, mapper)
+        private IConditionComponentTreeToLambdaExpression _conditionToExpressionMapper;
+        public ProductRepository(HiTechStoreDbContext context, IMapper mapper, IConditionComponentTreeToLambdaExpression conditionToExpressionMapper) : base(context, mapper)
         {
-
+            _conditionToExpressionMapper = conditionToExpressionMapper;
         }
         /**
             Override the Project method for handling the projection manually because:
@@ -190,6 +192,17 @@ namespace HiTechStore.Data.Repositories
 
             }
             return queryBuilder;
+        }
+
+        public async Task<IEnumerable<ProductDto>> GetDiscountedProducts(ConditionComponent componentTree)
+        {
+            var conditionExpression = _conditionToExpressionMapper.Map<Product>(componentTree);
+
+            return await Project(
+                _dbSet.Where(
+                    conditionExpression
+                )
+            ).ToListAsync();
         }
 
         protected override IQueryable<Product> GetByIdAsyncQueryBuilder(IQueryable<Product> queryBuilder)
