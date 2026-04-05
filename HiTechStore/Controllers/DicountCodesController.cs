@@ -3,7 +3,7 @@ using AutoMapper;
 using HiTechStore.Core;
 using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Services.Discount;
-using HiTechStore.Data.DTOs.DiscountCode;
+using HiTechStore.Data.DTOs.Discount;
 using HiTechStore.Data.Queries;
 using HiTechStore.Helpers.URLFilterQuery;
 using HiTechStore.Models;
@@ -34,7 +34,7 @@ public class DicountCodesController(
     }
 
     [HttpGet("{name:alpha}")]
-    public async Task<ActionResult<DiscountCode>> GetDiscountCode(string name)
+    public async Task<ActionResult<Discount>> GetDiscountCode(string name)
     {
         var discountCode = await _unitOfWork.DiscountCodeRepository.GetDiscountCodeByNameProjectedAsync(name);
 
@@ -47,7 +47,7 @@ public class DicountCodesController(
     }
 
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<DiscountCode>> GetDiscountCodeByID(int id)
+    public async Task<ActionResult<Discount>> GetDiscountCodeByID(int id)
     {
         var discountCode = await _unitOfWork.DiscountCodeRepository.GetByIdProjectedAsync(id);
 
@@ -60,7 +60,7 @@ public class DicountCodesController(
     }
 
     [HttpGet]
-    public async Task<ActionResult<DiscountCode>> GetAllDiscountCodes([ToQuery] DiscountQuery discountQuery)
+    public async Task<ActionResult<Discount>> GetAllDiscountCodes([ToQuery] DiscountQuery discountQuery)
     {
         return Ok(await _disountService.GetAllDiscountCodes(discountQuery));
     }
@@ -85,7 +85,7 @@ public class DicountCodesController(
     }
 
     [HttpPatch("{id}")]
-    public async Task<ActionResult<DiscountCodeDto>> UpdateDiscountCode(int id, [FromBody] DiscountCodeUpdateDto discountCodeUpdateDto)
+    public async Task<ActionResult<DiscountDto>> UpdateDiscountCode(int id, [FromBody] DiscountCodeUpdateDto discountCodeUpdateDto)
     {
         var discountCode = await _disountService.UpdateDiscountCode(id, discountCodeUpdateDto, User);
 

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace HiTechStore.Data.DTOs.DiscountCode;
+namespace HiTechStore.Data.DTOs.Discount;
 
 public class DiscountCodeUpdateDto
 {

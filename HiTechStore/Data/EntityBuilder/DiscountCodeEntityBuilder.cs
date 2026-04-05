@@ -8,10 +8,10 @@ public class DiscountCodeEntityBuilder
 {
     public static void Build(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DiscountCode>(
+        modelBuilder.Entity<Discount>(
              (entity) =>
              {
-                 entity.ToTable("DiscountCodes");
+                 entity.ToTable("Discounts");
                  entity.Property(dc => dc.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
                  entity.Property(dc => dc.IsDeactivated).HasDefaultValue(false);
                  entity.HasOne(dc => dc.Creator).WithMany().HasForeignKey(dc => dc.CreatorId);

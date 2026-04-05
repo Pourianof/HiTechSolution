@@ -2,10 +2,10 @@ using HiTechStore.Data.DTOs.DiscountEntity;
 using HiTechStore.Helpers.AutoMapper;
 using HiTechStore.Models;
 
-namespace HiTechStore.Data.DTOs.DiscountCode;
+namespace HiTechStore.Data.DTOs.Discount;
 
-[MapFrom<Models.DiscountCode>]
-public class DiscountCodeDto
+[MapFrom<Models.Discount>]
+public class DiscountDto
 {
     public int DiscountCodeId { get; set; }
     public string? Code { get; set; }

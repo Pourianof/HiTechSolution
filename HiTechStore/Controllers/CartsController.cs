@@ -4,7 +4,7 @@ using HiTechStore.Core;
 using HiTechStore.Core.Services.Discount;
 using HiTechStore.Data.DTOs;
 using HiTechStore.Data.DTOs.Cart;
-using HiTechStore.Data.DTOs.DiscountCode;
+using HiTechStore.Data.DTOs.Discount;
 using HiTechStore.Models;
 
 using Microsoft.AspNetCore.Authorization;

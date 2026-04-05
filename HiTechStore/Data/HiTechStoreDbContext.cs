@@ -48,7 +48,7 @@ namespace HiTechStore.Data
         public DbSet<BrandModel> BrandModel { get; set; }
         public DbSet<Cart> Carts { get; set; }
         public DbSet<Order> Orders { get; set; }
-        public DbSet<DiscountCode> DiscountCodes { get; set; }
+        public DbSet<Discount> Discounts { get; set; }
         public DbSet<DiscountEntity> DiscountEntities { get; set; }
         public DbSet<ConditionComponent> ConditionComponents { get; set; }
         public DbSet<ConditionMethod> ConditionMethods { get; set; }

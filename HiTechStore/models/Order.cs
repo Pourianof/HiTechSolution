@@ -17,5 +17,5 @@ public class Order : IModel
     public virtual List<OrderItem>? Items { get; set; }
     public virtual User? Client { get; set; }
     public virtual string? ClientId { get; set; }
-    public virtual DiscountCode? DiscountCode { get; set; }
+    public virtual Discount? DiscountCode { get; set; }
 }

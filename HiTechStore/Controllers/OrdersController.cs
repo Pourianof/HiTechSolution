@@ -8,7 +8,7 @@ using HiTechPay.Sdk.Communication;
 using HiTechStore.Core;
 using HiTechStore.Core.Services.Discount;
 using HiTechStore.Data.DTOs;
-using HiTechStore.Data.DTOs.DiscountCode;
+using HiTechStore.Data.DTOs.Discount;
 using HiTechStore.Data.DTOs.Order;
 using HiTechStore.Models;
 
@@ -146,7 +146,7 @@ public class OrdersController(IHiTechPaySdkFacade hiTechPaySdkFacade, IUnitOfWor
             return BadRequest(problem);
         }
 
-        DiscountCode? appliedDiscountCode = default;
+        Discount? appliedDiscountCode = default;
         DiscountResultDto? checkResult = default;
 
         if (discountCode is not null)

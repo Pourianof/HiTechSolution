@@ -5,7 +5,7 @@ using AutoMapper;
 using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Helpers;
 using HiTechStore.Data.DTOs;
-using HiTechStore.Data.DTOs.DiscountCode;
+using HiTechStore.Data.DTOs.Discount;
 using HiTechStore.Data.DTOs.Product;
 using HiTechStore.Data.Queries;
 using HiTechStore.Helpers.URLFilterQuery;
@@ -53,7 +53,7 @@ public class DiscountService(
         return code!;
     }
 
-    public Task<PagedResultDto<DiscountCodeDto>> GetAllDiscountCodes(DiscountQuery? discountQuery)
+    public Task<PagedResultDto<DiscountDto>> GetAllDiscountCodes(DiscountQuery? discountQuery)
     {
         var query = discountQuery ?? new();
 
@@ -65,7 +65,7 @@ public class DiscountService(
         return unitOfWork.DiscountCodeRepository.GetAllProjectedAsync(query);
     }
 
-    public async Task<DiscountCode> RegisterDiscountCode(DiscountCodeCreationDto discountCodeCreationDto)
+    public async Task<Models.Discount> RegisterDiscountCode(DiscountCodeCreationDto discountCodeCreationDto)
     {
 
         if (discountCodeCreationDto.StartTime > discountCodeCreationDto.EndTime)
@@ -73,7 +73,7 @@ public class DiscountService(
             throw new ModelException("Invalid state", "StartTime cannot be greater than EndTime", nameof(DiscountCodeCreationDto.StartTime));
         }
 
-        var discountCode = mapper.Map<DiscountCode>(discountCodeCreationDto);
+        var discountCode = mapper.Map<Models.Discount>(discountCodeCreationDto);
 
         var dbDiscountCodes = await unitOfWork.DiscountCodeRepository.GetDiscountCodeByNameAsync(discountCode.Code!);
 
@@ -86,7 +86,7 @@ public class DiscountService(
             if (overlappingDiscount is not null)
             {
                 // overlap state
-                throw new ModelException("Overlapping date range", $"There is another discount with code \"{discountCode.Code}\" which start at {overlappingDiscount.StartTime} and ends at \"{overlappingDiscount.EndTime}\"", nameof(DiscountCode.StartTime));
+                throw new ModelException("Overlapping date range", $"There is another discount with code \"{discountCode.Code}\" which start at {overlappingDiscount.StartTime} and ends at \"{overlappingDiscount.EndTime}\"", nameof(Models.Discount.StartTime));
             }
         }
 
@@ -103,7 +103,7 @@ public class DiscountService(
         throw new Exceptions.ApplicationException("Failed to save", "Something went wrong to save database");
     }
 
-    async public Task<DiscountCodeDto?> UpdateDiscountCode(int id, DiscountCodeUpdateDto discountCodeUpdateDto, ClaimsPrincipal claims)
+    async public Task<DiscountDto?> UpdateDiscountCode(int id, DiscountCodeUpdateDto discountCodeUpdateDto, ClaimsPrincipal claims)
     {
         var discountCode = await unitOfWork.DiscountCodeRepository.GetModelByIdAsync(id);
 
@@ -133,7 +133,7 @@ public class DiscountService(
 
         await unitOfWork.Complete();
 
-        return new DiscountCodeDto()
+        return new DiscountDto()
         {
             Code = discountCode.Code,
             CreatedAt = discountCode.CreatedAt,
@@ -239,7 +239,7 @@ public class DiscountService(
         };
     }
 
-    public async Task<DiscountCode?> GetActiveDiscountCodeOf(string discountCode)
+    public async Task<Models.Discount?> GetActiveDiscountCodeOf(string discountCode)
     {
         var now = DateTime.Now;
 
