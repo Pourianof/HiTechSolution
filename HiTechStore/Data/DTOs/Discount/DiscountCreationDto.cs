@@ -24,3 +24,13 @@ public class DiscountCreationDto
     public ICollection<DiscountRuleCreationDto>? Rules { get; set; }
 }
 
+
+
+[MapTo<Models.Discount>]
+public class DiscountCodeCreationDto : DiscountCreationDto
+{
+    [Required]
+    [MinLength(3)]
+    [MaxLength(12)]
+    public string? Code { get; set; }
+}
