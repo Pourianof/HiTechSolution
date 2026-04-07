@@ -26,6 +26,7 @@ public class DiscountRuleDto
     public string? Description { get; set; }
     // public ConditionComponentDto Condition { get; set; } = new();
     public DiscountActionDto? DiscountAction { get; set; }
+    public string? RawConditionScript { get; set; }
 }
 
 [MapFrom<DiscountAction>]
