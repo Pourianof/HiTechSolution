@@ -24,7 +24,7 @@ public class DiscountRuleDto
     public int DiscountRuleId { get; set; }
     public string? Name { get; set; }
     public string? Description { get; set; }
-    public ConditionComponentDto Condition { get; set; } = new();
+    // public ConditionComponentDto Condition { get; set; } = new();
     public DiscountActionDto? DiscountAction { get; set; }
 }
 

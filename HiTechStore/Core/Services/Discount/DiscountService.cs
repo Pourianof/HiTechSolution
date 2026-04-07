@@ -65,39 +65,78 @@ public class DiscountService(
         return unitOfWork.DiscountCodeRepository.GetAllProjectedAsync(query);
     }
 
-    public async Task<Models.Discount> RegisterDiscountCode(DiscountCodeCreationDto discountCodeCreationDto)
+    private async Task ValidateDiscount(DiscountCreationDto discount)
     {
-
-        if (discountCodeCreationDto.StartTime > discountCodeCreationDto.EndTime)
+        if (discount.StartTime > discount.EndTime)
         {
-            throw new ModelException("Invalid state", "StartTime cannot be greater than EndTime", nameof(DiscountCodeCreationDto.StartTime));
+            throw new ModelException("Invalid state", $"{nameof(Models.Discount.StartTime)} cannot be greater than {nameof(Models.Discount.EndTime)}", nameof(DiscountCodeCreationDto.StartTime));
         }
 
-        var discountCode = mapper.Map<Models.Discount>(discountCodeCreationDto);
+        if (!discount.Rules!.Any())
+        {
+            throw new ModelException("Invalid state", "At least one rule must define for discount", nameof(DiscountCodeCreationDto.Rules));
+        }
 
-        var dbDiscountCodes = await unitOfWork.DiscountCodeRepository.GetDiscountCodeByNameAsync(discountCode.Code!);
+        for (int index = 0; index < discount.Rules!.Count(); index++)
+        {
+            var rule = discount.Rules!.ElementAt(index);
+            var conditionTree = scriptParser.Parse(rule.Script!);
+
+            if (conditionTree is null)
+            {
+                throw new ModelException("Invalid condition script", "Rule's condition script could not interpret as a expression which evaluate a boolean", $"{nameof(Models.Discount.Rules)}[{index}]");
+            }
+        }
+    }
+
+
+    public async Task<DiscountDto> RegisterDiscountCode(DiscountCodeCreationDto discountCodeCreationDto)
+    {
+
+        await ValidateDiscount(discountCodeCreationDto);
+        var discount = mapper.Map<Models.Discount>(discountCodeCreationDto);
+
+        var dbDiscountCodes = await unitOfWork.DiscountCodeRepository.GetDiscountCodeByNameAsync(discount.Code!);
 
         if (dbDiscountCodes is not null)
         {
             var overlappingDiscount = dbDiscountCodes.FirstOrDefault(
-                    dbdc => !(discountCode.StartTime > dbdc!.EndTime
-                        || discountCode.EndTime < dbdc.StartTime)
+                    dbdc => !(discount.StartTime > dbdc!.EndTime
+                        || discount.EndTime < dbdc.StartTime)
                 );
             if (overlappingDiscount is not null)
             {
                 // overlap state
-                throw new ModelException("Overlapping date range", $"There is another discount with code \"{discountCode.Code}\" which start at {overlappingDiscount.StartTime} and ends at \"{overlappingDiscount.EndTime}\"", nameof(Models.Discount.StartTime));
+                throw new ModelException("Overlapping date range", $"There is another discount with code \"{discount.Code}\" which start at {overlappingDiscount.StartTime} and ends at \"{overlappingDiscount.EndTime}\"", nameof(Models.Discount.StartTime));
             }
         }
 
         // lack of knowledge of buisiness rules to check
         // maybe completed later. need for experties
 
-        await unitOfWork.DiscountCodeRepository.AddAsync(discountCode);
+        await unitOfWork.DiscountCodeRepository.AddAsync(discount);
 
         if (await unitOfWork.Complete() > 0)
         {
-            return discountCode;
+            return mapper.Map<DiscountDto>(discount);
+        }
+
+        throw new Exceptions.ApplicationException("Failed to save", "Something went wrong to save database");
+    }
+
+    public async Task<DiscountDto> RegisterDiscount(DiscountCreationDto discountCreationDto)
+    {
+        await ValidateDiscount(discountCreationDto);
+
+        // IMapper also convert script string to ConditionComponent by parser
+        var discount = mapper.Map<Models.Discount>(discountCreationDto);
+
+        await unitOfWork.DiscountCodeRepository.AddAsync(discount);
+
+
+        if (await unitOfWork.Complete() > 0)
+        {
+            return mapper.Map<DiscountDto>(discount);
         }
 
         throw new Exceptions.ApplicationException("Failed to save", "Something went wrong to save database");
@@ -161,62 +200,6 @@ public class DiscountService(
         {
             var isRuleAppliable = false;
             List<ProductVariation> productsWhichPassedCondition = new();
-            foreach (var condGroup in rule.Conditions)
-            {
-                var isConditionGroupEstablished = true;
-                // foreach (var condition in condGroup.Conditions!)
-                // {
-                //     // check condition
-                //     var criteria = condition.EntityProperty;
-                //     string conditionValue = condition.Value!; // discount creator specify that
-
-                //     // how extract criteriaValue?
-                //     // in discountCode: Cart
-                //     // in normal discount: just product table
-
-                //     // get the criteria value
-                //     var entityPath = (await unitOfWork.DiscountEntityRepository.GetPropertyById(criteria!.DiscountEntityPropertyId))?.Path;
-                //     if (entityPath is null)
-                //     {
-                //         throw new NotFoundException("The specified discount code cannot get handle");
-                //     }
-
-                //     // compare to condition value based on operator
-                //     var criteriaValue = await discountEntityResolver.GetDiscountEntityInterpreter(entityPath!)
-                //                                     .Interpret(condition.Operation, conditionValue, new DiscountEntityResolverContext()
-                //                                     {
-                //                                         Cart = userCart,
-                //                                         MatchedProducts = productsWhichPassedCondition,
-                //                                         UnitOfWork = unitOfWork,
-                //                                         User = new User() { Id = userId }
-                //                                     });
-
-                //     // if comparation return false then the condition group
-                //     // will short circuit and fail
-                //     if (!criteriaValue.IsConditionPassed)
-                //     {
-                //         isConditionGroupEstablished = false;
-                //         // condition -> false -> condGroup -> false ->  circuit break
-                //         break;
-                //     }
-
-                //     if (criteriaValue.IsProductBase)
-                //     {
-                //         productsWhichPassedCondition.AddRange(criteriaValue.ConditionMatchedProducts!);
-                //     }
-                // }
-
-                if (isConditionGroupEstablished)
-                {
-                    // at least one condGroup -> true -> circuit break -> rules  established
-                    isRuleAppliable = true;
-                    break;
-                }
-                else
-                {
-                    continue;
-                }
-            }
 
             if (isRuleAppliable)
             {
