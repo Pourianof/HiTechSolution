@@ -33,11 +33,6 @@ public static class DependencyRegistration
 
         builder.Services.AddMapping();
 
-        builder.Services.AddAutoMapper((cfg) =>
-        {
-            cfg.RegisterAttributeMaps(Assembly.GetExecutingAssembly());
-            cfg.AddProfile(typeof(MappingProfile));
-        });
         builder.Services.AddQueryParser();
         builder.Services.AddAppServices();
 

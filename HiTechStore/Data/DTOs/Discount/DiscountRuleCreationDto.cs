@@ -16,8 +16,8 @@ public class DiscountRuleCreationDto
     public string? Description { get; set; }
     [Required]
     [MinLength(3)]
-    [MapUsing<ScriptToConditionComponentResolver>]
-    [MapToProperty(nameof(DiscountRule.ConditionTree))]
+    [MapToProperty(nameof(DiscountRule.ConditionTree), Converter = typeof(ScriptToConditionComponentResolver))]
+    [MapToProperty(nameof(DiscountRule.RawConditionScript))]
     public string? Script { get; set; }
     [Required]
     public DiscountActionCreationDto? DiscountAction { get; set; }

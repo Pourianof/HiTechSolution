@@ -1,4 +1,8 @@
+using System.Reflection;
+
 using HiTechStore.Core.Helpers;
+using HiTechStore.Data.Mapping.Discount;
+using HiTechStore.Helpers.AutoMapper;
 using HiTechStore.Helpers.ConditionParser;
 
 namespace HiTechStore.Data.Mapping;
@@ -10,6 +14,13 @@ public static class MappingDependenciesRegistration
         services.AddTransient<IRosylnDiscountConditionMapper, RoslynExpressionVisitorBase>();
         services.AddTransient<IDiscountConditionScriptParser, RoslynConditionScriptParser>();
         services.AddTransient<IConditionComponentTreeToLambdaExpression, ConditionComponentTreeToExpression>();
+        services.AddTransient<ScriptToConditionComponentResolver>();
+
+        services.AddAutoMapper((cfg) =>
+        {
+            cfg.RegisterAttributeMaps(Assembly.GetExecutingAssembly());
+            cfg.AddProfile(typeof(MappingProfile));
+        });
 
         return services;
     }
