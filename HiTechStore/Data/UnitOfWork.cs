@@ -20,7 +20,7 @@ namespace HiTechStore.Data
         public ICartRepository CartRepository { get; }
         public IOrderRepository OrderRepository { get; }
         public IColorRepository ColorRepository { get; }
-        public IDiscountCodeRepository DiscountCodeRepository { get; }
+        public IDiscountCodeRepository DiscountRepository { get; }
         public IDiscountEntityRepository DiscountEntityRepository { get; }
         public IConditionMethodRepository ConditionMethodRepository { get; }
 
@@ -54,7 +54,7 @@ namespace HiTechStore.Data
             CartRepository = cartRepository;
             OrderRepository = orderRepository;
             ColorRepository = colorRepository;
-            DiscountCodeRepository = discountCodeRepository;
+            DiscountRepository = discountCodeRepository;
             DiscountEntityRepository = discountEntityRepository;
             ConditionMethodRepository = conditionMethodRepository;
         }

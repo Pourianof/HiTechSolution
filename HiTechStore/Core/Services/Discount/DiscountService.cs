@@ -24,14 +24,14 @@ public class DiscountService(
 {
     public async Task<bool> DeleteDiscountCode(int id)
     {
-        var discountCode = await unitOfWork.DiscountCodeRepository.GetModelByIdAsync(id);
+        var discountCode = await unitOfWork.DiscountRepository.GetModelByIdAsync(id);
 
         if (discountCode is null)
         {
             return false;
         }
 
-        await unitOfWork.DiscountCodeRepository.Delete(discountCode);
+        await unitOfWork.DiscountRepository.Delete(discountCode);
 
         return true;
     }
@@ -45,7 +45,7 @@ public class DiscountService(
         {
             code = codeGenerator.GenerateCode(length);
 
-            var discountCode = unitOfWork.DiscountCodeRepository.GetDiscountCodeByNameAsync(code).Result;
+            var discountCode = unitOfWork.DiscountRepository.GetDiscountCodeByNameAsync(code).Result;
 
             hasGenerated = discountCode is null;
         }
@@ -62,7 +62,7 @@ public class DiscountService(
         query.Limit ??= new QueryFilterItem("limit")
             .AddOperatorValuePair(QueryOperator.Equal, new StringValues("10"));
 
-        return unitOfWork.DiscountCodeRepository.GetAllProjectedAsync(query);
+        return unitOfWork.DiscountRepository.GetAllProjectedAsync(query);
     }
 
     private async Task ValidateDiscount(DiscountCreationDto discount)
@@ -96,7 +96,7 @@ public class DiscountService(
         await ValidateDiscount(discountCodeCreationDto);
         var discount = mapper.Map<Models.Discount>(discountCodeCreationDto);
 
-        var dbDiscountCodes = await unitOfWork.DiscountCodeRepository.GetDiscountCodeByNameAsync(discount.Code!);
+        var dbDiscountCodes = await unitOfWork.DiscountRepository.GetDiscountCodeByNameAsync(discount.Code!);
 
         if (dbDiscountCodes is not null)
         {
@@ -114,7 +114,7 @@ public class DiscountService(
         // lack of knowledge of buisiness rules to check
         // maybe completed later. need for experties
 
-        await unitOfWork.DiscountCodeRepository.AddAsync(discount);
+        await unitOfWork.DiscountRepository.AddAsync(discount);
 
         if (await unitOfWork.Complete() > 0)
         {
@@ -131,7 +131,7 @@ public class DiscountService(
         // IMapper also convert script string to ConditionComponent by parser
         var discount = mapper.Map<Models.Discount>(discountCreationDto);
 
-        await unitOfWork.DiscountCodeRepository.AddAsync(discount);
+        await unitOfWork.DiscountRepository.AddAsync(discount);
 
 
         if (await unitOfWork.Complete() > 0)
@@ -144,7 +144,7 @@ public class DiscountService(
 
     async public Task<DiscountDto?> UpdateDiscountCode(int id, DiscountCodeUpdateDto discountCodeUpdateDto, ClaimsPrincipal claims)
     {
-        var discountCode = await unitOfWork.DiscountCodeRepository.GetModelByIdAsync(id);
+        var discountCode = await unitOfWork.DiscountRepository.GetModelByIdAsync(id);
 
         if (discountCode is null)
         {
@@ -226,7 +226,7 @@ public class DiscountService(
     {
         var now = DateTime.Now;
 
-        var discounts = await unitOfWork.DiscountCodeRepository.GetDiscountCodeByNameAsync(discountCode);
+        var discounts = await unitOfWork.DiscountRepository.GetDiscountCodeByNameAsync(discountCode);
         var availableDiscount = discounts.FirstOrDefault(
             (d) => d!.EndTime > now && d.StartTime < now
         );
