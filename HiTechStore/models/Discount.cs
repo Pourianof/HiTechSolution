@@ -15,6 +15,5 @@ public class Discount : IModel
     public bool IsDeactivated { get; set; }
     public string? CreatorId { get; set; }
     virtual public User? Creator { get; set; }
-
     virtual public ICollection<DiscountRule>? Rules { get; set; }
 }
