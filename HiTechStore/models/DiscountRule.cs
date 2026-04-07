@@ -7,6 +7,7 @@ public class DiscountRule
     public int DiscountRuleId { get; set; }
     public string? Name { get; set; }
     public string? Description { get; set; }
+    public string? RawConditionScript { get; set; }
     virtual public ConditionComponent? ConditionTree { get; set; }
     virtual public DiscountAction? DiscountAction { get; set; }
 }
