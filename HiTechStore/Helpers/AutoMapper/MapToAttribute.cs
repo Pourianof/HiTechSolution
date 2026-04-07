@@ -20,25 +20,11 @@ public class MapToAttribute<T> : MapperAttribute
 
         foreach (var prop in sourceProperties)
         {
-            string candidateTargetPropertyName = prop.Name;
-            if (prop.TryToGetAttribute(typeof(MapToPropertyAttribute), out var propertyAttr))
-            {
-                candidateTargetPropertyName = ((MapToPropertyAttribute)propertyAttr).TargetPropertyName!;
-            }
+            var configAttributes = prop.GetInterfaceAttributes<IMapToConfigAttribute>();
 
-            if (prop.Name != candidateTargetPropertyName)
+            foreach (var configAttr in configAttributes)
             {
-                mapConfig.ForMember(
-                    candidateTargetPropertyName,
-                    opt => opt.MapFrom(prop.Name)
-                );
-            }
-
-            if (prop.TryToGetAttribute(typeof(MapUsingAttribute<>), out var attr))
-            {
-                var mapUsingGenericType = attr.GetType().GenericTypeArguments[0];
-
-                mapConfig.ConvertUsing(mapUsingGenericType);
+                configAttr.Config(mapConfig, prop);
             }
         }
 
