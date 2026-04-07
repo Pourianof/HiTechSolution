@@ -187,6 +187,7 @@ public class DiscountService(
 
     async public Task<DiscountResultDto> CheckDiscountCodeUsability(string discountCode, string userId)
     {
+        throw new NotImplementedException("To do...");
         var availableDiscount = await GetActiveDiscountCodeOf(discountCode);
 
         if (availableDiscount is null || availableDiscount.IsDeactivated)
