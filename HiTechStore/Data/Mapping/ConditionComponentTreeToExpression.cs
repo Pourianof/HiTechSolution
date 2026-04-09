@@ -10,7 +10,7 @@ namespace HiTechStore.Data.Mapping;
 
 public interface IConditionComponentTreeToLambdaExpression
 {
-    Expression<Func<TArg, bool>> Map<TArg>(ConditionComponent conditionComponent);
+    Expression<Func<TArg, bool>> Map<TArg>(ConditionComponent conditionComponent, string? wrappingLambdaPropertyName = default);
 }
 
 
@@ -240,11 +240,11 @@ public class ConditionComponentTreeToExpression : ConditionComponentTreeVisitor<
         ).Visit(condition);
     }
 
-    public Expression<Func<TArg, bool>> Map<TArg>(ConditionComponent conditionComponent)
+    public Expression<Func<TArg, bool>> Map<TArg>(ConditionComponent conditionComponent, string? wrappingLambdaPropertyName = default)
     {
         var mainType = typeof(TArg);
 
-        var finalFilteringLambdaParmeter = Expression.Parameter(mainType, mainType.Name);
+        var finalFilteringLambdaParmeter = Expression.Parameter(mainType, wrappingLambdaPropertyName ?? mainType.Name);
         WrappingLambdaParameterExpressionStack.Push(finalFilteringLambdaParmeter);
 
         var innerExpression = Visit(conditionComponent);
