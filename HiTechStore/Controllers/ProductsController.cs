@@ -6,8 +6,11 @@ using AutoMapper;
 using HiTechStore.Controllers.ActionFilters;
 using HiTechStore.Controllers.ExceptionFilters;
 using HiTechStore.Core;
+using HiTechStore.Core.Helpers;
+using HiTechStore.Core.Services.Product;
 using HiTechStore.Data.DTOs;
 using HiTechStore.Data.DTOs.Product;
+using HiTechStore.Data.Mapping;
 using HiTechStore.Data.Queries;
 using HiTechStore.DTOs.Product;
 using HiTechStore.Helpers.URLFilterQuery;
@@ -24,17 +27,20 @@ namespace HiTechStore.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IProductService _productService;
 
-        public ProductsController(IUnitOfWork unitOfWork, IMapper mapper)
+        public ProductsController(IUnitOfWork unitOfWork, IMapper mapper, IProductService productService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _productService = productService;
         }
 
         [HttpGet]
         public async Task<PagedResultDto<ProductDto>> GetProducts([ToQuery] ProductQuery query)
         {
-            var products = await _unitOfWork.Products.GetAllProjectedAsync(query);
+            var products = await _productService.GetProducts(query);
+
             return products;
         }
 
