@@ -7,8 +7,8 @@ using HiTechStore.Core;
 using HiTechStore.Data.DTOs;
 using HiTechStore.Data.DTOs.Category;
 using HiTechStore.Data.DTOs.Component;
+using HiTechStore.Data.Storage;
 using HiTechStore.DTOs.Category;
-using HiTechStore.Helpers.IO;
 using HiTechStore.Helpers.Types;
 using HiTechStore.Models;
 
@@ -24,11 +24,13 @@ namespace HiTechStore.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private ICategoryAssetHelper CategoryAssetHelper { get; }
 
-        public CategoriesController(IUnitOfWork unitOfWork, IMapper mapper)
+        public CategoriesController(IUnitOfWork unitOfWork, IMapper mapper, ICategoryAssetHelper categoryAssetHelper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            CategoryAssetHelper = categoryAssetHelper;
         }
 
         [HttpGet]
@@ -95,16 +97,10 @@ namespace HiTechStore.Controllers
 
             var categoryDto = await _unitOfWork.Categories.GetByIdProjectedAsync(category.CategoryId);
 
-            var writer = new CategoryAssetHelper(_unitOfWork, category.CategoryId)
-            {
-                Icon = createCategoryDto.Icon,
-                Image = createCategoryDto.Image
-            };
+            await CategoryAssetHelper.Write(category.CategoryId);
 
-            await writer.Write();
-
-            categoryDto!.Image = writer.ImagePath;
-            categoryDto.Icon = writer.IconPath;
+            categoryDto!.Image = CategoryAssetHelper.GetIconPath(category.CategoryId);
+            categoryDto.Icon = CategoryAssetHelper.GetIconPath(category.CategoryId);
 
 
             return CreatedAtAction(nameof(GetCategories), new { id = category.CategoryId }, categoryDto);
@@ -127,17 +123,9 @@ namespace HiTechStore.Controllers
             _mapper.Map(categoryUpdateDto, category);
             var categoryDto = _mapper.Map<CategoryDTO>(category);
 
-            var writer = new CategoryAssetHelper(_unitOfWork, category.CategoryId)
-            {
-                Image = categoryUpdateDto.Image,
-                Icon = categoryUpdateDto.Icon,
-                DeleteOnError = false
-            };
-            await writer.Write();
-            categoryDto.Image = writer.ImagePath;
-            categoryDto.Icon = writer.IconPath;
-
-
+            await CategoryAssetHelper.Write(category.CategoryId);
+            categoryDto!.Image = CategoryAssetHelper.GetIconPath(category.CategoryId);
+            categoryDto.Icon = CategoryAssetHelper.GetIconPath(category.CategoryId);
 
             await _unitOfWork.Complete();
 

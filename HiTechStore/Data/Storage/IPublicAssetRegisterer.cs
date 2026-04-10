@@ -1,16 +1,23 @@
 using HiTechStore.Core.Exceptions;
 
-namespace HiTechStore.Helpers.IO;
+namespace HiTechStore.Data.Storage;
 
-public static class PublicAssetsHelper
+public interface IPublicAssetRegisterer
+{
+    bool IsExist(string? publicPath);
+    Task WriteIFormFile(IFormFile file, string filePublicPath);
+    void DeleteFile(string publicPath);
+}
+
+public class LocalWWWRootAssetRegisterer : IPublicAssetRegisterer
 {
     const string RootPath = "wwwroot";
-    static public bool IsExist(string? publicPath)
+    public bool IsExist(string? publicPath)
     {
         return publicPath is not null && File.Exists(Path.Combine(RootPath, publicPath));
     }
 
-    static public async Task WriteIFormFile(IFormFile file, string filePublicPath)
+    public async Task WriteIFormFile(IFormFile file, string filePublicPath)
     {
         var filePath = Path.Combine("wwwroot", filePublicPath);
         var dirPath = Path.GetDirectoryName(filePath);
@@ -32,7 +39,7 @@ public static class PublicAssetsHelper
         }
     }
 
-    static public void DeleteFile(string publicPath)
+    public void DeleteFile(string publicPath)
     {
         var filePath = Path.Combine("wwwroot", publicPath);
         File.Delete(filePath);

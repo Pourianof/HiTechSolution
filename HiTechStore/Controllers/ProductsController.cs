@@ -62,10 +62,10 @@ namespace HiTechStore.Controllers
         [HttpPost]
         [Authorize(Roles = $"{IdentityRoles.Admin},{IdentityRoles.Manager}")]
         [ViolateForeignKeyExceptionFilter]
-        [TypeFilter<ProductCreationActionFilterAttribute>]
-        public IActionResult CreateProduct([FromForm] ProductCreationDto product)
+        public async Task<IActionResult> CreateProduct([FromForm] ProductCreationDto product)
         {
-            var createdProductDto = HttpContext.Items["createdProductDto"] as ProductDto;
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var createdProductDto = await _productService.CreateProduct(product, userId!);
             if (createdProductDto?.ProductId is null)
             {
                 return Problem(
@@ -116,14 +116,11 @@ namespace HiTechStore.Controllers
         [TypeFilter<SameAuthorValidationActionFilterAttribute<Product>>]
         public async Task<IActionResult> DeleteProduct(int id)
         {
-            var product = await _unitOfWork.Products.GetModelByIdAsync(id);
+            var product = await _productService.DeleteProduct(id);
             if (product == null)
             {
                 return BadRequest();
             }
-
-            await _unitOfWork.Products.Delete(product);
-            await _unitOfWork.Complete();
 
             return NoContent();
         }
@@ -137,23 +134,8 @@ namespace HiTechStore.Controllers
             {
                 return Unauthorized();
             }
-            // check if is any score registered by this user for this product before
-            var existingScore = await _unitOfWork.ProductScores.GetUserScoreForProductAsync(userId, productId);
-            if (existingScore != null)
-            {
-                // if exist delete it
-                await _unitOfWork.ProductScores.Delete(existingScore);
-            }
 
-            // register new one
-            var newScore = new ProductScore
-            {
-                UserId = userId,
-                ProductId = productId,
-                Score = score.Score // default score
-            };
-            await _unitOfWork.ProductScores.AddAsync(newScore);
-            await _unitOfWork.Complete();
+            var newScore = await _productService.ScoreProduct(productId, score, userId);
 
             return Ok(newScore);
         }

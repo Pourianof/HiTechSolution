@@ -1,5 +1,6 @@
 using HiTechStore.Core;
 using HiTechStore.Data.Repositories;
+using HiTechStore.Data.Storage;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -21,6 +22,9 @@ public static class DataDependencyRegistration
 
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
         builder.Services.AddRepositories();
+
+        builder.Services.AddTransient<IPublicAssetRegisterer, LocalWWWRootAssetRegisterer>();
+        builder.Services.AddTransient<ICategoryAssetHelper, CategoryAssetHelper>();
 
         return builder;
     }
