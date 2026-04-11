@@ -14,11 +14,14 @@ public class DiscountRuleCreationDto
     [MinLength(3)]
     public string? Name { get; set; }
     public string? Description { get; set; }
-    [Required]
     [MinLength(3)]
-    [MapToProperty(nameof(DiscountRule.ConditionTree), Converter = typeof(ScriptToConditionComponentResolver))]
-    [MapToProperty(nameof(DiscountRule.RawConditionScript))]
-    public string? Script { get; set; }
+    [MapToProperty(nameof(DiscountRule.ProductConditionTree), Converter = typeof(ScriptToConditionComponentResolver))]
+    [MapToProperty(nameof(DiscountRule.ProductRawConditionScript))]
+    public string? ProductScript { get; set; }
+    [MinLength(3)]
+    [MapToProperty(nameof(DiscountRule.UserConditionTree), Converter = typeof(ScriptToConditionComponentResolver))]
+    [MapToProperty(nameof(DiscountRule.UserRawConditionScript))]
+    public string? UserScript { get; set; }
     [Required]
     public DiscountActionCreationDto? DiscountAction { get; set; }
 }

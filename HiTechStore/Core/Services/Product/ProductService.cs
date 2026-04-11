@@ -34,7 +34,12 @@ public class ProductService(
 
         foreach (var rule in rules)
         {
-            var conditionTree = scriptParser.Parse(rule.RawConditionScript!);
+            var conditionTree = scriptParser.Parse(rule.ProductRawConditionScript!);
+
+            if (conditionTree is null)
+            {
+                continue;
+            }
 
             // need new instance for every process and remove previous state
             var conditionToExprMapper = serviceProvider.GetRequiredService<IConditionComponentTreeToLambdaExpression>();

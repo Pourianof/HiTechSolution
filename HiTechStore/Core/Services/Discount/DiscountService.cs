@@ -77,14 +77,40 @@ public class DiscountService(
             throw new ModelException("Invalid state", "At least one rule must define for discount", nameof(DiscountCodeCreationDto.Rules));
         }
 
+        var validateScript = (string? script, int index, string name) =>
+        {
+            if (script is not null)
+            {
+                var conditionTree = scriptParser.Parse(script);
+                if (conditionTree is null)
+                {
+                    throw new ModelException(
+                     "Invalid condition script", $"Rule's {name} condition script could not interpret as a expression which evaluate a boolean", $"{nameof(DiscountCreationDto.Rules)}[{index}].{name}");
+                }
+
+                return conditionTree;
+            }
+
+            return default;
+        };
+
         for (int index = 0; index < discount.Rules!.Count(); index++)
         {
             var rule = discount.Rules!.ElementAt(index);
-            var conditionTree = scriptParser.Parse(rule.Script!);
 
-            if (conditionTree is null)
+            var productScript = rule.ProductScript;
+            ConditionComponent? productConditionTree = validateScript(productScript, index, nameof(DiscountRuleCreationDto.ProductScript));
+
+            var userScript = rule.UserScript;
+            ConditionComponent? userConditionTree = validateScript(userScript, index, nameof(DiscountRuleCreationDto.UserScript));
+
+            if (productConditionTree is null && userConditionTree is null)
             {
-                throw new ModelException("Invalid condition script", "Rule's condition script could not interpret as a expression which evaluate a boolean", $"{nameof(Models.Discount.Rules)}[{index}]");
+                throw new ModelException(
+                    "No condition script",
+                    "Must specify either a product or user valid script",
+                    $"{nameof(DiscountCreationDto.Rules)}[{index}]"
+                );
             }
         }
     }
