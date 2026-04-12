@@ -38,6 +38,7 @@ namespace HiTechStore.Data
             DiscountEntityEntityBuilder.Build(modelBuilder);
             DiscountRuleEntityBuilder.Build(modelBuilder);
             modelBuilder.BuildConditionComponentModels();
+            modelBuilder.BuildUsertModels();
         }
 
         public DbSet<Product> Products { get; set; }
