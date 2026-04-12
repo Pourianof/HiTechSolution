@@ -50,22 +50,27 @@ public class DiscountEntityRepository : Repository<DiscountEntity, DiscountEntit
 // A class which has guard to don't stuck in a property->entity->property infinite cycle
 class DiscountEntitySafelyRegisterer(IDiscountEntityRepository Repo, HiTechStoreDbContext Context)
 {
-    private List<string> ReachedEntities { get; set; } = new();
+    private Dictionary<string, DiscountEntity> ReachedEntities { get; set; } = new();
     private async Task<DiscountEntity> AddEntitySafeAsync(DiscountEntity discountEntity)
     {
         var dbEntity = await Context.Set<DiscountEntity>().FirstOrDefaultAsync(e => e.Name == discountEntity.Name);
+
+        if (ReachedEntities.ContainsKey(discountEntity.Name!))
+        {
+            return ReachedEntities[discountEntity.Name!];
+        }
 
         if (dbEntity is null)
         {
             await Repo.AddAsync(discountEntity);
             dbEntity = discountEntity;
         }
-        ReachedEntities.Add(dbEntity.Name!);
+        ReachedEntities.Add(dbEntity.Name!, dbEntity);
 
         var entityProperties = new List<DiscountEntityProperty>(discountEntity.Properties ?? []);
         dbEntity.Properties ??= new List<DiscountEntityProperty>();
 
-        if (entityProperties is null || !entityProperties.Any())
+        if (!entityProperties.Any())
         {
             return dbEntity;
         }
@@ -76,7 +81,7 @@ class DiscountEntitySafelyRegisterer(IDiscountEntityRepository Repo, HiTechStore
             var propertySubEntity = entityProperty.SubEntity;
 
 
-            if (propertySubEntity is not null && !ReachedEntities.Contains(propertySubEntity.Name!))
+            if (propertySubEntity is not null)
             {
                 var entity = await AddEntitySafeAsync(propertySubEntity);
                 entityProperty.SubEntity = entity;
