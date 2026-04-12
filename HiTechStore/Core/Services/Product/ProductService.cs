@@ -1,6 +1,7 @@
 
 using AutoMapper;
 
+using HiTechStore.Core.Auth;
 using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Helpers;
 using HiTechStore.Data.DTOs;
@@ -17,6 +18,7 @@ namespace HiTechStore.Core.Services.Product;
 public class ProductService(
     IUnitOfWork unitOfWork,
     IServiceProvider serviceProvider,
+    ICurrentUserProvider currentUserProvider,
     IDiscountConditionScriptParser scriptParser,
     IMapper mapper,
     IPublicAssetRegisterer assetRegisterer
@@ -32,18 +34,49 @@ public class ProductService(
 
         var products = await unitOfWork.Products.GetAllProjectedAsync(query);
 
+        var currentUser = currentUserProvider.UserId is null ?
+                            default :
+                            await unitOfWork.UserRepository.GetUserByIdAsync(currentUserProvider.UserId);
+        var isAuthorized = currentUser is not null;
+
         foreach (var rule in rules)
         {
-            var conditionTree = scriptParser.Parse(rule.ProductRawConditionScript!);
+            var productConditionTree = rule.ProductRawConditionScript is null ? default : scriptParser.Parse(rule.ProductRawConditionScript);
+            var userConditionTree = rule.UserRawConditionScript is null ? default : scriptParser.Parse(rule.UserRawConditionScript);
 
-            if (conditionTree is null)
+            if (productConditionTree is null && userConditionTree is null)
+            {
+                continue;
+            }
+
+            if (userConditionTree is not null)
+            {
+                if (!isAuthorized)
+                {
+                    // if there is user-specific condition but client not authorized as user
+                    // so the whole discount not associate to him
+                    continue;
+                }
+
+                var userToExprMapper = serviceProvider.GetRequiredService<IConditionComponentTreeToLambdaExpression>();
+                var userEvaluator = userToExprMapper.Map<User>(userConditionTree);
+                var isUserAuthorized = userEvaluator.Compile().Invoke(currentUser!);
+
+                if (!isUserAuthorized)
+                {
+                    // if user condition not passed, then this discount not associate to user
+                    continue;
+                }
+            }
+
+            if (productConditionTree is null)
             {
                 continue;
             }
 
             // need new instance for every process and remove previous state
             var conditionToExprMapper = serviceProvider.GetRequiredService<IConditionComponentTreeToLambdaExpression>();
-            var filterExpr = conditionToExprMapper.Map<ProductDto>(conditionTree!, nameof(Product));
+            var filterExpr = conditionToExprMapper.Map<ProductDto>(productConditionTree, nameof(Product));
 
             var items = products.Items.Where(filterExpr.Compile());
 
