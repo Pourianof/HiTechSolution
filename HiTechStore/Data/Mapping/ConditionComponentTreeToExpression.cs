@@ -338,10 +338,9 @@ class ContextualMemberAccessHandler : ConditionComponentTreeToExpression
                 {
                     if (long.TryParse(condition.Value, out long ts))
                     {
-                        return Expression.New(
-                            typeof(DateTime).GetConstructor([typeof(long)])!,
-                            Expression.Constant(ts)
-                        );
+                        var dateTime = DateTimeOffset.FromUnixTimeMilliseconds(ts).LocalDateTime;
+
+                        return Expression.Constant(dateTime);
                     }
                     else if (DateTime.TryParse(condition.Value, out var dt))
                     {
