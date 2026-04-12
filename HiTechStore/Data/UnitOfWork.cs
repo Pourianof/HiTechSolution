@@ -23,6 +23,7 @@ namespace HiTechStore.Data
         public IDiscountCodeRepository DiscountRepository { get; }
         public IDiscountEntityRepository DiscountEntityRepository { get; }
         public IConditionMethodRepository ConditionMethodRepository { get; }
+        public IUserRepository UserRepository { get; }
 
         public UnitOfWork(
             HiTechStoreDbContext context,
@@ -39,7 +40,8 @@ namespace HiTechStore.Data
             IOrderRepository orderRepository,
             IDiscountCodeRepository discountCodeRepository,
             IDiscountEntityRepository discountEntityRepository,
-            IConditionMethodRepository conditionMethodRepository
+            IConditionMethodRepository conditionMethodRepository,
+            IUserRepository userRepository
         )
         {
             _context = context;
@@ -57,6 +59,7 @@ namespace HiTechStore.Data
             DiscountRepository = discountCodeRepository;
             DiscountEntityRepository = discountEntityRepository;
             ConditionMethodRepository = conditionMethodRepository;
+            UserRepository = userRepository;
         }
 
         public HiTechStoreDbContext Context()

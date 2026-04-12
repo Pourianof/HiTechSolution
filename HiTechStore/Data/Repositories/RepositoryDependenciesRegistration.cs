@@ -19,6 +19,7 @@ public static class RepositoryDependenciesRegistration
         services.AddTransient<IFilterRepository, FilterRepository>();
         services.AddTransient<IOrderRepository, OrderRepository>();
         services.AddTransient<IProductScoresRepository, ProductScoresRepository>();
+        services.AddTransient<IUserRepository, UserRepository>();
 
         return services;
     }
