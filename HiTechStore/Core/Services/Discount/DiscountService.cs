@@ -6,7 +6,7 @@ using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Helpers;
 using HiTechStore.Data.DTOs;
 using HiTechStore.Data.DTOs.Discount;
-using HiTechStore.Data.DTOs.Product;
+using HiTechStore.Data.Mapping;
 using HiTechStore.Data.Queries;
 using HiTechStore.Helpers.URLFilterQuery;
 using HiTechStore.Models;
@@ -18,6 +18,7 @@ namespace HiTechStore.Core.Services.Discount;
 public class DiscountService(
     IUnitOfWork unitOfWork,
     IDiscountCodeGenerator codeGenerator,
+    IServiceProvider serviceProvider,
     IDiscountConditionScriptParser scriptParser,
     IMapper mapper)
     : IDiscountService
@@ -210,10 +211,8 @@ public class DiscountService(
         };
     }
 
-
     async public Task<DiscountResultDto> CheckDiscountCodeUsability(string discountCode, string userId)
     {
-        throw new NotImplementedException("To do...");
         var availableDiscount = await GetActiveDiscountCodeOf(discountCode);
 
         if (availableDiscount is null || availableDiscount.IsDeactivated)
@@ -221,26 +220,53 @@ public class DiscountService(
             throw new NotFoundException("Discount not found", $"Discount named \"{discountCode}\" not exist");
         }
 
-        var userCart = await unitOfWork.CartRepository.GetUserActiveCartAsync(userId);
+        var currentUser = await unitOfWork.UserRepository.GetUserByIdAsync(userId);
+
+        if (currentUser is null)
+        {
+            // todo: throw unauthorized result
+
+            return new() { IsDiscountAppliable = false };
+        }
 
         foreach (var rule in availableDiscount.Rules!)
         {
-            var isRuleAppliable = false;
-            List<ProductVariation> productsWhichPassedCondition = new();
 
-            if (isRuleAppliable)
+            var ruleUserScript = rule.UserRawConditionScript;
+            var userConditionTree = ruleUserScript is null ? default : scriptParser.Parse(ruleUserScript);
+
+            if (userConditionTree is null)
             {
-                // calculate the discount which can assign to user cart
-                var discountAction = mapper.Map<DiscountActionDto>(rule.DiscountAction);
-                return new DiscountResultDto
-                {
-                    DiscountCode = discountCode,
-                    IsDiscountAppliable = true,
-                    AppliedTo = productsWhichPassedCondition.Any() ? DiscountTarget.Products.ToString() : DiscountTarget.Cart.ToString(),
-                    DiscountedProducts = mapper.Map<IEnumerable<ProductVariationDto>>(productsWhichPassedCondition),
-                    Discount = discountAction
-                };
+                continue;
             }
+
+            var userToExprMapper = serviceProvider.GetRequiredService<IConditionComponentTreeToLambdaExpression>();
+            var userEvaluator = userToExprMapper.Map<User>(userConditionTree);
+            var isUserAuthorized = userEvaluator.Compile().Invoke(currentUser!);
+
+            if (!isUserAuthorized)
+            {
+                // if user condition not passed, then this discount not associate to user
+                continue;
+            }
+
+            // for items in user's cart filtering we have two options:
+            // use Product-Script(Rule.RawProductScript) as a filtering
+            // or use User-Script itself but we must extract item filtering
+            // and then applying it seperately and in isolated context.
+
+            // List<ProductVariation> productsWhichPassedCondition = new();
+
+            // calculate the discount which can assign to user cart
+            var discountAction = mapper.Map<DiscountActionDto>(rule.DiscountAction);
+            return new DiscountResultDto
+            {
+                DiscountCode = discountCode,
+                IsDiscountAppliable = true,
+                // AppliedTo = productsWhichPassedCondition.Any() ? DiscountTarget.Products.ToString() : DiscountTarget.Cart.ToString(),
+                // DiscountedProducts = mapper.Map<IEnumerable<ProductVariationDto>>(productsWhichPassedCondition),
+                Discount = discountAction
+            };
         }
 
         return new DiscountResultDto
@@ -251,7 +277,7 @@ public class DiscountService(
 
     public async Task<Models.Discount?> GetActiveDiscountCodeOf(string discountCode)
     {
-        var now = DateTime.Now;
+        var now = DateTime.UtcNow;
 
         var discounts = await unitOfWork.DiscountRepository.GetDiscountCodeByNameAsync(discountCode);
         var availableDiscount = discounts.FirstOrDefault(
