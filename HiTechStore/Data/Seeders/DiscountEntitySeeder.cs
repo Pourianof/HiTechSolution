@@ -156,6 +156,12 @@ public static class DiscountEntitySeeder
                     Description = "User's active cart",
                     Type = DiscountEntityPropertyType.Object,
                     SubEntity = cartEntity,
+                },
+                 new (){
+                    Name = nameof(User.RegisteredAt),
+                    Description = "User's registration time",
+                    Type = DiscountEntityPropertyType.Date,
+                    SubEntity = cartEntity,
                 }
             ]
         };
