@@ -11,10 +11,6 @@ public static class DependencyRegistration
             sp =>
             {
                 var httpContext = sp.GetRequiredService<IHttpContextAccessor>().HttpContext;
-                foreach (var claim in httpContext!.User.Claims)
-                {
-                    Console.WriteLine($"{claim.Type} = {claim.Value}");
-                }
                 return new CurrentUserProvider(httpContext?.User);
             }
         );
