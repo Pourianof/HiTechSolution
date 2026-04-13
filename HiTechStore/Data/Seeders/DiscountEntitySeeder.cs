@@ -76,6 +76,12 @@ public static class DiscountEntitySeeder
             Description = "Discount based on product entities",
             Properties = [
                 new DiscountEntityProperty{
+                    Name = nameof(Product.ProductId),
+                    Description ="Product's id",
+                    Type = DiscountEntityPropertyType.Int,
+                    SubEntity = productVariationEntity
+                },
+                new DiscountEntityProperty{
                     Name = nameof(Product.Variations),
                     Description ="Variations of a product",
                     Type = DiscountEntityPropertyType.Array,
