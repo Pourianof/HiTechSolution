@@ -273,7 +273,7 @@ public class DiscountService(
             {
                 DiscountCode = discountCode,
                 IsDiscountAppliable = true,
-                // AppliedTo = productsWhichPassedCondition.Any() ? DiscountTarget.Products.ToString() : DiscountTarget.Cart.ToString(),
+                AppliedTo = DiscountTarget.Cart.ToString(),// productsWhichPassedCondition.Any() ? DiscountTarget.Products.ToString() : DiscountTarget.Cart.ToString(),
                 // DiscountedProducts = mapper.Map<IEnumerable<ProductVariationDto>>(productsWhichPassedCondition),
                 Discount = discountAction
             };
