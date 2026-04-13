@@ -16,15 +16,26 @@ public class DiscountCodeRepository : Repository<Discount, DiscountDto, Discount
     {
     }
 
-    public async Task<IEnumerable<Discount>> GetActiveDiscountsAsync()
+    public async Task<IEnumerable<Discount>> GetActiveDiscountsOfTypeAsync(DiscountType discountType = DiscountType.All)
     {
         var now = DateTime.UtcNow;
-        return await _dbSet.Where(
+        var query = _dbSet.Where(
             (discount) =>
                 !discount.IsDeactivated &&
                 discount.StartTime < now &&
                 discount.EndTime > now
-        ).ToListAsync();
+        );
+
+        if (discountType == DiscountType.Codes)
+        {
+            query = query.Where(d => d.IsDiscountCode);
+        }
+        else if (discountType == DiscountType.Products)
+        {
+            query = query.Where(d => !d.IsDiscountCode);
+        }
+
+        return await query.ToListAsync();
     }
 
     public async Task<IEnumerable<Discount?>> GetDiscountCodeByNameAsync(string name)

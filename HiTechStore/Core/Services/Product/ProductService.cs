@@ -26,7 +26,7 @@ public class ProductService(
 {
     public async Task<PagedResultDto<ProductDto>> GetProducts(ProductQuery query)
     {
-        var activeDiscounts = await unitOfWork.DiscountRepository.GetActiveDiscountsAsync();
+        var activeDiscounts = await unitOfWork.DiscountRepository.GetActiveDiscountsOfTypeAsync(DiscountType.Products);
 
         var rules = activeDiscounts.SelectMany(
             (discount) => discount.Rules!
