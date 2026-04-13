@@ -2,6 +2,7 @@ using System.Security.Claims;
 
 using AutoMapper;
 
+using HiTechStore.Core.Auth;
 using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Helpers;
 using HiTechStore.Data.DTOs;
@@ -20,7 +21,9 @@ public class DiscountService(
     IDiscountCodeGenerator codeGenerator,
     IServiceProvider serviceProvider,
     IDiscountConditionScriptParser scriptParser,
-    IMapper mapper)
+    IMapper mapper,
+    ICurrentUserProvider userProvider
+    )
     : IDiscountService
 {
     public async Task<bool> DeleteDiscountCode(int id)
@@ -143,6 +146,9 @@ public class DiscountService(
         // lack of knowledge of buisiness rules to check
         // maybe completed later. need for experties
 
+        discount.IsDiscountCode = true;
+        discount.CreatorId = userProvider.UserId!;
+
         await unitOfWork.DiscountRepository.AddAsync(discount);
 
         if (await unitOfWork.Complete() > 0)
@@ -160,8 +166,10 @@ public class DiscountService(
         // IMapper also convert script string to ConditionComponent by parser
         var discount = mapper.Map<Models.Discount>(discountCreationDto);
 
-        await unitOfWork.DiscountRepository.AddAsync(discount);
+        discount.CreatorId = userProvider.UserId!;
+        discount.IsDiscountCode = false;
 
+        await unitOfWork.DiscountRepository.AddAsync(discount);
 
         if (await unitOfWork.Complete() > 0)
         {
