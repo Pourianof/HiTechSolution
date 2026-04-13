@@ -54,7 +54,7 @@ public class DiscountService(
         return code!;
     }
 
-    public Task<PagedResultDto<DiscountDto>> GetAllDiscountCodes(DiscountQuery? discountQuery)
+    public Task<PagedResultDto<DiscountDto>> GetDiscounts(DiscountQuery? discountQuery)
     {
         var query = discountQuery ?? new();
 
@@ -62,6 +62,8 @@ public class DiscountService(
             .AddOperatorValuePair(QueryOperator.Equal, new StringValues("id,endTime"));
         query.Limit ??= new QueryFilterItem("limit")
             .AddOperatorValuePair(QueryOperator.Equal, new StringValues("10"));
+
+        query.DiscountType ??= DiscountType.All;
 
         return unitOfWork.DiscountRepository.GetAllProjectedAsync(query);
     }

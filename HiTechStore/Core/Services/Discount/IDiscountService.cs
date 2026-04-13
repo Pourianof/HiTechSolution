@@ -9,7 +9,7 @@ public interface IDiscountService
     string GenerateRanomCode(int length = 10);
     Task<DiscountDto> RegisterDiscountCode(DiscountCodeCreationDto discountCode);
     Task<DiscountDto> RegisterDiscount(DiscountCreationDto discount);
-    Task<PagedResultDto<DiscountDto>> GetAllDiscountCodes(DiscountQuery? query);
+    Task<PagedResultDto<DiscountDto>> GetDiscounts(DiscountQuery? query);
     Task<DiscountDto?> UpdateDiscountCode(int id, DiscountCodeUpdateDto discountCodeUpdateDto, System.Security.Claims.ClaimsPrincipal user);
     Task<bool> DeleteDiscountCode(int id);
     // check is discount code usable for current cart/order by user

@@ -59,12 +59,6 @@ public class DicountCodesController(
         return Ok(discountCode);
     }
 
-    [HttpGet]
-    public async Task<ActionResult<Discount>> GetAllDiscountCodes([ToQuery] DiscountQuery discountQuery)
-    {
-        return Ok(await _disountService.GetAllDiscountCodes(discountQuery));
-    }
-
     [HttpPost]
     public async Task<ActionResult> CreateCode([FromBody] DiscountCodeCreationDto? discountCodeCreationDto)
     {

@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HiTechStore.Data.Repositories;
 
-public class DiscountCodeRepository : Repository<Discount, DiscountDto>, IDiscountCodeRepository
+public class DiscountCodeRepository : Repository<Discount, DiscountDto, DiscountQuery>, IDiscountCodeRepository
 {
     public DiscountCodeRepository(HiTechStoreDbContext context, IMapper mapper) : base(context, mapper)
     {
@@ -43,11 +43,25 @@ public class DiscountCodeRepository : Repository<Discount, DiscountDto>, IDiscou
         ).ToListAsync();
     }
 
-    protected override IQueryable<Discount> GetAllQueryBuilder(IQueryable<Discount> queryBuilder, BaseQuery? queryParams = null)
+    protected override IQueryable<Discount> GetAllQueryBuilder(IQueryable<Discount> queryBuilder, DiscountQuery? queryParams = null)
     {
         if (queryParams is null)
         {
             return queryBuilder;
+        }
+
+        switch (queryParams.DiscountType)
+        {
+            case DiscountType.Codes:
+                {
+                    queryBuilder = queryBuilder.Where(d => d.IsDiscountCode);
+                    break;
+                }
+            case DiscountType.Products:
+                {
+                    queryBuilder = queryBuilder.Where(d => !d.IsDiscountCode);
+                    break;
+                }
         }
 
 
