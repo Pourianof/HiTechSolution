@@ -48,7 +48,7 @@ public class DiscountService(
 
             var discountCode = unitOfWork.DiscountRepository.GetDiscountCodeByNameAsync(code).Result;
 
-            hasGenerated = discountCode is null;
+            hasGenerated = discountCode is not null;
         }
 
         return code!;
