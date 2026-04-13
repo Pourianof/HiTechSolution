@@ -15,47 +15,11 @@ public class ApplicationExceptionHandler : IExceptionHandler
 
         switch (exception)
         {
-            case ModelException ex:
+            case Exceptions.ApplicationException ex:
                 {
-                    var validationProblemDetails = new ValidationProblemDetails(
-                        new Dictionary<string, string[]>
-                        {
-                        { ex.FieldName, new[] { ex.Message } }
-                        })
-                    {
-                        Status = StatusCodes.Status400BadRequest,
-                        Title = "Validation Error"
-                    };
+                    problemDetails = ex.ProvideProblemDetails();
 
-                    httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
-                    await httpContext.Response.WriteAsJsonAsync(validationProblemDetails, cancellationToken);
-                    return true;
-                }
-
-            case NotAllowedException ex:
-                {
-                    problemDetails = new ProblemDetails
-                    {
-                        Title = ex.Title,
-                        Detail = ex.Message,
-                        Status = StatusCodes.Status401Unauthorized
-                    };
-
-                    httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                    await httpContext.Response.WriteAsJsonAsync(new UnauthorizedObjectResult(problemDetails), cancellationToken);
-                    return true;
-                }
-
-            case Core.Exceptions.ApplicationException ex:
-                {
-                    problemDetails = new ProblemDetails
-                    {
-                        Title = ex.Title,
-                        Detail = ex.Message,
-                        Status = StatusCodes.Status400BadRequest
-                    };
-
-                    httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
+                    httpContext.Response.StatusCode = (int)ex.Status;
                     await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
                     return true;
                 }
