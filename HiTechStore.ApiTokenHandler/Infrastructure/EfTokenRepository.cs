@@ -67,6 +67,8 @@ internal class EfTokenRepository(AuthTokensDbContext dbContext) : ITokenReposito
            }
         );
 
+        await dbContext.SaveChangesAsync();
+
         return hashed;
     }
 
