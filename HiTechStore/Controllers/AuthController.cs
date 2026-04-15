@@ -157,6 +157,7 @@ public class AuthController : ControllerBase
         var authData = new LoginResponseDto
         {
             Token = token.Token,
+            RefreshToken = token.RefreshToken,
             ExpiresAt = expiration,
             User = new UserDto
             {
