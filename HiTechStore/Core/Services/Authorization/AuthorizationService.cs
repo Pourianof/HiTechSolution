@@ -7,7 +7,7 @@ using HiTechStore.Models;
 namespace HiTechStore.Core.Services.Authorization;
 
 
-public class Authorization(IUnitOfWork unitOfWork) : IAuthorizationService
+public class AuthorizationService(IUnitOfWork unitOfWork) : IAuthorizationService
 {
     public async Task<User?> LoginAsync(LoginDto loginDto)
     {
@@ -18,13 +18,13 @@ public class Authorization(IUnitOfWork unitOfWork) : IAuthorizationService
         }
 
         User? user;
-        if (loginDto.Email is null)
+        if (loginDto.Email is not null)
         {
-            user = await unitOfWork.UserRepository.GetUserByEmailAsync(loginDto.Username!);
+            user = await unitOfWork.UserRepository.GetUserByEmailAsync(loginDto.Email!);
         }
         else
         {
-            user = await unitOfWork.UserRepository.GetUserByEmailAsync(loginDto.Email!);
+            user = await unitOfWork.UserRepository.GetUserByUsernameAsync(loginDto.Username!);
         }
 
         if (user == null || !await unitOfWork.UserRepository.CheckUserPasswordAsync(user, loginDto.Password!))

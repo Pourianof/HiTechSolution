@@ -18,6 +18,8 @@ public static class DependencyRegistrations
             }
         );
 
+        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+
         services.AddTransient<IRandomSecureTokenGenerator, RandomTokenGenerator>();
         services.AddScoped<ITokenRepository, EfTokenRepository>();
         services.AddScoped<ITokenHandler, JwtTokenHandler>();

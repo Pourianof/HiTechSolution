@@ -17,12 +17,12 @@ public class UserRepository(UserManager<User> userManager) : IUserRepository
 
     public Task<User?> GetUserByUsernameAsync(string username)
     {
-        return userManager.FindByIdAsync(username);
+        return userManager.FindByNameAsync(username);
     }
 
     public Task<User?> GetUserByEmailAsync(string email)
     {
-        return userManager.FindByIdAsync(email);
+        return userManager.FindByEmailAsync(email);
     }
 
     public Task<bool> CheckUserPasswordAsync(User user, string password)

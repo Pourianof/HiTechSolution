@@ -51,3 +51,5 @@ wwwroot/
 node_modules/
 admin.conf
 *.pem
+
+*.http
