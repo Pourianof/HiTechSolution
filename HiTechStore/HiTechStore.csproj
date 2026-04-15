@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HiTechPay.Sdk\HiTechPay.Sdk.csproj" />
+    <ProjectReference Include="..\HiTechStore.ApiTokenHandler\HiTechStore.ApiTokenHandler.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,6 +1,8 @@
+using System.Security.Claims;
+
 using AutoMapper;
 
-using HiTechStore.Controllers.ActionFilters;
+using HiTechStore.ApiTokenHandler.Core;
 using HiTechStore.Data.DTOs.Authorization;
 using HiTechStore.Models;
 
@@ -14,12 +16,18 @@ public class AuthController : ControllerBase
 {
     private readonly UserManager<User> _userManager;
     private readonly IMapper _mapper;
+    private readonly ITokenHandler _tokenHelper;
+    private readonly HiTechStore.Core.Services.Authorization.IAuthorizationService _authorizationService;
 
     public AuthController(UserManager<User> userManager,
-                          IMapper mapper)
+                          IMapper mapper,
+                          ITokenHandler tokenHelper,
+                          HiTechStore.Core.Services.Authorization.IAuthorizationService authorizationService)
     {
         _userManager = userManager;
         _mapper = mapper;
+        _tokenHelper = tokenHelper;
+        _authorizationService = authorizationService;
     }
 
     private async Task<IActionResult> RegisterUser(RegisterDto dto)
@@ -108,11 +116,95 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    [TypeFilter(typeof(LoginValidationAttribute))]
-    public IActionResult Login([FromBody] LoginDto dto)
+    public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
     {
-        var authData = HttpContext.Items["AuthData"];
+        if (loginDto == null || !ModelState.IsValid)
+        {
+            return new BadRequestObjectResult(ModelState);
+        }
+
+        if (loginDto.Email == null && loginDto.Username == null)
+        {
+            ModelState.AddModelError(
+                "Login",
+                "Email or Username is required"
+            );
+
+            return new BadRequestObjectResult(new ValidationProblemDetails(ModelState)
+            {
+                Title = "Invalid Login",
+                Status = StatusCodes.Status400BadRequest,
+                Detail = "Email or Username is required"
+            });
+        }
+
+        User? user = await _authorizationService.LoginAsync(loginDto);
+
+        if (user == null)
+        {
+            var authorizationProblemDetail = new ProblemDetails()
+            {
+                Detail = "Invalid username or password",
+                Title = "Unauthorized",
+                Status = StatusCodes.Status401Unauthorized
+            };
+            return new UnauthorizedObjectResult(authorizationProblemDetail);
+        }
+
+        var expiration = DateTime.UtcNow.AddHours(1);
+        var token = await _tokenHelper.IssueToken(user.Claims ?? [], user.Id, expiration);
+
+        var authData = new LoginResponseDto
+        {
+            Token = token.Token,
+            ExpiresAt = expiration,
+            User = new UserDto
+            {
+                UserName = user.UserName,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                Roles = user.Roles?.Select(r => r.Name!)
+            }
+        };
         return Ok(authData);
     }
 
+    [HttpGet("refresh")]
+    [Authorize]
+    public async Task<ActionResult> Refresh([FromQuery] string refreshToken)
+    {
+        var user = await _authorizationService.GetUserAsync(User.Claims);
+
+        if (user is null)
+        {
+            return Unauthorized();
+        }
+
+        var expiration = DateTime.UtcNow.AddMinutes(30);
+        var token = await _tokenHelper.IssueTokenForRefreshToken(refreshToken, User.Claims, expiration);
+
+        return Ok(
+            new LoginResponseDto
+            {
+                Token = token,
+                ExpiresAt = expiration
+            }
+        );
+    }
+
+    [Authorize]
+    public async Task<ActionResult> Logout()
+    {
+        var user = await _authorizationService.GetUserAsync(User.Claims);
+
+        if (user is null)
+        {
+            return Unauthorized();
+        }
+
+        await _tokenHelper.RevokeRefreshToken(User.Claims);
+
+        return Ok();
+    }
 }

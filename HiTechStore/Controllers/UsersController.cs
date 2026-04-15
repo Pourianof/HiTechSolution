@@ -39,7 +39,7 @@ public class UsersController(UserManager<User> userManager) : ControllerBase
             FirstName = user.FirstName,
             LastName = user.LastName,
             Email = user.Email,
-            Role = role
+            // Role = role
         };
     }
 }

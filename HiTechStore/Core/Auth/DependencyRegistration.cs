@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Text;
 
+using HiTechStore.ApiTokenHandler.Core;
 using HiTechStore.Core.Auth.Authorization;
 using HiTechStore.Data;
 using HiTechStore.Models;
@@ -66,6 +67,27 @@ public static class AuthRegistration
                         context.Response.ContentType = "application/problem+json";
 
                         await context.Response.WriteAsJsonAsync(problem);
+                    },
+                    OnTokenValidated = async (context) =>
+                    {
+
+                        if (context.Principal?.Claims is null)
+                        {
+                            context.Fail("No token claims detected");
+                            return;
+                        }
+
+                        var serviceProvider = context.HttpContext.RequestServices;
+
+                        var tokenHandler = serviceProvider.GetRequiredService<ITokenHandler>();
+
+                        var isValid = await tokenHandler.IsJwtTokenAuthorized(context.Principal.Claims);
+
+                        if (isValid)
+                        {
+                            context.Fail("User is not valid.");
+                            return;
+                        }
                     }
                 };
                 options.TokenValidationParameters = new TokenValidationParameters

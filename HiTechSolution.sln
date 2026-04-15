@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HiTechPay.Sdk", "HiTechPay.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HiTechStore.UnitTests", "HiTechStore.UnitTests\HiTechStore.UnitTests.csproj", "{9A91A614-FDD7-4EB1-8D22-0991E1E5414A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HiTechStore.ApiTokenHandler", "HiTechStore.ApiTokenHandler\HiTechStore.ApiTokenHandler.csproj", "{6FDB3A8B-3A91-4034-AB31-3CE3BCEF7FDE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,18 @@ Global
 		{9A91A614-FDD7-4EB1-8D22-0991E1E5414A}.Release|x64.Build.0 = Release|Any CPU
 		{9A91A614-FDD7-4EB1-8D22-0991E1E5414A}.Release|x86.ActiveCfg = Release|Any CPU
 		{9A91A614-FDD7-4EB1-8D22-0991E1E5414A}.Release|x86.Build.0 = Release|Any CPU
+		{6FDB3A8B-3A91-4034-AB31-3CE3BCEF7FDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FDB3A8B-3A91-4034-AB31-3CE3BCEF7FDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FDB3A8B-3A91-4034-AB31-3CE3BCEF7FDE}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6FDB3A8B-3A91-4034-AB31-3CE3BCEF7FDE}.Debug|x64.Build.0 = Debug|Any CPU
+		{6FDB3A8B-3A91-4034-AB31-3CE3BCEF7FDE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6FDB3A8B-3A91-4034-AB31-3CE3BCEF7FDE}.Debug|x86.Build.0 = Debug|Any CPU
+		{6FDB3A8B-3A91-4034-AB31-3CE3BCEF7FDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FDB3A8B-3A91-4034-AB31-3CE3BCEF7FDE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6FDB3A8B-3A91-4034-AB31-3CE3BCEF7FDE}.Release|x64.ActiveCfg = Release|Any CPU
+		{6FDB3A8B-3A91-4034-AB31-3CE3BCEF7FDE}.Release|x64.Build.0 = Release|Any CPU
+		{6FDB3A8B-3A91-4034-AB31-3CE3BCEF7FDE}.Release|x86.ActiveCfg = Release|Any CPU
+		{6FDB3A8B-3A91-4034-AB31-3CE3BCEF7FDE}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

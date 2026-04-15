@@ -1,3 +1,4 @@
+using HiTechStore.ApiTokenHandler;
 using HiTechStore.Core.Auth;
 using HiTechStore.Presentation.Auth;
 
@@ -5,9 +6,9 @@ namespace HiTechStore.Presentation;
 
 public static class DependencyRegistration
 {
-    public static IServiceCollection AddPresentation(this IServiceCollection services)
+    public static WebApplicationBuilder UsePresentation(this WebApplicationBuilder builder)
     {
-        services.AddScoped<ICurrentUserProvider>(
+        builder.Services.AddScoped<ICurrentUserProvider>(
             sp =>
             {
                 var httpContext = sp.GetRequiredService<IHttpContextAccessor>().HttpContext;
@@ -15,6 +16,14 @@ public static class DependencyRegistration
             }
         );
 
-        return services;
+        var baseConnStr = builder.Configuration.GetConnectionString("DefaultConnection");
+        var username = builder.Configuration["Db:Username"];
+        var password = builder.Configuration["Db:Password"];
+
+        var fullConnStr = $"{baseConnStr}Username={username};Password={password}";
+
+        builder.Services.AddTokenHandler(fullConnStr);
+
+        return builder;
     }
 }
