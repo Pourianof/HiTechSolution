@@ -55,6 +55,14 @@ public class InMemoryTokenRepository : ITokenRepository
         return refToken.Token;
     }
 
+    public async Task<bool> RemoveByRawToken(string token)
+    {
+        var hashed = await Hash(token);
+        return _tokenStore.RemoveAll(
+            rt => rt.Token == hashed
+        ) > 0;
+    }
+
     public async Task<bool> RemoveToken(string token)
     {
         return _tokenStore.RemoveAll(
