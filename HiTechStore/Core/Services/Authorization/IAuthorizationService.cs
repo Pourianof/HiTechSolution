@@ -9,4 +9,5 @@ public interface IAuthorizationService
 {
     Task<User?> LoginAsync(LoginDto loginDto);
     Task<User?> GetUserAsync(IEnumerable<Claim> claims);
+    Task<User?> GetUserByIdAsync(string userId);
 }

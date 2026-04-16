@@ -72,5 +72,20 @@ public class AuthorizationService(IUnitOfWork unitOfWork) : IAuthorizationServic
             new Claim(ClaimTypes.Email, user.Email!),
         ];
     }
+
+    public async Task<User?> GetUserByIdAsync(string userId)
+    {
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId);
+
+        if (user is null)
+        {
+            return default;
+        }
+
+        var roles = user.Roles?.Select(r => r.Name!) ?? [IdentityRoles.User];
+        user.Claims = ProvideUserClaims(user, roles);
+
+        return user;
+    }
 }
 
