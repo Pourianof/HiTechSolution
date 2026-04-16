@@ -151,7 +151,7 @@ public class AuthController : ControllerBase
             return new UnauthorizedObjectResult(authorizationProblemDetail);
         }
 
-        var expiration = DateTime.UtcNow.AddHours(1);
+        var expiration = DateTime.UtcNow.AddMinutes(10); // 10 minute jwt lifetime
         var token = await _tokenHelper.IssueToken(user.Claims ?? [], user.Id, expiration);
 
         var authData = new LoginResponseDto
@@ -172,38 +172,40 @@ public class AuthController : ControllerBase
     }
 
     [HttpGet("refresh")]
-    [Authorize]
     public async Task<ActionResult> Refresh([FromQuery] string refreshToken)
     {
-        var user = await _authorizationService.GetUserAsync(User.Claims);
+        var userId = await _tokenHelper.GetRefreshTokenUserId(
+            refreshToken
+        );
+
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+
+        var user = await _authorizationService.GetUserByIdAsync(userId);
 
         if (user is null)
         {
             return Unauthorized();
         }
 
-        var expiration = DateTime.UtcNow.AddMinutes(30);
-        var token = await _tokenHelper.IssueTokenForRefreshToken(refreshToken, User.Claims, expiration);
+        var expiration = DateTime.UtcNow.AddMinutes(10);
+        var token = await _tokenHelper.IssueTokenForRefreshToken(refreshToken, user.Claims!, expiration);
 
         return Ok(
             new LoginResponseDto
             {
                 Token = token,
+                RefreshToken = refreshToken,
                 ExpiresAt = expiration
             }
         );
     }
 
-    [Authorize]
-    public async Task<ActionResult> Logout()
+
+    public async Task<ActionResult> Logout([FromQuery] string refreshToken)
     {
-        var user = await _authorizationService.GetUserAsync(User.Claims);
-
-        if (user is null)
-        {
-            return Unauthorized();
-        }
-
         await _tokenHelper.RevokeRefreshToken(User.Claims);
 
         return Ok();
