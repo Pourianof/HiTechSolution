@@ -203,10 +203,10 @@ public class AuthController : ControllerBase
         );
     }
 
-
+    [Route("logout")]
     public async Task<ActionResult> Logout([FromQuery] string refreshToken)
     {
-        await _tokenHelper.RevokeRefreshToken(User.Claims);
+        await _tokenHelper.RevokeRefreshToken(refreshToken);
 
         return Ok();
     }
