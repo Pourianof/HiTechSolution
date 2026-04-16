@@ -10,5 +10,6 @@ public interface ITokenHandler
     Task<string> IssueTokenForRefreshToken(string refreshToken, IEnumerable<Claim> claims, DateTime? expiration);
     Task<bool> IsJwtTokenAuthorized(IEnumerable<Claim> claims);
     Task RevokeRefreshToken(IEnumerable<Claim> claims);
+    Task RevokeRefreshToken(string token);
     Task<string?> GetRefreshTokenUserId(string token);
 }

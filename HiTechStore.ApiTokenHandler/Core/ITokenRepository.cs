@@ -9,5 +9,5 @@ public interface ITokenRepository
     Task<RefreshToken?> GetTokenFromRaw(string token);
     Task<IEnumerable<RefreshToken>> GetTokensForUser(string userId);
     Task<bool> RemoveToken(string token);
-
+    Task<bool> RemoveByRawToken(string token);
 }

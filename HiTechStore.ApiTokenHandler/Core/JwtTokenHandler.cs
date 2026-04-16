@@ -108,6 +108,10 @@ public class JwtTokenHandler(
 
         await tokenRepository.RemoveToken(hash);
     }
+    public async Task RevokeRefreshToken(string token)
+    {
+        await tokenRepository.RemoveByRawToken(token);
+    }
 
     public async Task<string?> GetRefreshTokenUserId(string token)
     {

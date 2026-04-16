@@ -77,4 +77,10 @@ internal class EfTokenRepository(AuthTokensDbContext dbContext) : ITokenReposito
     {
         return await dbContext.RefreshTokens.Where(e => e.Token == token).ExecuteDeleteAsync() > 0;
     }
+
+    public async Task<bool> RemoveByRawToken(string token)
+    {
+        var hashed = await Hash(token);
+        return await dbContext.RefreshTokens.Where(e => e.Token == hashed).ExecuteDeleteAsync() > 0;
+    }
 }
