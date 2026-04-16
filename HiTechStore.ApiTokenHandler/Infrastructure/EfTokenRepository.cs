@@ -28,7 +28,7 @@ internal class EfTokenRepository(AuthTokensDbContext dbContext) : ITokenReposito
         }
     }
 
-    public async Task<RefreshToken?> GetTokenFromHash(string token)
+    public async Task<RefreshToken?> GetTokenFromRaw(string token)
     {
         var hashed = await Hash(token);
 
@@ -37,10 +37,10 @@ internal class EfTokenRepository(AuthTokensDbContext dbContext) : ITokenReposito
         );
     }
 
-    public Task<RefreshToken?> GetTokenFromRaw(string token)
+    public Task<RefreshToken?> GetTokenFromHash(string hashedToken)
     {
         return dbContext.RefreshTokens.FirstOrDefaultAsync(
-           rt => rt.Token == token
+           rt => rt.Token == hashedToken
         );
     }
 
@@ -56,15 +56,16 @@ internal class EfTokenRepository(AuthTokensDbContext dbContext) : ITokenReposito
         return Hash(token);
     }
 
-    public async Task<string> RegisterToken(string token, string userId)
+    public async Task<string> RegisterToken(RefreshToken refreshToken)
     {
-        var hashed = await Hash(token);
+        var hashed = await Hash(refreshToken.Token!);
         await dbContext.RefreshTokens.AddAsync(
-           new()
-           {
-               Token = hashed,
-               UserId = userId
-           }
+            new RefreshToken
+            {
+                Token = hashed,
+                UserId = refreshToken.UserId,
+                ExpirateAt = refreshToken.ExpirateAt
+            }
         );
 
         await dbContext.SaveChangesAsync();

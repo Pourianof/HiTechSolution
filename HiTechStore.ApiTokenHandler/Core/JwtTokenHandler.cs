@@ -11,11 +11,25 @@ public class JwtTokenHandler(
     IJwtTokenGenerator jwtTokenGenerator
 ) : ITokenHandler
 {
-    public async Task<IssuedTokensDto> IssueToken(IEnumerable<Claim> claims, string userId, DateTime? expiration)
+    public async Task<IssuedTokensDto> IssueToken(
+        IEnumerable<Claim> claims,
+        string userId,
+        DateTime? jwtExpiration,
+        DateTime? refreshTokenExpiration = default
+    )
     {
         var refreshToken = await tokenGenerator.Genreate();
 
-        await tokenRepository.RegisterToken(refreshToken, userId);
+        refreshTokenExpiration ??= DateTime.UtcNow.AddDays(30); // by default 30 day
+
+        await tokenRepository.RegisterToken(
+            new()
+            {
+                Token = refreshToken,
+                UserId = userId,
+                ExpirateAt = refreshTokenExpiration.Value
+            }
+        );
 
         claims = claims.Append(
             new Claim(
@@ -25,7 +39,7 @@ public class JwtTokenHandler(
 
         return new()
         {
-            Token = jwtTokenGenerator.CreateJwtToken(claims, expiration),
+            Token = jwtTokenGenerator.CreateJwtToken(claims, jwtExpiration),
             RefreshToken = refreshToken
         };
     }
@@ -93,5 +107,23 @@ public class JwtTokenHandler(
         }
 
         await tokenRepository.RemoveToken(hash);
+    }
+
+    public async Task<string?> GetRefreshTokenUserId(string token)
+    {
+        var refToken = await tokenRepository.GetTokenFromRaw(token);
+
+        if (refToken is null)
+        {
+            return null;
+        }
+
+        var now = DateTime.UtcNow;
+        if (refToken.ExpirateAt < now)
+        {
+            return null;
+        }
+
+        return refToken.UserId;
     }
 }
