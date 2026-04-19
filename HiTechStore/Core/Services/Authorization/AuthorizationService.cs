@@ -9,6 +9,21 @@ namespace HiTechStore.Core.Services.Authorization;
 
 public class AuthorizationService(IUnitOfWork unitOfWork) : IAuthorizationService
 {
+
+    private async Task<User?> EnrichUserWithClaimsAndRoles(User user)
+    {
+        var roles = await unitOfWork.UserRepository.GetUserRoles(user);
+
+        if (!roles.Any())
+        {
+            roles = [IdentityRoles.User];
+        }
+
+        user.Claims = ProvideUserClaims(user, roles!);
+        user.Roles = roles;
+
+        return user;
+    }
     public async Task<User?> LoginAsync(LoginDto loginDto)
     {
 
@@ -32,9 +47,7 @@ public class AuthorizationService(IUnitOfWork unitOfWork) : IAuthorizationServic
             return null;
         }
 
-        var roles = user.Roles?.Select(r => r.Name) ?? [IdentityRoles.User];
-
-        user.Claims = ProvideUserClaims(user, roles!);
+        user = await EnrichUserWithClaimsAndRoles(user);
 
         return user;
 
@@ -82,8 +95,7 @@ public class AuthorizationService(IUnitOfWork unitOfWork) : IAuthorizationServic
             return default;
         }
 
-        var roles = user.Roles?.Select(r => r.Name!) ?? [IdentityRoles.User];
-        user.Claims = ProvideUserClaims(user, roles);
+        user = await EnrichUserWithClaimsAndRoles(user);
 
         return user;
     }

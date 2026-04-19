@@ -40,4 +40,9 @@ public class UserRepository(UserManager<User> userManager) : IUserRepository
         await userManager.AddClaimsAsync(user, claims);
     }
 
+    public async Task<IEnumerable<string>> GetUserRoles(User user)
+    {
+        return await userManager.GetRolesAsync(user);
+    }
+
 }

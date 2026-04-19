@@ -13,4 +13,5 @@ public interface IUserRepository
     Task<bool> CheckUserPasswordAsync(User user, string password);
     Task<IEnumerable<Claim>> GetUserClaims(User user);
     Task AddClaimUser(User user, IEnumerable<Claim> claims);
+    Task<IEnumerable<string>> GetUserRoles(User user);
 }

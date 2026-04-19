@@ -165,7 +165,7 @@ public class AuthController : ControllerBase
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Email = user.Email,
-                Roles = user.Roles?.Select(r => r.Name!)
+                Roles = user.Roles
             }
         };
         return Ok(authData);

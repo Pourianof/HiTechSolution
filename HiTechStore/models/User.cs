@@ -12,8 +12,10 @@ namespace HiTechStore.Models
         public DateTime RegisteredAt { get; set; }
         virtual public IEnumerable<Order>? Orders { get; set; }
         virtual public Cart? ActiveCart { get; set; }
-        virtual public IEnumerable<IdentityRole>? Roles { get; set; }
+        // maybe it better to include these two props in dto, but im tired
         [NotMapped]
         public IEnumerable<Claim>? Claims { get; set; }
+        [NotMapped]
+        public IEnumerable<string> Roles { get; set; } = [];
     }
 }
