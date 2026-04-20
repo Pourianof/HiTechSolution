@@ -8,7 +8,7 @@ using HiTechStore.Data.DTOs.Product;
 using HiTechStore.Data.Mapping;
 using HiTechStore.Data.Queries;
 using HiTechStore.Data.Repositories.Helpers;
-using HiTechStore.Helpers.Expression;
+using HiTechStore.Helpers.Expressions;
 using HiTechStore.Helpers.URLFilterQuery;
 using HiTechStore.Models;
 

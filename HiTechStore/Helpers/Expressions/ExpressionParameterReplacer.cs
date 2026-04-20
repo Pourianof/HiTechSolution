@@ -1,9 +1,7 @@
 
 using System.Linq.Expressions;
 
-namespace HiTechStore.Helpers.Expression;
-
-using Expr = System.Linq.Expressions.Expression;
+namespace HiTechStore.Helpers.Expressions;
 
 public class ExpressionParameterReplacer : ExpressionVisitor
 {
@@ -16,7 +14,7 @@ public class ExpressionParameterReplacer : ExpressionVisitor
         _newParameter = newParameter;
     }
 
-    protected override Expr VisitParameter(ParameterExpression node)
+    protected override Expression VisitParameter(ParameterExpression node)
     {
         return node == _oldParameter ? _newParameter : base.VisitParameter(node);
     }
@@ -30,6 +28,6 @@ public class ExpressionParameterReplacer : ExpressionVisitor
         var replacer = new ExpressionParameterReplacer(oldParam, newParameter);
         var newBody = replacer.Visit(expression.Body);
 
-        return Expr.Lambda(newBody, newParameter);
+        return Expression.Lambda(newBody, newParameter);
     }
 }

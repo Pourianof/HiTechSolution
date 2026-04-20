@@ -1,22 +1,19 @@
 using System.Linq.Expressions;
 
-namespace HiTechStore.Helpers.Expression;
-
-using Expr = System.Linq.Expressions.Expression;
-
+namespace HiTechStore.Helpers.Expressions;
 
 public class ExpressionProjectModifier<T, TTarget> : ExpressionVisitor
 {
-    private readonly Dictionary<string, Expr> _propertyModifications;
+    private readonly Dictionary<string, Expression> _propertyModifications;
     private readonly ParameterExpression _modelParameter;
 
-    public ExpressionProjectModifier(Dictionary<string, Expr> propertyModifications, ParameterExpression modelParameter)
+    public ExpressionProjectModifier(Dictionary<string, Expression> propertyModifications, ParameterExpression modelParameter)
     {
         _propertyModifications = propertyModifications;
         _modelParameter = modelParameter;
     }
 
-    protected override Expr VisitMemberInit(MemberInitExpression node)
+    protected override Expression VisitMemberInit(MemberInitExpression node)
     {
         var existingBindings = node.Bindings.ToList();
         var newBindings = new List<MemberBinding>();
@@ -33,7 +30,7 @@ public class ExpressionProjectModifier<T, TTarget> : ExpressionVisitor
                         lambda, _modelParameter
                     );
                 }
-                newBindings.Add(Expr.Bind(memberBinding.Member, newValue));
+                newBindings.Add(Expression.Bind(memberBinding.Member, newValue));
             }
             else
             {
@@ -49,12 +46,12 @@ public class ExpressionProjectModifier<T, TTarget> : ExpressionVisitor
                 var property = typeof(TTarget).GetProperty(newProp);
                 if (property != null)
                 {
-                    newBindings.Add(Expr.Bind(property, _propertyModifications[newProp]));
+                    newBindings.Add(Expression.Bind(property, _propertyModifications[newProp]));
                 }
             }
         }
 
-        return Expr.MemberInit(node.NewExpression, newBindings);
+        return Expression.MemberInit(node.NewExpression, newBindings);
     }
 }
 
@@ -62,10 +59,10 @@ public static class ProjectionExtensions
 {
     public static Expression<Func<T, TTarget>> ModifyProjection<T, TTarget>(
         this Expression<Func<T, TTarget>> originalProjection,
-        Dictionary<string, Expr> modifications)
+        Dictionary<string, Expression> modifications)
     {
         var modifier = new ExpressionProjectModifier<T, TTarget>(modifications, originalProjection.Parameters.First());
         var newBody = modifier.Visit(originalProjection.Body);
-        return Expr.Lambda<Func<T, TTarget>>(newBody, originalProjection.Parameters);
+        return Expression.Lambda<Func<T, TTarget>>(newBody, originalProjection.Parameters);
     }
 }

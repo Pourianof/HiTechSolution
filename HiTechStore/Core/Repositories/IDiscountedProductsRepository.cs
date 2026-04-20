@@ -6,6 +6,7 @@ namespace HiTechStore.Core.Repositories;
 
 public interface IDiscountedProductsRepository
 {
+    // Task<PagedResultDto<ProductDto>> GetDiscountedProducts(IEnumerable<DiscountRule> rules, ProductQuery? productQuery = default);
     Task<IEnumerable<ProductDto>> GetDiscountedProducts(IEnumerable<DiscountRule> rules, ProductQuery? productQuery = default);
     Task<IEnumerable<ProductDto>> GetProductsByCondition(ConditionComponent conditionTree);
 }
