@@ -104,10 +104,10 @@ public static class ProductFilterApplier
     }
 
 
-    public static IQueryable<Product> Apply(IQueryable<Product> baseQuery,
+    public static IQueryable<TProduct> Apply<TProduct>(IQueryable<TProduct> baseQuery,
         Dictionary<string, QueryFilterItem> productComponentFilters,
         CategoryFilters categoryFilters
-        )
+        ) where TProduct : Product
     {
         if (productComponentFilters.Any())
         {

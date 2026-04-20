@@ -58,6 +58,16 @@ namespace HiTechStore.Controllers
             return product;
         }
 
+        [HttpGet("on-sales")]
+        public async Task<ActionResult<IEnumerable<ProductDto>>> GetOnSaleProducts()
+        {
+            var onSaleProducts = await _productService.GetOnSaleProducts();
+
+            return Ok(
+                onSaleProducts
+            );
+        }
+
 
         [HttpPost]
         [Authorize(Roles = $"{IdentityRoles.Admin},{IdentityRoles.Manager}")]

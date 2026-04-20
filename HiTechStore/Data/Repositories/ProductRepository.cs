@@ -10,6 +10,7 @@ using HiTechStore.Data.DTOs.Component;
 using HiTechStore.Data.DTOs.Product;
 using HiTechStore.Data.Mapping;
 using HiTechStore.Data.Queries;
+using HiTechStore.Data.Repositories.Helpers;
 using HiTechStore.Helpers.Repository;
 using HiTechStore.Helpers.URLFilterQuery;
 using HiTechStore.Helpers.URLFilterQuery.QueryAppliers;
@@ -21,10 +22,8 @@ namespace HiTechStore.Data.Repositories
 {
     public class ProductRepository : Repository<Product, ProductDto, ProductQuery>, IProductRepository
     {
-        private IConditionComponentTreeToLambdaExpression _conditionToExpressionMapper;
         public ProductRepository(HiTechStoreDbContext context, IMapper mapper, IConditionComponentTreeToLambdaExpression conditionToExpressionMapper) : base(context, mapper)
         {
-            _conditionToExpressionMapper = conditionToExpressionMapper;
         }
         /**
             Override the Project method for handling the projection manually because:
@@ -43,166 +42,14 @@ namespace HiTechStore.Data.Repositories
         */
         protected override IQueryable<ProductDto> Project(IQueryable<Product> queryable)
         {
-            return queryable.Select(p => new ProductDto
-            {
-                ProductId = p.ProductId,
-                Title = p.Title,
-                AverageScore = p.Scores.Any()
-                                ? p.Scores.Average(s => (double)s.Score)
-                                : 0.0,
-                ScoreCounts = p.Scores.Count(),
-                AuthorId = p.AuthorId,
-                BrandModel = new BrandModelDto
-                {
-                    BrandName = p.BrandModel!.Brand!.Name,
-                    ModelName = p.BrandModel.Name,
-                    Descriotion = p.BrandModel.Description,
-                    ModelId = p.BrandModel.BrandModelId
-                },
-                Components = p.Category!.Components!.Select(
-                    (c) => new ProductComponentDto()
-                    {
-                        Name = c.Component!.Name,
-                        ComponentTypeId = c.ComponentTypeId,
-                        Description = c.Component!.Description,
-                        Models = p.ComponentModels.Where(m => m.ComponentTypeId == c.ComponentTypeId).Select(
-                            (m) => new ComponentModelDto()
-                            {
-                                BrandModel = m.BrandModel != null ? new BrandModelDto()
-                                {
-                                    BrandName = m.BrandModel.Brand!.Name,
-                                    Descriotion = m.BrandModel.Description,
-                                    ModelId = m.BrandModel.BrandModelId,
-                                    ModelName = m.BrandModel.Name
-                                } : null,
-                                ComponentModelId = m.ComponentModelId,
-                                ComponentTypeId = c.ComponentTypeId,
-                                Description = m.Description,
-                                Properties = m.Properties!.Select(
-                                    (prop) => new PropertyValueDto()
-                                    {
-                                        Name = prop.Property!.Name,
-                                        PropertyId = prop.PropertyId,
-                                        Value = prop.Value!.ValueNumber != null ? (object?)prop.Value!.ValueNumber :
-                                                prop.Value!.ValueDateTime != null ? (object?)prop.Value!.ValueDateTime :
-                                                prop.Value!.ValueBoolean != null ? (object?)prop.Value!.ValueBoolean :
-                                                prop.Value!.ValueString,
-                                        ValueType = prop.Property.PropertyType
-                                    }
-                                )
-                            }
-                        )
-                    }
-                ).ToList(),
-                Variations = p.Variations.Select(pv => new ProductVariationDto()
-                {
-                    ProductVariationId = pv.ProductVariationId,
-                    Color = pv.Color,
-                    Inventory = pv.Inventory,
-                    Media = pv.Media.Select(m => new ProductMediaDto()
-                    {
-                        IsMain = m.IsMain,
-                        ProductMediaId = m.ProductMediaId,
-                        Url = m.FilePath,
-                        Type = m.Type == MediaType.Image ? "Image" : "Video"
-                    }).ToList(),
-                    Price = pv.Price
-                }).ToList(),
-                CategoryId = p.CategoryId,
-                Description = p.Description,
-                Properties = p.Properties.Select(
-                    (prop) => new PropertyValueDto()
-                    {
-                        Name = prop.Property!.Name,
-                        PropertyId = prop.ProductId,
-                        Value = prop.Value!.ValueNumber != null ? (object?)prop.Value!.ValueNumber :
-                                prop.Value!.ValueDateTime != null ? (object?)prop.Value!.ValueDateTime :
-                                prop.Value!.ValueBoolean != null ? (object?)prop.Value!.ValueBoolean :
-                                prop.Value!.ValueString,
-                        ValueType = prop.Property.PropertyType
-                    }
-                ).ToList()
-            });
+            return ProductRepositoryHelper.ToDtoProject(queryable);
         }
-
         protected override IQueryable<Product> GetAllQueryBuilder(IQueryable<Product> queryBuilder, ProductQuery? productQueryParams)
         {
-
-            if (productQueryParams is not null)
-            {
-                var categoryId = productQueryParams.Category?.GetValues<int>(QueryOperator.Equal)?.FirstOrDefault();
-                if (categoryId is not null)
-                {
-                    queryBuilder = queryBuilder.Where((p) => categoryId == p.CategoryId);
-                }
-
-                var priceFilters = productQueryParams.Price?.GetFilters(
-                         QueryOperator.GreaterThan |
-                         QueryOperator.GreaterThanOrEqual |
-                         QueryOperator.LessThan |
-                         QueryOperator.LessThanOrEqual
-                 );
-                if (priceFilters is not null && priceFilters.Count() > 0)
-                {
-                    queryBuilder = queryBuilder.ApplyFiltersTo<Product, double>(
-                            priceFilters,
-                            new CollectionQueryApplier<Product, double, ProductVariation>(
-                                (Product product) => product.Variations,
-                                pv => pv.Price
-                            )
-                    );
-                }
-
-                var brandFilters = productQueryParams.Brand?.GetFilters(
-                         QueryOperator.In |
-                         QueryOperator.Equal
-                 );
-                if (brandFilters is not null && brandFilters.Count() > 0)
-                {
-                    queryBuilder = queryBuilder.ApplyFiltersTo<Product, string>(
-                            brandFilters, new SinglePropertyQueryApplier<Product, string>(
-                                (Product product) => product.BrandModel!.Brand!.Name!
-                            )
-                    );
-                }
-
-                queryBuilder = ProductFilterApplier.Apply(queryBuilder, productQueryParams.FilterMaps,
-                                new CategoryFilters([categoryId], productQueryParams.CategoryProperties));
-
-                var sortBy = productQueryParams.SortBy?.GetValue<string>(QueryOperator.Equal);
-                if (sortBy is not null)
-                {
-
-                    Expression<Func<Product, object>> sorter = sortBy switch
-                    {
-                        "created_at" => (Product p) => p.CreatedAt,
-                        "price" => productQueryParams.SortDir?.GetValue<string>(QueryOperator.Equal) == "des" ?
-                                (Product p) =>
-                                    p.Variations.Max(pv => pv.Price) :
-                                (Product p) =>
-                                    p.Variations.Min(pv => pv.Price),
-                        _ => (Product p) => p.CreatedAt
-                    };
-                    queryBuilder = queryBuilder.OrderBy(sorter);
-                }
-                else
-                {
-                    queryBuilder = queryBuilder.OrderBy((Product p) => p.CreatedAt).OrderDescending();
-                }
-
-            }
-            return queryBuilder;
-        }
-
-        public async Task<IEnumerable<ProductDto>> GetDiscountedProducts(ConditionComponent componentTree)
-        {
-            var conditionExpression = _conditionToExpressionMapper.Map<Product>(componentTree);
-
-            return await Project(
-                _dbSet.Where(
-                    conditionExpression
-                )
-            ).ToListAsync();
+            return ProductRepositoryHelper.ApplyQueryParams(
+                queryBuilder,
+                productQueryParams
+            );
         }
 
         protected override IQueryable<Product> GetByIdAsyncQueryBuilder(IQueryable<Product> queryBuilder)

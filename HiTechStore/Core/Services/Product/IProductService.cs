@@ -12,4 +12,5 @@ public interface IProductService
     Task<ProductScore> ScoreProduct(int productId, ProductScoreDto score, string userId);
     Task<Models.Product?> DeleteProduct(int id);
     Task<ProductDto> CreateProduct(ProductCreationDto product, string userId);
+    Task<IEnumerable<ProductDto>> GetOnSaleProducts();
 }

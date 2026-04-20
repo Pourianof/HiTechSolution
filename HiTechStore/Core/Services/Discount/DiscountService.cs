@@ -309,7 +309,7 @@ public class DiscountService(
             };
         }
 
-        var discountedProducts = await unitOfWork.Products.GetDiscountedProducts(conditionTree);
+        var discountedProducts = await unitOfWork.DiscountedProductsRepository.GetProductsByCondition(conditionTree);
 
         return new ConditionParseResult()
         {

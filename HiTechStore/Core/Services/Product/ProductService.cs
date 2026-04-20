@@ -1,4 +1,5 @@
 
+
 using AutoMapper;
 
 using HiTechStore.Core.Auth;
@@ -17,14 +18,39 @@ namespace HiTechStore.Core.Services.Product;
 
 public class ProductService(
     IUnitOfWork unitOfWork,
-    IServiceProvider serviceProvider,
     ICurrentUserProvider currentUserProvider,
     IDiscountConditionScriptParser scriptParser,
     IMapper mapper,
-    IPublicAssetRegisterer assetRegisterer
+    IPublicAssetRegisterer assetRegisterer,
+    IConditionComponentTreeToLambdaExpression conditionTreeToLambdaExprMapper
 ) : IProductService
 {
-    public async Task<PagedResultDto<ProductDto>> GetProducts(ProductQuery query)
+    private void ApplyRulesToProducts(IEnumerable<ProductDto> products, IEnumerable<DiscountRule> rules)
+    {
+        foreach (var rule in rules)
+        {
+            var productConditionTree = rule.ProductRawConditionScript is null ? default : scriptParser.Parse(rule.ProductRawConditionScript);
+
+            var items = products;
+            if (productConditionTree is not null)
+            {
+                // need new instance for every process and remove previous state
+                var filterExpr = conditionTreeToLambdaExprMapper.Map<ProductDto>(productConditionTree, nameof(Product));
+
+                items = products.Where(filterExpr.Compile());
+            }
+
+
+            foreach (var variation in items.SelectMany(i => i.Variations))
+            {
+                variation.Discount += rule.DiscountAction!.Type == DiscountActionType.Percent ?
+                    variation.Price * (double)rule.DiscountAction.Value! / 100 :
+                    (double)rule.DiscountAction.Value;
+            }
+        }
+    }
+
+    private async Task<IEnumerable<DiscountRule>> GetAppliableActiveDiscount()
     {
         var activeDiscounts = await unitOfWork.DiscountRepository.GetActiveDiscountsOfTypeAsync(DiscountType.Products);
 
@@ -32,13 +58,12 @@ public class ProductService(
             (discount) => discount.Rules!
         );
 
-        var products = await unitOfWork.Products.GetAllProjectedAsync(query);
-
         var currentUser = currentUserProvider.UserId is null ?
                             default :
                             await unitOfWork.UserRepository.GetUserByIdAsync(currentUserProvider.UserId);
         var isAuthorized = currentUser is not null;
 
+        List<DiscountRule> applyableRules = [];
         foreach (var rule in rules)
         {
             var productConditionTree = rule.ProductRawConditionScript is null ? default : scriptParser.Parse(rule.ProductRawConditionScript);
@@ -58,8 +83,7 @@ public class ProductService(
                     continue;
                 }
 
-                var userToExprMapper = serviceProvider.GetRequiredService<IConditionComponentTreeToLambdaExpression>();
-                var userEvaluator = userToExprMapper.Map<User>(userConditionTree);
+                var userEvaluator = conditionTreeToLambdaExprMapper.Map<User>(userConditionTree);
                 var isUserAuthorized = userEvaluator.Compile().Invoke(currentUser!);
 
                 if (!isUserAuthorized)
@@ -74,19 +98,24 @@ public class ProductService(
                 continue;
             }
 
-            // need new instance for every process and remove previous state
-            var conditionToExprMapper = serviceProvider.GetRequiredService<IConditionComponentTreeToLambdaExpression>();
-            var filterExpr = conditionToExprMapper.Map<ProductDto>(productConditionTree, nameof(Product));
-
-            var items = products.Items.Where(filterExpr.Compile());
-
-            foreach (var variation in items.SelectMany(i => i.Variations))
-            {
-                variation.Discount += rule.DiscountAction!.Type == DiscountActionType.Percent ?
-                    variation.Price * (double)rule.DiscountAction.Value! / 100 :
-                    (double)rule.DiscountAction.Value;
-            }
+            rule.ProductConditionTree = productConditionTree;
+            applyableRules.Add(rule);
         }
+
+        return applyableRules;
+    }
+
+    public async Task<PagedResultDto<ProductDto>> GetProducts(ProductQuery query)
+    {
+        var activeDiscounts = await unitOfWork.DiscountRepository.GetActiveDiscountsOfTypeAsync(DiscountType.Products);
+
+        var rules = activeDiscounts.SelectMany(
+            (discount) => discount.Rules!
+        );
+
+        var products = await unitOfWork.Products.GetAllProjectedAsync(query);
+
+        ApplyRulesToProducts(products.Items, rules);
 
         return products;
     }
@@ -295,5 +324,17 @@ public class ProductService(
 
 
         return (await unitOfWork.Products.GetByIdProjectedAsync(createdProduct.ProductId))!;
+    }
+
+    public async Task<IEnumerable<ProductDto>> GetOnSaleProducts()
+    {
+
+        var activeDiscounts = await GetAppliableActiveDiscount();
+
+        var products = await unitOfWork.DiscountedProductsRepository.GetDiscountedProducts(activeDiscounts);
+
+        ApplyRulesToProducts(products, activeDiscounts);
+
+        return products;
     }
 }

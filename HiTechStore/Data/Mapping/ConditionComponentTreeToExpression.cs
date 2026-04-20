@@ -242,6 +242,9 @@ public class ConditionComponentTreeToExpression : ConditionComponentTreeVisitor<
 
     public Expression<Func<TArg, bool>> Map<TArg>(ConditionComponent conditionComponent, string? wrappingLambdaPropertyName = default)
     {
+        // prepare context for each map
+        WrappingLambdaParameterExpressionStack.Clear();
+
         var mainType = typeof(TArg);
 
         var finalFilteringLambdaParmeter = Expression.Parameter(mainType, wrappingLambdaPropertyName ?? mainType.Name);

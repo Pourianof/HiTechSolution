@@ -5,6 +5,7 @@ using HiTechStore.Core;
 using HiTechStore.Core.Repositories;
 using HiTechStore.Data.DTOs;
 using HiTechStore.Data.Queries;
+using HiTechStore.Data.Repositories.Helpers;
 using HiTechStore.Helpers.Types;
 using HiTechStore.Helpers.URLFilterQuery;
 
@@ -133,49 +134,14 @@ namespace HiTechStore.Data.Repositories
             return queryBuilder;
         }
 
-        private class QueryParamAppliedQuery
+
+
+        private RepositoryHelper.QueryParamAppliedQuery<T> BuildQueryBuilderBasedOnQueryParams(Q? queryParams)
         {
-            required public IQueryable<T>? BaseQuery { get; set; }
-            required public IQueryable<T>? AppliedQuery { get; set; }
-            required public int PageSize { get; set; }
-            required public int Page { get; set; }
-        }
-
-        private QueryParamAppliedQuery BuildQueryBuilderBasedOnQueryParams(Q? queryParams)
-        {
-            var baseQuery = GetAllQueryBuilder(_dbSet.AsQueryable(), queryParams);
-            var query = baseQuery;
-
-            if (queryParams?.SortBy is not null && queryParams.SortDir is not null)
-            {
-                var sortDir = queryParams.SortDir.GetValue<string>(QueryOperator.Equal)?.ToLower();
-                if (sortDir == "des")
-                {
-                    query = query.Reverse();
-                }
-            }
-
-            var page = queryParams?.Page?.GetValue<int>(QueryOperator.Equal);
-            var limit = queryParams?.Limit?.GetValue<int>(QueryOperator.Equal);
-            if (page is not null)
-            {
-                query = query.Skip(
-                    (limit ?? 0) * (page.Value - 1)
-                );
-            }
-
-            if (limit is not null)
-            {
-                query = query.Take(limit.Value);
-            }
-
-            return new()
-            {
-                BaseQuery = baseQuery,
-                AppliedQuery = query,
-                Page = page ?? 1,
-                PageSize = limit ?? 0,
-            };
+            return RepositoryHelper.BuildQueryBuilderBasedOnQueryParams(
+                GetAllQueryBuilder(_dbSet.AsQueryable(), queryParams),
+                queryParams
+            );
         }
 
         private async Task<PagedResultDto<TOut>> BaseGetAll<TOut>(Q? queryParams)
