@@ -97,20 +97,20 @@ public class JwtTokenHandler(
         return true;
     }
 
-    public async Task RevokeRefreshToken(IEnumerable<Claim> claims)
+    public async Task<bool> RevokeRefreshToken(IEnumerable<Claim> claims)
     {
         var hash = claims.FirstOrDefault(c => c.Type == ClaimTypes.Hash)?.Value;
 
         if (hash is null)
         {
-            return;
+            return false;
         }
 
-        await tokenRepository.RemoveToken(hash);
+        return await tokenRepository.RemoveToken(hash);
     }
-    public async Task RevokeRefreshToken(string token)
+    public Task<bool> RevokeRefreshToken(string token)
     {
-        await tokenRepository.RemoveByRawToken(token);
+        return tokenRepository.RemoveByRawToken(token);
     }
 
     public async Task<string?> GetRefreshTokenUserId(string token)
