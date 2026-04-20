@@ -4,6 +4,7 @@ using AutoMapper;
 using HiTechStore.Core.Repositories;
 using HiTechStore.Data.DTOs.Discount;
 using HiTechStore.Data.Queries;
+using HiTechStore.Helpers.URLFilterQuery;
 using HiTechStore.Models;
 
 using Microsoft.EntityFrameworkCore;
@@ -78,7 +79,7 @@ public class DiscountCodeRepository : Repository<Discount, DiscountDto, Discount
 
         if (queryParams.SortBy is not null)
         {
-            var sortBy = queryParams.SortBy.GetValue<string>(Helpers.URLFilterQuery.QueryOperator.Equal);
+            var sortBy = queryParams.SortBy.GetValue<string>(QueryOperator.Equal);
 
             if (sortBy is not null)
             {
