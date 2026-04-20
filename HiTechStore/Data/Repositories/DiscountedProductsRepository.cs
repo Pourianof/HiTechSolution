@@ -23,7 +23,13 @@ public class DiscountedProductsRepository(
 ) : IDiscountedProductsRepository
 {
     private DbSet<Product> _dbSet = dbContext.Products;
-    private IQueryable<ProductDto> ProjectWithDiscountData(IEnumerable<RuleCondition> ruleConditions, ProductQuery? productQuery)
+
+    private class DiscountedProductPageResultData
+    {
+        public IQueryable<ProductDto>? MainQuery { get; set; }
+        public IQueryable<Product>? CountingQuery { get; set; }
+    }
+    private DiscountedProductPageResultData ProjectWithDiscountData(IEnumerable<RuleCondition> ruleConditions, ProductQuery? productQuery)
     {
         Expression<Func<ProductWithMinMaxPrice, ProductWithMinMaxDiscount>> productDiscount =
                         (ProductWithMinMaxPrice p) => new ProductWithMinMaxDiscount
@@ -112,6 +118,31 @@ public class DiscountedProductsRepository(
             }
         );
 
+        // query with minimum side filtering and processing
+
+        var paramForLightQueryFilter = Expression.Parameter(typeof(Product));
+        var baseLightQuery = _dbSet.Where(
+            Expression.Lambda<Func<Product, bool>>(
+                // Maybe this is the worst code a person could write
+                // but im tired and just wanna finnish it
+                ExpressionParameterReplacer.ReplaceParameter(
+                    Expression.Lambda(isDiscountApply, [param]),
+                    paramForLightQueryFilter
+                ).Body,
+                [
+                    paramForLightQueryFilter
+                ]
+            )
+        );
+
+        if (productQuery is not null)
+        {
+            baseLightQuery = ProductRepositoryHelper.ApplyQueryParams(
+                baseLightQuery,
+                productQuery
+            );
+        }
+
         // 1- query for calculate products min/max variation's price 
         // 1/1- along with filtering the discounted products
         // 2- then calculate the min/max total discount based-on percentage
@@ -167,7 +198,7 @@ public class DiscountedProductsRepository(
 
 
         // map to ProductDto
-        return discountBaseQuery
+        var mainQuery = discountBaseQuery
         .Select(p => new ProductDto
         {
             ProductId = p.ProductId,
@@ -251,13 +282,25 @@ public class DiscountedProductsRepository(
                 ).ToList()
         }
         );
+
+        return new()
+        {
+            MainQuery = mainQuery,
+            CountingQuery = baseLightQuery
+        };
     }
 
-    public async Task<IEnumerable<ProductDto>> GetDiscountedProducts(IEnumerable<DiscountRule> rules, ProductQuery? productQuery = default)
+    public async Task<PagedResultDto<ProductDto>> GetDiscountedProducts(IEnumerable<DiscountRule> rules, ProductQuery? productQuery = default)
     {
         if (!rules.Any())
         {
-            return [];
+            return new()
+            {
+                Items = [],
+                PageNumber = 0,
+                PageSize = 0,
+                TotalCount = 0
+            };
         }
 
         var ruleConditions = rules.Select(
@@ -268,7 +311,19 @@ public class DiscountedProductsRepository(
             }
         );
 
-        return await ProjectWithDiscountData(ruleConditions, productQuery).ToListAsync();
+        var pageData = ProjectWithDiscountData(ruleConditions, productQuery);
+        var totalCounts = await pageData.CountingQuery!.CountAsync();
+
+        var page = productQuery?.Page?.GetValue<int>(QueryOperator.Equal);
+        var limit = productQuery?.Limit?.GetValue<int>(QueryOperator.Equal);
+
+        return new()
+        {
+            Items = await pageData.MainQuery!.ToListAsync(),
+            PageSize = limit ?? totalCounts,
+            PageNumber = page ?? 0,
+            TotalCount = totalCounts
+        };
     }
 
     public async Task<IEnumerable<ProductDto>> GetProductsByCondition(ConditionComponent conditionTree)

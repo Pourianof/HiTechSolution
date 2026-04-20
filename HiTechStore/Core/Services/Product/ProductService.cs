@@ -326,14 +326,14 @@ public class ProductService(
         return (await unitOfWork.Products.GetByIdProjectedAsync(createdProduct.ProductId))!;
     }
 
-    public async Task<IEnumerable<ProductDto>> GetOnSaleProducts()
+    public async Task<PagedResultDto<ProductDto>> GetOnSaleProducts()
     {
 
         var activeDiscounts = await GetAppliableActiveDiscount();
 
         var products = await unitOfWork.DiscountedProductsRepository.GetDiscountedProducts(activeDiscounts);
 
-        ApplyRulesToProducts(products, activeDiscounts);
+        ApplyRulesToProducts(products.Items, activeDiscounts);
 
         return products;
     }
