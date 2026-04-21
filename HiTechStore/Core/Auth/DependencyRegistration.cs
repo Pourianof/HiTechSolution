@@ -88,7 +88,7 @@ public static class AuthRegistration
 
                         var isValid = await tokenHandler.IsJwtTokenAuthorized(context.Principal.Claims);
 
-                        if (isValid)
+                        if (!isValid)
                         {
                             logger.LogInformation("user token was not validate in term of refresh token");
 
