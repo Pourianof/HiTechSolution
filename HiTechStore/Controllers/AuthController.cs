@@ -204,6 +204,11 @@ public class AuthController : ControllerBase
 
         var expiration = DateTime.UtcNow.AddMinutes(10);
         var token = await _tokenHelper.IssueTokenForRefreshToken(refreshToken, user.Claims!, expiration);
+        _logger.LogInformation(
+            "new token issued for user with id {userId}", userId
+        );
+
+        Console.WriteLine(expiration);
 
         return Ok(
             new LoginResponseDto
