@@ -4,12 +4,14 @@ using HiTechStore.Data.Queries;
 using HiTechStore.Helpers.URLFilterQuery;
 using HiTechStore.Models;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HiTechStore.Controllers;
 
 [ApiController]
 [Route("/api/[controller]")]
+[Authorize]
 public class DiscountsController(IDiscountService discountService) : ControllerBase
 {
     [HttpPost]
