@@ -70,9 +70,13 @@ public static class AuthRegistration
                     },
                     OnTokenValidated = async (context) =>
                     {
+                        var logger = context.HttpContext.RequestServices
+                                            .GetRequiredService<ILogger<Program>>();
 
                         if (context.Principal?.Claims is null)
                         {
+                            logger.LogWarning("user has not any claim");
+
                             context.Fail("No token claims detected");
                             return;
                         }
@@ -81,10 +85,13 @@ public static class AuthRegistration
 
                         var tokenHandler = serviceProvider.GetRequiredService<ITokenHandler>();
 
+
                         var isValid = await tokenHandler.IsJwtTokenAuthorized(context.Principal.Claims);
 
                         if (isValid)
                         {
+                            logger.LogInformation("user token was not validate in term of refresh token");
+
                             context.Fail("User is not valid.");
                             return;
                         }

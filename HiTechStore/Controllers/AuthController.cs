@@ -17,17 +17,21 @@ public class AuthController : ControllerBase
     private readonly UserManager<User> _userManager;
     private readonly IMapper _mapper;
     private readonly ITokenHandler _tokenHelper;
+    private readonly ILogger _logger;
     private readonly HiTechStore.Core.Services.Authorization.IAuthorizationService _authorizationService;
 
     public AuthController(UserManager<User> userManager,
                           IMapper mapper,
                           ITokenHandler tokenHelper,
-                          HiTechStore.Core.Services.Authorization.IAuthorizationService authorizationService)
+                          HiTechStore.Core.Services.Authorization.IAuthorizationService authorizationService,
+                          ILogger<AuthController> logger
+                          )
     {
         _userManager = userManager;
         _mapper = mapper;
         _tokenHelper = tokenHelper;
         _authorizationService = authorizationService;
+        _logger = logger;
     }
 
     private async Task<IActionResult> RegisterUser(RegisterDto dto)
@@ -151,6 +155,10 @@ public class AuthController : ControllerBase
             return new UnauthorizedObjectResult(authorizationProblemDetail);
         }
 
+        _logger.LogInformation(
+            "user with id {id} logged-in", user
+        );
+
         var expiration = DateTime.UtcNow.AddMinutes(10); // 10 minute jwt lifetime
         var token = await _tokenHelper.IssueToken(user.Claims ?? [], user.Id, expiration);
 
@@ -180,6 +188,10 @@ public class AuthController : ControllerBase
 
         if (userId is null)
         {
+            _logger.LogInformation(
+                "could not find user based on ref-token {refToken}", refreshToken
+            );
+
             return Unauthorized();
         }
 
@@ -206,7 +218,18 @@ public class AuthController : ControllerBase
     [Route("logout")]
     public async Task<ActionResult> Logout([FromQuery] string refreshToken)
     {
-        await _tokenHelper.RevokeRefreshToken(refreshToken);
+        var userId = await _tokenHelper.GetRefreshTokenUserId(
+           refreshToken
+       );
+
+        var deletedAny = await _tokenHelper.RevokeRefreshToken(refreshToken);
+
+        _logger.LogInformation(
+            "user with id {userId} tried to logout via refresh-token {refToken} and is any token removed: {state}",
+            userId,
+            refreshToken,
+            deletedAny
+        );
 
         return Ok();
     }
