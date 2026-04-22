@@ -16,6 +16,8 @@ public static class DependencyRegistration
 {
     public static WebApplicationBuilder ConfigueBuilder(this WebApplicationBuilder builder)
     {
+        builder.Services.AddHealthChecks();
+
         builder.Services.AddLogging();
 
         builder.Services.AddBackroundJobs();

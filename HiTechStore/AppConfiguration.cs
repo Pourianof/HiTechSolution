@@ -29,6 +29,8 @@ public static class AppConfiguration
         app.MapControllers();
         app.UseExceptionHandler();
 
+        app.UseHealthChecks("/_health");
+
         await app.SeedDatabase();
     }
 }
