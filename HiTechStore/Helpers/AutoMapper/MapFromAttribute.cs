@@ -1,7 +1,3 @@
-using System;
-
-using AutoMapper;
-
 namespace HiTechStore.Helpers.AutoMapper;
 
 public class MapFromAttribute<T> : MapperAttribute
@@ -12,8 +8,13 @@ public class MapFromAttribute<T> : MapperAttribute
         Type = typeof(T);
     }
 
-    public override void Map(IMapperConfigurationExpression config, Type sourceType)
+    protected override Type GetSourceType(Type targetType)
     {
-        config.CreateMap(Type, sourceType);
+        return Type;
+    }
+
+    protected override Type GetDestType(Type targetType)
+    {
+        return targetType;
     }
 }

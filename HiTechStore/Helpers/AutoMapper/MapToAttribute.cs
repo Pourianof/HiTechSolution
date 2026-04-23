@@ -1,7 +1,3 @@
-using AutoMapper;
-
-using HiTechStore.Helpers.Types;
-
 namespace HiTechStore.Helpers.AutoMapper;
 
 public class MapToAttribute<T> : MapperAttribute
@@ -12,21 +8,13 @@ public class MapToAttribute<T> : MapperAttribute
         Type = typeof(T);
     }
 
-    public override void Map(IMapperConfigurationExpression config, Type sourceType)
+    protected override Type GetSourceType(Type targetType)
     {
-        var sourceProperties = sourceType.GetProperties();
+        return targetType;
+    }
 
-        var mapConfig = config.CreateMap(sourceType, Type);
-
-        foreach (var prop in sourceProperties)
-        {
-            var configAttributes = prop.GetInterfaceAttributes<IMapToConfigAttribute>();
-
-            foreach (var configAttr in configAttributes)
-            {
-                configAttr.Config(mapConfig, prop);
-            }
-        }
-
+    protected override Type GetDestType(Type targetType)
+    {
+        return Type;
     }
 }

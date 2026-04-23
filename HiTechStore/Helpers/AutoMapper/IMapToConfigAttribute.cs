@@ -4,7 +4,7 @@ using AutoMapper;
 
 namespace HiTechStore.Helpers.AutoMapper;
 
-public interface IMapToConfigAttribute
+public interface IMapConfigAttribute
 {
     void Config(IMappingExpression mappingConfig, PropertyInfo propertyInfo);
 }
