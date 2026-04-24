@@ -7,7 +7,6 @@ using HiTechStore.Data.DTOs;
 using HiTechStore.Data.Queries;
 using HiTechStore.Data.Repositories.Helpers;
 using HiTechStore.Helpers.Types;
-using HiTechStore.Helpers.URLFilterQuery;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -136,17 +135,17 @@ namespace HiTechStore.Data.Repositories
 
 
 
-        private RepositoryHelper.QueryParamAppliedQuery<T> BuildQueryBuilderBasedOnQueryParams(Q? queryParams)
+        private RepositoryHelper.QueryParamAppliedQuery<T> BuildQueryBuilderBasedOnQueryParams(IQueryable<T> baseQuery, Q? queryParams)
         {
             return RepositoryHelper.BuildQueryBuilderBasedOnQueryParams(
-                GetAllQueryBuilder(_dbSet.AsQueryable(), queryParams),
+                GetAllQueryBuilder(baseQuery, queryParams),
                 queryParams
             );
         }
 
-        private async Task<PagedResultDto<TOut>> BaseGetAll<TOut>(Q? queryParams)
+        protected async Task<PagedResultDto<TOut>> GetPagedResult<TOut>(IQueryable<T> baseQuery, Q? queryParams)
         {
-            var query = BuildQueryBuilderBasedOnQueryParams(queryParams);
+            var query = BuildQueryBuilderBasedOnQueryParams(baseQuery, queryParams);
             return new PagedResultDto<TOut>()
             {
                 Items = await Project<TOut>(query.AppliedQuery!).ToListAsync(),
@@ -156,39 +155,51 @@ namespace HiTechStore.Data.Repositories
             };
         }
 
-        public async Task<PagedResultDto<TProject>> GetAllProjectToAsync<TProject>(Q? queryParams)
+        protected Task<PagedResultDto<TOut>> GetPagedResult<TOut>(Q? queryParams)
         {
-            var query = BuildQueryBuilderBasedOnQueryParams(queryParams);
-            return new PagedResultDto<TProject>()
-            {
-                Items = await Project<TProject>(query.AppliedQuery!).ToListAsync(),
-                PageNumber = query.Page,
-                PageSize = query.PageSize,
-                TotalCount = await query.BaseQuery!.CountAsync()
-            };
-        }
-        public virtual async Task<PagedResultDto<O>> GetAllProjectedAsync(Q queryParams)
-        {
-            var query = BuildQueryBuilderBasedOnQueryParams(queryParams);
-            return new PagedResultDto<O>()
-            {
-                Items = await Project(query.AppliedQuery!).ToListAsync(),
-                PageNumber = query.Page,
-                PageSize = query.PageSize,
-                TotalCount = await query.BaseQuery!.CountAsync()
-            };
+            return GetPagedResult<TOut>(_dbSet.AsQueryable(), queryParams);
         }
 
-        protected virtual IQueryable<TOut> Project<TOut>(IQueryable<T> queryable)
+        private Task<PagedResultDto<TOut>> BaseGetAll<TOut>(Q? queryParams)
         {
-            if (typeof(TOut) == typeof(T))
-            {
-                return (IQueryable<TOut>)queryable;
-            }
+            return GetPagedResult<TOut>(queryParams);
+        }
+
+        public Task<PagedResultDto<TProject>> GetAllProjectToAsync<TProject>(Q? queryParams)
+        {
+            return GetPagedResult<TProject>(queryParams);
+        }
+        public virtual Task<PagedResultDto<O>> GetAllProjectedAsync(Q queryParams)
+        {
+            return GetPagedResult<O>(queryParams);
+        }
+
+        protected virtual IQueryable<O> HandleProject(IQueryable<T> queryable)
+        {
+            return HandleProject<O>(queryable);
+        }
+
+        protected virtual IQueryable<TOut> HandleProject<TOut>(IQueryable<T> queryable)
+        {
             return queryable.ProjectTo<TOut>(_mapper.ConfigurationProvider);
         }
 
-        protected virtual IQueryable<O> Project(IQueryable<T> queryable)
+        protected IQueryable<TOut> Project<TOut>(IQueryable<T> queryable)
+        {
+            var outType = typeof(TOut);
+            if (outType == typeof(T))
+            {
+                return (IQueryable<TOut>)queryable;
+            }
+            if (outType == typeof(O))
+            {
+                return (IQueryable<TOut>)HandleProject(queryable);
+            }
+
+            return queryable.ProjectTo<TOut>(_mapper.ConfigurationProvider);
+        }
+
+        protected IQueryable<O> Project(IQueryable<T> queryable)
         {
             return Project<O>(queryable);
         }

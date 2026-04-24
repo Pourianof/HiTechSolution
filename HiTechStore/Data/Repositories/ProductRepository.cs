@@ -40,10 +40,11 @@ namespace HiTechStore.Data.Repositories
             to a appropriate sql which give us the component-models which associate to
             target product
         */
-        protected override IQueryable<ProductDto> Project(IQueryable<Product> queryable)
+        protected override IQueryable<ProductDto> HandleProject(IQueryable<Product> queryable)
         {
             return ProductRepositoryHelper.ToDtoProject(queryable);
         }
+
         protected override IQueryable<Product> GetAllQueryBuilder(IQueryable<Product> queryBuilder, ProductQuery? productQueryParams)
         {
             return ProductRepositoryHelper.ApplyQueryParams(
