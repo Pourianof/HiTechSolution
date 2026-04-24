@@ -12,3 +12,13 @@ public class BaseQuery
     [MiscQueryFiltersMarker]
     public Dictionary<string, QueryFilterItem> FilterMaps { get; set; } = new();
 }
+
+public static class BaseQueryHelper
+{
+    public static int GetPage(this BaseQuery query)
+    {
+        var page = query.Page?.GetValue<int>(QueryOperator.Equal) ?? 0;
+
+        return page;
+    }
+}
