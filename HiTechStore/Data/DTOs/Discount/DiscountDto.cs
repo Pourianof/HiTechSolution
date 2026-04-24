@@ -7,7 +7,7 @@ namespace HiTechStore.Data.DTOs.Discount;
 [MapFrom<Models.Discount>]
 public class DiscountDto
 {
-    public int DiscountCodeId { get; set; }
+    public int DiscountId { get; set; }
     public string? Code { get; set; }
     public string? Description { get; set; }
     public DateTime StartTime { get; set; }

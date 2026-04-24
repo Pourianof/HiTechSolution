@@ -62,7 +62,9 @@ public class DiscountService(
         var query = discountQuery ?? new();
 
         query.SortBy ??= new QueryFilterItem("sortBy")
-            .AddOperatorValuePair(QueryOperator.Equal, new StringValues("id,endTime"));
+            .AddOperatorValuePair(QueryOperator.Equal, new StringValues("created_at,endtime"));
+        query.SortDir ??= new QueryFilterItem("sortDir")
+            .AddOperatorValuePair(QueryOperator.Equal, "des");
         query.Limit ??= new QueryFilterItem("limit")
             .AddOperatorValuePair(QueryOperator.Equal, new StringValues("10"));
 

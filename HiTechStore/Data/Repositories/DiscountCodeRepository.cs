@@ -1,4 +1,6 @@
 
+using System.Linq.Expressions;
+
 using AutoMapper;
 
 using HiTechStore.Core.Repositories;
@@ -10,6 +12,8 @@ using HiTechStore.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace HiTechStore.Data.Repositories;
+
+using DiscountSorter = Expression<Func<Discount, dynamic>>;
 
 public class DiscountCodeRepository : Repository<Discount, DiscountDto, DiscountQuery>, IDiscountCodeRepository
 {
@@ -85,20 +89,22 @@ public class DiscountCodeRepository : Repository<Discount, DiscountDto, Discount
             {
                 var sortyByCriterias = sortBy.Split(",").Select(sb => sb.Trim().ToLower());
 
+                var hasOrdered = false;
+
                 foreach (var criteria in sortyByCriterias)
                 {
-                    switch (criteria)
+                    DiscountSorter sorter = criteria switch
                     {
-                        case "endtime":
-                            queryBuilder = queryBuilder.OrderBy((dc) => dc.EndTime);
-                            break;
-                        case "startime":
-                            queryBuilder = queryBuilder.OrderBy((dc) => dc.StartTime);
-                            break;
-                        case "id":
-                            queryBuilder = queryBuilder.OrderBy((dc) => dc.DiscountId);
-                            break;
-                    }
+                        "endtime" => (dc) => dc.EndTime!,
+                        "startime" => (dc) => dc.StartTime!,
+                        "id" => (dc) => dc.DiscountId,
+                        _ => (dc) => dc.CreatedAt
+                    };
+                    queryBuilder = hasOrdered ?
+                        (queryBuilder as IOrderedQueryable<Discount>)!.ThenBy(sorter) :
+                        queryBuilder.OrderBy(sorter);
+
+                    hasOrdered = true;
                 }
             }
 
