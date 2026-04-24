@@ -22,18 +22,18 @@ public class JwtTokenHandler(
 
         refreshTokenExpiration ??= DateTime.UtcNow.AddDays(30); // by default 30 day
 
-        await tokenRepository.RegisterToken(
-            new()
-            {
-                Token = refreshToken,
-                UserId = userId,
-                ExpirateAt = refreshTokenExpiration.Value
-            }
-        );
+        var hashedRefToken = await tokenRepository.RegisterToken(
+             new()
+             {
+                 Token = refreshToken,
+                 UserId = userId,
+                 ExpirateAt = refreshTokenExpiration.Value
+             }
+         );
 
         claims = claims.Append(
             new Claim(
-                ClaimTypes.Hash, refreshToken
+                ClaimTypes.Hash, hashedRefToken
             )
         );
 

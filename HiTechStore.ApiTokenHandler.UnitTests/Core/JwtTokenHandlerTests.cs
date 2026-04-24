@@ -1,4 +1,5 @@
 
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 using HiTechStore.ApiTokenHandler.Core;
@@ -156,9 +157,16 @@ public class JwtTokenHandlerTests
             expiredDate
         );
         var tokenOwner = await _tokenHandlerUnderTest.GetRefreshTokenUserId(tokens.RefreshToken!);
+        var submitedToken = await TokenRepository.GetTokenFromRaw(tokens.RefreshToken!);
+
+        var hashClaim = new JwtSecurityTokenHandler().ReadJwtToken(tokens.Token).Claims.FirstOrDefault(c => c.Type == ClaimTypes.Hash)?.Value;
 
         // Assert
         Assert.Equal(tokenOwner, userId);
+        Assert.NotNull(hashClaim);
+        Assert.NotEqual(hashClaim, tokens.RefreshToken); // not equal with raw ref
+        Assert.NotNull(submitedToken?.Token);
+        Assert.Equal(hashClaim, submitedToken!.Token); // equal with hashed in repo
         Assert.NotNull(tokens.RefreshToken);
         Assert.NotEmpty(tokens.RefreshToken);
     }
