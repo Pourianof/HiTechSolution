@@ -134,29 +134,6 @@ public class ProductService(
         return product;
     }
 
-    public async Task<ProductScore> ScoreProduct(int productId, ProductScoreDto score, string userId)
-    {
-        // check if is any score registered by this user for this product before
-        var existingScore = await unitOfWork.ProductScores.GetUserScoreForProductAsync(userId, productId);
-        if (existingScore != null)
-        {
-            // if exist delete it
-            await unitOfWork.ProductScores.Delete(existingScore);
-        }
-
-        // register new one
-        var newScore = new ProductScore
-        {
-            UserId = userId,
-            ProductId = productId,
-            Score = score.Score // default score
-        };
-        await unitOfWork.ProductScores.AddAsync(newScore);
-        await unitOfWork.Complete();
-
-        return newScore;
-    }
-
     public async Task<ProductDto> CreateProduct(ProductCreationDto product, string userId)
     {
         var createdProduct = mapper.Map<Models.Product>(product);
@@ -336,5 +313,10 @@ public class ProductService(
         ApplyRulesToProducts(products.Items, activeDiscounts);
 
         return products;
+    }
+
+    public Task<ProductDto?> GetProductById(int productId)
+    {
+        return unitOfWork.Products.GetByIdProjectedAsync(productId);
     }
 }

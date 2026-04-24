@@ -4,6 +4,8 @@ using HiTechStore.Core;
 using HiTechStore.Core.Repositories;
 using HiTechStore.Data.Repositories;
 
+using Microsoft.EntityFrameworkCore.Storage;
+
 namespace HiTechStore.Data
 {
     public class UnitOfWork : IUnitOfWork
@@ -25,6 +27,7 @@ namespace HiTechStore.Data
         public IConditionMethodRepository ConditionMethodRepository { get; }
         public IUserRepository UserRepository { get; }
         public IDiscountedProductsRepository DiscountedProductsRepository { get; }
+        public ICommentRepository CommentRepository { get; }
 
         public UnitOfWork(
             HiTechStoreDbContext context,
@@ -43,7 +46,8 @@ namespace HiTechStore.Data
             IDiscountEntityRepository discountEntityRepository,
             IConditionMethodRepository conditionMethodRepository,
             IUserRepository userRepository,
-            IDiscountedProductsRepository discountedProductsRepository
+            IDiscountedProductsRepository discountedProductsRepository,
+            ICommentRepository commentRepository
         )
         {
             _context = context;
@@ -63,6 +67,7 @@ namespace HiTechStore.Data
             ConditionMethodRepository = conditionMethodRepository;
             UserRepository = userRepository;
             DiscountedProductsRepository = discountedProductsRepository;
+            CommentRepository = commentRepository;
         }
 
         public HiTechStoreDbContext Context()
@@ -84,5 +89,36 @@ namespace HiTechStore.Data
         {
             return new RepositoryCore<TModel>(_context);
         }
+
+        public async Task<ITransaction> StartTransaction()
+        {
+            var trx = await _context.Database.BeginTransactionAsync();
+
+            return new Transaction(trx);
+        }
+    }
+}
+
+
+class Transaction(IDbContextTransaction dbTrx) : ITransaction
+{
+    public Task Commit()
+    {
+        return dbTrx.CommitAsync();
+    }
+
+    public Task Rollback()
+    {
+        return dbTrx.RollbackAsync();
+    }
+
+    public void Dispose()
+    {
+        dbTrx.Dispose();
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        return dbTrx.DisposeAsync();
     }
 }

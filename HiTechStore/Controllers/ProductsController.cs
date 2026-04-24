@@ -6,11 +6,9 @@ using AutoMapper;
 using HiTechStore.Controllers.ActionFilters;
 using HiTechStore.Controllers.ExceptionFilters;
 using HiTechStore.Core;
-using HiTechStore.Core.Helpers;
 using HiTechStore.Core.Services.Product;
 using HiTechStore.Data.DTOs;
 using HiTechStore.Data.DTOs.Product;
-using HiTechStore.Data.Mapping;
 using HiTechStore.Data.Queries;
 using HiTechStore.DTOs.Product;
 using HiTechStore.Helpers.URLFilterQuery;
@@ -133,21 +131,6 @@ namespace HiTechStore.Controllers
             }
 
             return NoContent();
-        }
-
-        [HttpPost("{productId}/score/me")]
-        [Authorize]
-        public async Task<IActionResult> ScoreProduct(int productId, [FromBody] ProductScoreDto score)
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId is null)
-            {
-                return Unauthorized();
-            }
-
-            var newScore = await _productService.ScoreProduct(productId, score, userId);
-
-            return Ok(newScore);
         }
 
     }
