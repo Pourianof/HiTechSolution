@@ -20,9 +20,7 @@ namespace HiTechStore.Models
         public virtual Category? Category { get; set; }
         public virtual ICollection<Comment>? Comments { get; set; } = new List<Comment>();
         public virtual ICollection<ProductScore> Scores { get; set; } = new List<ProductScore>();
-        [NotMapped]
         public double? AverageScore { get; set; } = 0.0;
-        [NotMapped]
         public int ScoreCounts { get; set; } = 0;
         [NotMapped]
         public int? MyScore { get; set; }

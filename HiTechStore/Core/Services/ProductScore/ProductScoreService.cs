@@ -21,7 +21,6 @@ public class ProductScoreService : ServiceBase, IProductScoreService
          ProdcutScoreCreationServiceDto productScoreCreationDto
      )
     {
-
         int rate = productScoreCreationDto.Score;
         if (rate < 1 || rate > 5)
         {
@@ -33,12 +32,22 @@ public class ProductScoreService : ServiceBase, IProductScoreService
         }
 
         var user = await GetUser();
+        var product = await _unitOfWork.Products.GetModelByIdAsync(productScoreCreationDto.ProductId);
+
+        if (product is null)
+        {
+            throw new NotFoundException(
+                "Product not found",
+                $"product with id {productScoreCreationDto.ProductId} not found"
+            );
+        }
 
         // check if is any score registered by this user for this product before
         var score = await _unitOfWork.ProductScores.GetUserScoreForProductAsync(user.Id, productScoreCreationDto.ProductId);
         if (score != null)
         {
             // if exist delete it
+            product.AverageScore = product.AverageScore - score.Score + productScoreCreationDto.Score;
             score.Score = productScoreCreationDto.Score;
         }
         else
@@ -51,6 +60,10 @@ public class ProductScoreService : ServiceBase, IProductScoreService
                 Score = productScoreCreationDto.Score // default score
             };
             await _unitOfWork.ProductScores.AddAsync(score);
+
+            var newCount = product.ScoreCounts + 1;
+            product.AverageScore = ((product.AverageScore * product.ScoreCounts) + score.Score) / newCount;
+            product.ScoreCounts = newCount;
 
         }
 
