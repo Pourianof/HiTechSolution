@@ -228,7 +228,7 @@ public class DiscountedProductsRepository(
             {
                 BrandName = p.BrandModel!.Brand!.Name,
                 ModelName = p.BrandModel.Name,
-                Descriotion = p.BrandModel.Description,
+                Description = p.BrandModel.Description,
                 ModelId = p.BrandModel.BrandModelId
             },
             Components = p.Category!.Components!.Select(
@@ -243,7 +243,7 @@ public class DiscountedProductsRepository(
                                 BrandModel = m.BrandModel != null ? new BrandModelDto()
                                 {
                                     BrandName = m.BrandModel.Brand!.Name,
-                                    Descriotion = m.BrandModel.Description,
+                                    Description = m.BrandModel.Description,
                                     ModelId = m.BrandModel.BrandModelId,
                                     ModelName = m.BrandModel.Name
                                 } : null,

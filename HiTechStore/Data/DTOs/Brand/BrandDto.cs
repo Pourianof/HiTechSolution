@@ -14,5 +14,5 @@ public class BrandModelDto
     public int ModelId { get; set; }
     public string? BrandName { get; set; }
     public string? ModelName { get; set; }
-    public string? Descriotion { get; set; }
+    public string? Description { get; set; }
 }
