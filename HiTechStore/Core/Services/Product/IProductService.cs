@@ -11,5 +11,11 @@ public interface IProductService
     Task<Models.Product?> DeleteProduct(int id);
     Task<ProductDto> CreateProduct(ProductCreationDto product, string userId);
     Task<PagedResultDto<ProductDto>> GetOnSaleProducts();
-    Task<ProductDto?> GetProductById(int product);
+    Task<ProductDto?> GetProductById(int product, ProductAccessAdditionalProcessing? discountCalculation = default);
+}
+
+public class ProductAccessAdditionalProcessing
+{
+    public bool DiscountCalculation { get; set; } = false;
+    public bool UsersScore { get; set; } = false;
 }

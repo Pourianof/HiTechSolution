@@ -315,8 +315,20 @@ public class ProductService(
         return products;
     }
 
-    public Task<ProductDto?> GetProductById(int productId)
+    public async Task<ProductDto?> GetProductById(int productId, ProductAccessAdditionalProcessing? discountCalculation = default)
     {
-        return unitOfWork.Products.GetByIdProjectedAsync(productId);
+        var activeDiscounts = await GetAppliableActiveDiscount();
+
+        var product = await unitOfWork.Products.GetByIdAsync(
+            productId,
+            discountCalculation?.UsersScore == true ? currentUserProvider.UserId : default
+        );
+
+        if (discountCalculation?.DiscountCalculation == true && product is not null)
+        {
+            ApplyRulesToProducts([product], activeDiscounts);
+        }
+
+        return product;
     }
 }

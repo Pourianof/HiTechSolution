@@ -45,8 +45,11 @@ namespace HiTechStore.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<ProductDto>> GetProduct(int id)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var product = await _unitOfWork.Products.GetByIdAsync(id, userId);
+            var product = await _productService.GetProductById(id, new()
+            {
+                UsersScore = true,
+                DiscountCalculation = true
+            });
 
             if (product == null)
             {
