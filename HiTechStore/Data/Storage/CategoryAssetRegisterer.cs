@@ -2,6 +2,7 @@
 using System.Diagnostics;
 
 using HiTechStore.Core;
+using HiTechStore.Core.Common.Interfaces.Infra;
 using HiTechStore.Core.Exceptions;
 
 namespace HiTechStore.Data.Storage;

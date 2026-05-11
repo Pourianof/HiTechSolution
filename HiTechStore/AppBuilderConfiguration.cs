@@ -8,6 +8,7 @@ using HiTechStore.Core.Services;
 using HiTechStore.Data;
 using HiTechStore.Data.Mapping;
 using HiTechStore.Helpers.URLFilterQuery;
+using HiTechStore.Infrastructure;
 using HiTechStore.Presentation;
 
 namespace HiTechStore;
@@ -43,6 +44,8 @@ public static class DependencyRegistration
         builder.Services.AddExceptionHandler<ApplicationExceptionHandler>();
         builder.Services.AddExceptionHandler<PgDbExceptionHandler>();
         builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
+        builder.Services.AddInfrastructure();
 
         builder.Services.UseHiTechPaySdk();
 

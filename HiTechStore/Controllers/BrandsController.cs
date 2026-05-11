@@ -2,8 +2,8 @@ using AutoMapper;
 
 using HiTechStore.Controllers.ActionFilters;
 using HiTechStore.Core;
+using HiTechStore.Core.Common.Interfaces.Infra;
 using HiTechStore.Data.DTOs.Brand;
-using HiTechStore.Data.Storage;
 using HiTechStore.Models;
 
 using Microsoft.AspNetCore.Authorization;

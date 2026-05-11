@@ -19,6 +19,7 @@ public static class ServicesDependencyRegistration
         services.AddScoped<ICommentService, CommentService>();
         services.AddScoped<IProductCommentService, ProductCommentService>();
         services.AddScoped<IProductScoreService, ProductScoreService>();
+        services.AddTransient<ProductServiceHelper>();
 
         return services;
     }

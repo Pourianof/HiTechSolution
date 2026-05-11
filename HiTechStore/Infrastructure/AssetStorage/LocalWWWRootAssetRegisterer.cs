@@ -1,25 +1,18 @@
+
+using HiTechStore.Core.Common.Interfaces.Infra;
+using HiTechStore.Core.Common.Interfaces.Presentation;
 using HiTechStore.Core.Exceptions;
 
-namespace HiTechStore.Data.Storage;
-
-public interface IPublicAssetRegisterer
+public class LocalWWWRootAssetRegisterer(IApplicationContext applicationContext) : IPublicAssetRegisterer
 {
-    bool IsExist(string? publicPath);
-    Task WriteIFormFile(IFormFile file, string filePublicPath);
-    void DeleteFile(string publicPath);
-}
-
-public class LocalWWWRootAssetRegisterer : IPublicAssetRegisterer
-{
-    const string RootPath = "wwwroot";
     public bool IsExist(string? publicPath)
     {
-        return publicPath is not null && File.Exists(Path.Combine(RootPath, publicPath));
+        return publicPath is not null && File.Exists(Path.Combine(applicationContext.GetAssetPath(), publicPath));
     }
 
     public async Task WriteIFormFile(IFormFile file, string filePublicPath)
     {
-        var filePath = Path.Combine("wwwroot", filePublicPath);
+        var filePath = Path.Combine(applicationContext.GetAssetPath(), filePublicPath);
         var dirPath = Path.GetDirectoryName(filePath);
         try
         {
@@ -41,7 +34,12 @@ public class LocalWWWRootAssetRegisterer : IPublicAssetRegisterer
 
     public void DeleteFile(string publicPath)
     {
-        var filePath = Path.Combine("wwwroot", publicPath);
+        var filePath = Path.Combine(applicationContext.GetAssetPath(), publicPath);
         File.Delete(filePath);
+    }
+
+    public string GetAssetPhysicalFullPath(string relativePath)
+    {
+        return Path.Combine(applicationContext.GetAssetPath(), relativePath);
     }
 }

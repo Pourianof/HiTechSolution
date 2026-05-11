@@ -1,4 +1,5 @@
 using HiTechStore.Core;
+using HiTechStore.Core.Common.Interfaces.Infra;
 using HiTechStore.Data.Repositories;
 using HiTechStore.Data.Storage;
 
