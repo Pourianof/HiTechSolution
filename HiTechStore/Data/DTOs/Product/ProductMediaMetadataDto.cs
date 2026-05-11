@@ -10,4 +10,6 @@ public class MediaMetaDataDto
     [Required]
     [JsonPropertyName("index")]
     public int Index { get; set; }
+    [JsonPropertyName("thumbnailIndex")]
+    public int? ThumbnailIndex { get; set; }
 }

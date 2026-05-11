@@ -32,6 +32,7 @@ public class ProductCreationDto
     public IEnumerable<ProductVariationCreationDto>? Variations { get; set; }
     [ProductMediaValidation]
     public IEnumerable<IFormFile>? Media { get; set; }
+    public IEnumerable<IFormFile>? Thumbnails { get; set; }
 }
 
 public class ProductVariationCreationDto

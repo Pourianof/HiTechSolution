@@ -3,6 +3,7 @@
 using AutoMapper;
 
 using HiTechStore.Core.Auth;
+using HiTechStore.Core.Common.Interfaces.Infra;
 using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Helpers;
 using HiTechStore.Data.DTOs;
@@ -21,8 +22,8 @@ public class ProductService(
     ICurrentUserProvider currentUserProvider,
     IDiscountConditionScriptParser scriptParser,
     IMapper mapper,
-    IPublicAssetRegisterer assetRegisterer,
-    IConditionComponentTreeToLambdaExpression conditionTreeToLambdaExprMapper
+    IConditionComponentTreeToLambdaExpression conditionTreeToLambdaExprMapper,
+    ProductServiceHelper productServiceHelper
 ) : IProductService
 {
     private void ApplyRulesToProducts(IEnumerable<ProductDto> products, IEnumerable<DiscountRule> rules)
@@ -135,6 +136,50 @@ public class ProductService(
     }
 
     public async Task<ProductDto> CreateProduct(ProductCreationDto product, string userId)
+    {
+
+        int? createdProductId = default;
+        using (var trx = await unitOfWork.StartTransaction())
+        {
+            try
+            {
+                var createdProduct = await _CreateProduct(product, userId);
+
+                await trx.Commit();
+
+                createdProductId = createdProduct.ProductId;
+
+                var variationData = await productServiceHelper.RegisterCreatedProductMedia(createdProduct.ProductId, product);
+
+                foreach (var pvData in variationData)
+                {
+                    var variation = createdProduct.Variations.ElementAt(pvData.VariationIndex);
+
+                    if (variation is not null && pvData.VariationMedia is not null)
+                    {
+                        variation.Media.Add(pvData.VariationMedia);
+                    }
+                }
+
+                await unitOfWork.Complete();
+
+                return (await unitOfWork.Products.GetByIdProjectedAsync(createdProduct.ProductId))!;
+
+            }
+            catch
+            {
+                if (createdProductId is not null)
+                {
+                    return (await unitOfWork.Products.GetByIdProjectedAsync(createdProductId.Value))!;
+                }
+
+                await trx.Rollback();
+                throw;
+            }
+        }
+    }
+
+    private async Task<Models.Product> _CreateProduct(ProductCreationDto product, string userId)
     {
         var createdProduct = mapper.Map<Models.Product>(product);
 
@@ -260,47 +305,7 @@ public class ProductService(
         await unitOfWork.Products.AddAsync(createdProduct);
         await unitOfWork.Complete();
 
-        try
-        {
-            foreach (var variation in product.Variations!)
-            {
-                var variationMedia = variation.MediaMetaData!.Select(
-                    (meta) => new
-                    {
-                        File = product.Media!.ElementAt(meta.Index),
-                        meta.IsMain
-                    }
-                );
-
-                for (int index = 0; index < variationMedia.Count(); index++)
-                {
-                    var media = variationMedia.ElementAt(index);
-                    var isImage = MediaTypeHelper.IsImage(media.File.FileName);
-
-                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(media.File.FileName);
-                    string fileRelativePath = Path.Combine("images", "products", createdProduct.ProductId.ToString(), fileName);
-                    await assetRegisterer.WriteIFormFile(media.File, fileRelativePath);
-
-                    var createdVariation = createdProduct.Variations.First(
-                        v => v.ColorId == variation.Color
-                    );
-                    createdVariation.Media.Add(new ProductMedia { FilePath = $"/{fileRelativePath}", IsMain = media.IsMain, Type = MediaTypeHelper.GetMediaType(fileRelativePath) });
-
-                }
-            }
-
-        }
-        catch
-        {
-            await unitOfWork.Products.Delete(createdProduct);
-            throw;
-        }
-
-        // For updating the product media
-        await unitOfWork.Complete();
-
-
-        return (await unitOfWork.Products.GetByIdProjectedAsync(createdProduct.ProductId))!;
+        return createdProduct;
     }
 
     public async Task<PagedResultDto<ProductDto>> GetOnSaleProducts()

@@ -14,13 +14,19 @@ public class ProductMedia : IModel
     public string? FilePath { get; set; }
     public MediaType Type { get; set; }
     public int ProductId { get; set; }
+    public string? ThumnailPath { get; set; }
 }
 
 
 
 public static class MediaTypeHelper
 {
-    static readonly string[] ValidMediaTypes = ["png", "jpg", "jpeg", "mp4"];
+    static public string Jpg = "jpg";
+    static public string Jpeg = "jpeg";
+    static public string Png = "png";
+    static public string Mp4 = "mp4";
+
+    static readonly string[] ValidMediaTypes = [Jpg, Jpeg, Png, Mp4];
     public static string[] ValidTypes()
     {
         return ValidMediaTypes;

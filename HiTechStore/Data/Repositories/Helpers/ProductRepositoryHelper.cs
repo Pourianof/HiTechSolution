@@ -78,7 +78,8 @@ public class ProductRepositoryHelper
                     IsMain = m.IsMain,
                     ProductMediaId = m.ProductMediaId,
                     Url = m.FilePath,
-                    Type = m.Type == MediaType.Image ? "Image" : "Video"
+                    Type = m.Type == MediaType.Image ? "Image" : "Video",
+                    ThumbnailUrl = m.ThumnailPath
                 }).ToList(),
                 Price = pv.Price
             }).ToList(),

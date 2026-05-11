@@ -1,19 +1,10 @@
-using System.Diagnostics;
-using System.Linq.Expressions;
-
 using AutoMapper;
 
 using HiTechStore.Core.Repositories;
-using HiTechStore.Data.DTOs;
-using HiTechStore.Data.DTOs.Brand;
-using HiTechStore.Data.DTOs.Component;
 using HiTechStore.Data.DTOs.Product;
 using HiTechStore.Data.Mapping;
 using HiTechStore.Data.Queries;
 using HiTechStore.Data.Repositories.Helpers;
-using HiTechStore.Helpers.Repository;
-using HiTechStore.Helpers.URLFilterQuery;
-using HiTechStore.Helpers.URLFilterQuery.QueryAppliers;
 using HiTechStore.Models;
 
 using Microsoft.EntityFrameworkCore;
