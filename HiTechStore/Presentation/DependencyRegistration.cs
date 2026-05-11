@@ -1,5 +1,6 @@
 using HiTechStore.ApiTokenHandler;
 using HiTechStore.Core.Auth;
+using HiTechStore.Core.Common.Interfaces.Presentation;
 using HiTechStore.Presentation.Auth;
 
 namespace HiTechStore.Presentation;
@@ -23,6 +24,7 @@ public static class DependencyRegistration
         var fullConnStr = $"{baseConnStr}Username={username};Password={password}";
 
         builder.Services.AddTokenHandler(fullConnStr);
+        builder.Services.AddSingleton<IApplicationContext, ApplicationContext>();
 
         return builder;
     }
