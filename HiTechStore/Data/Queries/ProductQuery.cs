@@ -11,4 +11,20 @@ public class ProductQuery : BaseQuery
     [NamespacedQueryFiltersMarker("ct")]
     public Dictionary<string, QueryFilterItem>? CategoryProperties { get; set; }
     public QueryFilterItem? Discount { get; set; }
+
+    public ProductQuery CopyWith(ProductQuery? query)
+    {
+        return new()
+        {
+            Brand = query?.Brand ?? Brand,
+            Category = query?.Category ?? Category,
+            Color = query?.Color ?? Color,
+            Discount = query?.Discount ?? Discount,
+            Limit = query?.Limit ?? Limit,
+            Page = query?.Page ?? Page,
+            Price = query?.Price ?? Price,
+            SortBy = query?.SortBy ?? SortBy,
+            SortDir = query?.SortDir ?? SortDir
+        };
+    }
 }
