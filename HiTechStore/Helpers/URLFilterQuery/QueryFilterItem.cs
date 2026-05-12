@@ -95,6 +95,21 @@ public class QueryFilterItem
     {
         return _opValuePairs.GetEnumerator();
     }
+
+    private static QueryFilterItem CreateDefaultItem(ValueType value)
+    {
+        return new QueryFilterItem("no-key").AddOperatorValuePair(QueryOperator.Equal, value.ToString());
+    }
+
+    public static implicit operator QueryFilterItem(ValueType value)
+    {
+        return CreateDefaultItem(value);
+    }
+
+    public static implicit operator QueryFilterItem(object[] value)
+    {
+        return CreateDefaultItem(new StringValues(string.Join(",", value.Select(v => v.ToString()))));
+    }
 }
 
 static class QueryFilterItemHelper
