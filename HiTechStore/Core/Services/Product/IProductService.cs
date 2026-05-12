@@ -12,6 +12,7 @@ public interface IProductService
     Task<ProductDto> CreateProduct(ProductCreationDto product, string userId);
     Task<PagedResultDto<ProductDto>> GetOnSaleProducts();
     Task<ProductDto?> GetProductById(int product, ProductAccessAdditionalProcessing? discountCalculation = default);
+    Task<IEnumerable<ProductDto>> GetSimilarProductsOf(int productId);
 }
 
 public class ProductAccessAdditionalProcessing

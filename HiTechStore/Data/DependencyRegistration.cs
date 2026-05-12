@@ -18,8 +18,14 @@ public static class DataDependencyRegistration
         var fullConnStr = $"{baseConnStr}Username={username};Password={password}";
 
         builder.Services.AddDbContext<HiTechStoreDbContext>(options =>
-            options.UseNpgsql(fullConnStr)
-            );
+            {
+                options.UseNpgsql(fullConnStr);
+                if (builder.Environment.IsDevelopment())
+                {
+                    options.EnableSensitiveDataLogging();
+                }
+            }
+        );
 
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
         builder.Services.AddRepositories();

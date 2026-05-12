@@ -336,4 +336,18 @@ public class ProductService(
 
         return product;
     }
+
+    public async Task<IEnumerable<ProductDto>> GetSimilarProductsOf(int productId)
+    {
+        var isProductExist = await unitOfWork.Products.IsExistsAsync(productId);
+
+        if (!isProductExist)
+        {
+            throw new NotFoundException($"No product with id {productId} found");
+        }
+
+        var similarProducts = await unitOfWork.Products.GetSimilarProductsOf(productId);
+
+        return similarProducts;
+    }
 }

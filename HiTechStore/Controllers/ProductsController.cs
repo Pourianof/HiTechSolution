@@ -59,6 +59,14 @@ namespace HiTechStore.Controllers
             return product;
         }
 
+        [HttpGet("{id}/similars")]
+        public async Task<ActionResult<IEnumerable<ProductDto>>> GetSimilarProducts(int id)
+        {
+            var products = await _productService.GetSimilarProductsOf(id);
+
+            return Ok(products);
+        }
+
         [HttpGet("on-sales")]
         public async Task<ActionResult<IEnumerable<ProductDto>>> GetOnSaleProducts()
         {
