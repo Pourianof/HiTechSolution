@@ -1,6 +1,7 @@
 using AutoMapper;
 
 using HiTechStore.Core.Repositories;
+using HiTechStore.Data.DTOs;
 using HiTechStore.Data.DTOs.Product;
 using HiTechStore.Data.Mapping;
 using HiTechStore.Data.Queries;
@@ -135,6 +136,15 @@ namespace HiTechStore.Data.Repositories
 
             return await Project(query)
             .ToListAsync();
+        }
+
+        public Task<PagedResultDto<ProductDto>> GetPoductsOfUser(string userId, ProductQuery? productQuery)
+        {
+            return GetPagedResult<ProductDto>(
+                _dbSet.Where(
+                    p => p.AuthorId == userId
+                ), productQuery
+            );
         }
     }
 }

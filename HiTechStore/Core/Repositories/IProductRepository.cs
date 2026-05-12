@@ -1,3 +1,4 @@
+using HiTechStore.Data.DTOs;
 using HiTechStore.Data.DTOs.Product;
 using HiTechStore.Data.Queries;
 using HiTechStore.Models;
@@ -9,5 +10,6 @@ namespace HiTechStore.Core.Repositories
         Task<ProductDto?> GetByIdAsync(int id, string? userId);
         Task<IEnumerable<ProductVariation>> GetAllVariations(IEnumerable<int> variationIds);
         Task<IEnumerable<ProductDto>> GetSimilarProductsOf(int productId);
+        Task<PagedResultDto<ProductDto>> GetPoductsOfUser(string userId, ProductQuery? productQuery = default);
     }
 }

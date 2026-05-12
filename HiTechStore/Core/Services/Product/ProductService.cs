@@ -6,6 +6,7 @@ using HiTechStore.Core.Auth;
 using HiTechStore.Core.Common.Interfaces.Infra;
 using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Helpers;
+using HiTechStore.Core.Services.Authorization;
 using HiTechStore.Data.DTOs;
 using HiTechStore.Data.DTOs.Product;
 using HiTechStore.Data.Mapping;
@@ -23,8 +24,9 @@ public class ProductService(
     IDiscountConditionScriptParser scriptParser,
     IMapper mapper,
     IConditionComponentTreeToLambdaExpression conditionTreeToLambdaExprMapper,
-    ProductServiceHelper productServiceHelper
-) : IProductService
+    ProductServiceHelper productServiceHelper,
+    IAuthorizationService authorizationService
+) : ServiceBase(authorizationService, currentUserProvider), IProductService
 {
     private void ApplyRulesToProducts(IEnumerable<ProductDto> products, IEnumerable<DiscountRule> rules)
     {
@@ -59,9 +61,8 @@ public class ProductService(
             (discount) => discount.Rules!
         );
 
-        var currentUser = currentUserProvider.UserId is null ?
-                            default :
-                            await unitOfWork.UserRepository.GetUserByIdAsync(currentUserProvider.UserId);
+        var currentUser = await GetUserOrDefault();
+
         var isAuthorized = currentUser is not null;
 
         List<DiscountRule> applyableRules = [];
@@ -326,7 +327,7 @@ public class ProductService(
 
         var product = await unitOfWork.Products.GetByIdAsync(
             productId,
-            discountCalculation?.UsersScore == true ? currentUserProvider.UserId : default
+            discountCalculation?.UsersScore == true ? UserId : default
         );
 
         if (discountCalculation?.DiscountCalculation == true && product is not null)
@@ -349,5 +350,14 @@ public class ProductService(
         var similarProducts = await unitOfWork.Products.GetSimilarProductsOf(productId);
 
         return similarProducts;
+    }
+
+    public async Task<PagedResultDto<ProductDto>> GetUsersProducts(ProductQuery? productQuery = default)
+    {
+        var user = await GetUser();
+
+        var products = await unitOfWork.Products.GetPoductsOfUser(user.Id, ProductsDefaultQuery.Query.CopyWith(productQuery));
+
+        return products;
     }
 }

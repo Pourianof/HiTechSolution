@@ -13,6 +13,7 @@ public interface IProductService
     Task<PagedResultDto<ProductDto>> GetOnSaleProducts();
     Task<ProductDto?> GetProductById(int product, ProductAccessAdditionalProcessing? discountCalculation = default);
     Task<IEnumerable<ProductDto>> GetSimilarProductsOf(int productId);
+    Task<PagedResultDto<ProductDto>> GetUsersProducts(ProductQuery? productQuery = default);
 }
 
 public class ProductAccessAdditionalProcessing

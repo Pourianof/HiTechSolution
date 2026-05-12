@@ -10,6 +10,8 @@ public class ServiceBase(
     ICurrentUserProvider currentUserProvider
 )
 {
+    protected string? UserId => currentUserProvider.UserId;
+
     protected dynamic Unauthorized(
         string? detail = default
     )

@@ -1,5 +1,10 @@
+using HiTechStore.Core.Services.Product;
+using HiTechStore.Data.DTOs;
 using HiTechStore.Data.DTOs.Authorization;
+using HiTechStore.Data.DTOs.Product;
 using HiTechStore.Data.DTOs.User;
+using HiTechStore.Data.Queries;
+using HiTechStore.Helpers.URLFilterQuery;
 using HiTechStore.Models;
 
 using Microsoft.AspNetCore.Authorization;
@@ -10,7 +15,7 @@ namespace HiTechStore.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class UsersController(UserManager<User> userManager) : ControllerBase
+public class UsersController(UserManager<User> userManager, IProductService productService) : ControllerBase
 {
     private UserManager<User> _userManager = userManager;
 
@@ -41,5 +46,13 @@ public class UsersController(UserManager<User> userManager) : ControllerBase
             Email = user.Email,
             // Role = role
         };
+    }
+
+    [HttpGet("me/products")]
+    public async Task<ActionResult<PagedResultDto<ProductDto>>> GetMyProducts([ToQuery] ProductQuery productQuery)
+    {
+        var usersProduct = await productService.GetUsersProducts(productQuery);
+
+        return Ok(usersProduct);
     }
 }
