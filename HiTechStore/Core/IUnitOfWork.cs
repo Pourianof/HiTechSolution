@@ -5,6 +5,7 @@ namespace HiTechStore.Core
     public interface IUnitOfWork : IDisposable
     {
         IProductRepository Products { get; }
+        IProductVariationRepository ProductVariationRepository { get; }
         ICategoryRepository Categories { get; }
         IProductScoresRepository ProductScores { get; }
         IComponentRepository ComponentRepository { get; }

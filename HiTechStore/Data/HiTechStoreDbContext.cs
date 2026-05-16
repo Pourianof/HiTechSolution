@@ -43,6 +43,7 @@ namespace HiTechStore.Data
         }
 
         public DbSet<Product> Products { get; set; }
+        public DbSet<ProductVariation> ProductVariations { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<ProductScore> ProductScores { get; set; }
         public DbSet<ComponentType> ComponentType { get; set; }

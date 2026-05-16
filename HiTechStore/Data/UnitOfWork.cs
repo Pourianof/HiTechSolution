@@ -28,6 +28,7 @@ namespace HiTechStore.Data
         public IUserRepository UserRepository { get; }
         public IDiscountedProductsRepository DiscountedProductsRepository { get; }
         public ICommentRepository CommentRepository { get; }
+        public IProductVariationRepository ProductVariationRepository { get; }
 
         public UnitOfWork(
             HiTechStoreDbContext context,
@@ -47,7 +48,8 @@ namespace HiTechStore.Data
             IConditionMethodRepository conditionMethodRepository,
             IUserRepository userRepository,
             IDiscountedProductsRepository discountedProductsRepository,
-            ICommentRepository commentRepository
+            ICommentRepository commentRepository,
+            IProductVariationRepository productVariationRepository
         )
         {
             _context = context;
@@ -68,6 +70,7 @@ namespace HiTechStore.Data
             UserRepository = userRepository;
             DiscountedProductsRepository = discountedProductsRepository;
             CommentRepository = commentRepository;
+            ProductVariationRepository = productVariationRepository;
         }
 
         public HiTechStoreDbContext Context()
