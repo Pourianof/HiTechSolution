@@ -1,11 +1,8 @@
-using HiTechStore.Core.Common.Interfaces.Infra;
+using HiTechStore.Data.Storage;
 using HiTechStore.DTOs.Product;
 using HiTechStore.Models;
 
-public class ProductServiceHelper(
-    IPublicAssetRegisterer assetRegisterer,
-    IThumbnailGenerator thumbnailGenerator
-    )
+public class ProductServiceHelper(ProductMediaRegisterer productMediaRegisterer)
 {
     public async Task<IEnumerable<VariationRegisteredMediaData>> RegisterCreatedProductMedia(int productId, ProductCreationDto productCreationDto)
     {
@@ -16,10 +13,10 @@ public class ProductServiceHelper(
         {
             var variation = productCreationDto.Variations!.ElementAt(variationIndex);
             var variationMedia = variation.MediaMetaData!.Select(
-                (meta) => new
+                (meta) => new MediaData
                 {
                     File = productCreationDto.Media!.ElementAt(meta.Index),
-                    meta.IsMain,
+                    IsMain = meta.IsMain,
                     Thumbnail = meta.ThumbnailIndex is not null ?
                         productCreationDto.Thumbnails?.ElementAt(meta.ThumbnailIndex.Value) :
                         default
@@ -29,59 +26,8 @@ public class ProductServiceHelper(
             for (int index = 0; index < variationMedia.Count(); index++)
             {
                 var media = variationMedia.ElementAt(index);
-                var isImage = MediaTypeHelper.IsImage(media.File.FileName);
 
-                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(media.File.FileName);
-
-                var productIdString = productId.ToString();
-
-                string fileRelativePath = isImage ?
-                    Path.Combine("images", "products", productIdString, fileName) :
-                    Path.Combine("videos", "products", productIdString, fileName);
-
-                await assetRegisterer.WriteIFormFile(media.File, fileRelativePath);
-
-                var productMedia = new ProductMedia
-                {
-                    FilePath = $"/{fileRelativePath}",
-                    IsMain = media.IsMain,
-                    Type = MediaTypeHelper.GetMediaType(fileRelativePath)
-                };
-
-                if (!isImage)
-                {
-                    var thumbnailPath = Path.ChangeExtension(
-                           Path.Combine("thumbnails", productIdString, Guid.NewGuid().ToString()),
-                           MediaTypeHelper.Jpg
-                       );
-
-
-                    if (media.Thumbnail is not null)
-                    {
-                        // save thumbnail
-                        await assetRegisterer.WriteIFormFile(
-                            media.Thumbnail, thumbnailPath
-                        );
-
-                        productMedia.ThumnailPath = $"/{thumbnailPath}";
-                    }
-                    else
-                    {
-                        var fullPath = assetRegisterer.GetAssetPhysicalFullPath(thumbnailPath);
-
-                        // create and save a thumbnail 
-                        var hasCreated = await thumbnailGenerator.GenerateThumbnail(
-                            fileRelativePath,
-                            fullPath,
-                            TimeSpan.FromMicroseconds(1)
-                        );
-
-                        if (hasCreated)
-                        {
-                            productMedia.ThumnailPath = $"/{thumbnailPath}";
-                        }
-                    }
-                }
+                var productMedia = await productMediaRegisterer.RegisterMedia(productId, media);
 
                 variationsMediaData.Add(
                     new()
