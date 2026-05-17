@@ -5,6 +5,7 @@ using HiTechStore.Core.Services.Discount;
 using HiTechStore.Core.Services.Product;
 using HiTechStore.Core.Services.ProductComment;
 using HiTechStore.Core.Services.ProductScore;
+using HiTechStore.Core.Services.ProductVariation;
 
 namespace HiTechStore.Core.Services;
 
@@ -19,6 +20,8 @@ public static class ServicesDependencyRegistration
         services.AddScoped<ICommentService, CommentService>();
         services.AddScoped<IProductCommentService, ProductCommentService>();
         services.AddScoped<IProductScoreService, ProductScoreService>();
+        services.AddScoped<IProductVariationService, ProductVariationService>();
+
         services.AddTransient<ProductServiceHelper>();
 
         return services;

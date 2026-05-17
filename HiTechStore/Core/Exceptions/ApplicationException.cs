@@ -8,6 +8,7 @@ public class ApplicationException : Exception
 {
     public string Title { get; private set; }
     public HttpStatusCode Status { get; private set; }
+    public string Detail => Message;
     public ApplicationException(string title, string detail, HttpStatusCode httpStatusCode) : base(detail)
     {
         Title = title;

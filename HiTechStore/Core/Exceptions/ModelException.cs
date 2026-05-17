@@ -22,7 +22,8 @@ public class ModelException : ApplicationException
         )
         {
             Status = StatusCodes.Status400BadRequest,
-            Title = "Validation Error"
+            Title = "Validation Error",
+            Detail = Detail
         };
     }
 }

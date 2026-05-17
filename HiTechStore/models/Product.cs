@@ -2,8 +2,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 using HiTechStore.Core;
 
-using Microsoft.EntityFrameworkCore;
-
 namespace HiTechStore.Models
 {
     public class Product : IModel
@@ -37,6 +35,7 @@ namespace HiTechStore.Models
         public override PropertyValue? Value { get; set; }
     }
 
+    [Table("ProductVariation")] // just for temperory alignment with DbSet<ProductVariation> ProductVariations in DbContext
     public class ProductVariation : IModel
     {
         public int ProductVariationId { get; set; }
@@ -45,6 +44,7 @@ namespace HiTechStore.Models
         public virtual Color? Color { get; set; }
         public int Inventory { get; set; }
         public virtual List<ProductMedia> Media { get; set; } = new();
+        public int ProductId { get; set; }
         public virtual Product? Product { get; set; }
         public virtual IEnumerable<OrderItem>? Orders { get; set; }
     }
