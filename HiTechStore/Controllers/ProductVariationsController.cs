@@ -2,6 +2,8 @@ using AutoMapper;
 
 using HiTechStore.Core.Dto.ProductVariation;
 using HiTechStore.Core.Services.ProductVariation;
+using HiTechStore.Data.DTOs;
+using HiTechStore.Data.DTOs.Product;
 using HiTechStore.Presentation.Requests.ProductVariation;
 
 using Microsoft.AspNetCore.Mvc;
@@ -16,28 +18,25 @@ public class ProductVariationsController(
 ) : ControllerBase
 {
     [HttpPatch("{id}")]
-    public async Task<ActionResult> UpdateVariationDetails(int id, UpdateVariationDetailsRequest updateRequest)
+    public async Task<ActionResult<ProductVariationDto>> UpdateVariationDetails(int id, UpdateVariationDetailsRequest updateRequest)
     {
         var result = await productVariationService.UpdateDetails(id, mapper.Map<UpdateProductVariationDetailsDto>(updateRequest));
 
-        if (!result)
+        if (result is null)
         {
-            return BadRequest(new ProblemDetails
-            {
-                Title = "Update failed",
-                Detail = "Update failed with unknown reason"
-            });
+            // no changes
+            return Ok();
         }
 
-        return Ok();
+        return Ok(result);
     }
 
     [HttpPost("{id}/media")]
-    public async Task<ActionResult> RegisterNewMediaForProductVariation(int id, [FromForm] AddNewMediaRequest newMediaRequest)
+    public async Task<ActionResult<ProductMediaDto>> RegisterNewMediaForProductVariation(int id, [FromForm] AddNewMediaRequest newMediaRequest)
     {
         var result = await productVariationService.InsertNewMedia(id, mapper.Map<AddNewMediaDto>(newMediaRequest));
 
-        if (!result)
+        if (result is null)
         {
             return BadRequest(new ProblemDetails
             {
@@ -46,7 +45,7 @@ public class ProductVariationsController(
             });
         }
 
-        return Ok();
+        return Ok(result);
     }
 
 

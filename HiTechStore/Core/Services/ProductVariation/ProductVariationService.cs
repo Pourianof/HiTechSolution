@@ -1,7 +1,11 @@
+using AutoMapper;
+
 using HiTechStore.Core.Auth;
 using HiTechStore.Core.Dto.ProductVariation;
 using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Services.Authorization;
+using HiTechStore.Data.DTOs;
+using HiTechStore.Data.DTOs.Product;
 using HiTechStore.Data.Storage;
 
 namespace HiTechStore.Core.Services.ProductVariation;
@@ -10,16 +14,19 @@ public class ProductVariationService : ServiceBase, IProductVariationService
 {
     private IUnitOfWork _unitOfWork;
     private ProductMediaRegisterer _mediaRegisterer;
+    private IMapper _mapper;
 
     public ProductVariationService(
         IAuthorizationService authorizationService,
         ICurrentUserProvider currentUserProvider,
         IUnitOfWork unitOfWork,
-        ProductMediaRegisterer mediaRegisterer
+        ProductMediaRegisterer mediaRegisterer,
+        IMapper mapper
     ) : base(authorizationService, currentUserProvider)
     {
         _unitOfWork = unitOfWork;
         _mediaRegisterer = mediaRegisterer;
+        _mapper = mapper;
     }
 
     private async Task<Models.ProductVariation> GetVariation(int variationId)
@@ -41,7 +48,7 @@ public class ProductVariationService : ServiceBase, IProductVariationService
         return productVariation;
     }
 
-    public async Task<bool> UpdateDetails(int variationId, UpdateProductVariationDetailsDto updateDto)
+    public async Task<ProductVariationDto?> UpdateDetails(int variationId, UpdateProductVariationDetailsDto updateDto)
     {
         var isColorSpecified = updateDto.ColorId is not null && updateDto.ColorId.Value > 0;
         var isPriceSpecified = updateDto.Price is not null && updateDto.Price.Value > 0;
@@ -49,7 +56,7 @@ public class ProductVariationService : ServiceBase, IProductVariationService
 
         if (!isColorSpecified && !isPriceSpecified && !isInventorySpecified)
         {
-            return true;
+            return default;
         }
 
         var productVariation = await GetVariation(variationId);
@@ -64,7 +71,7 @@ public class ProductVariationService : ServiceBase, IProductVariationService
             isSamePrice
         )
         {
-            return true;
+            return default;
         }
 
         if (!isSameColor)
@@ -101,10 +108,10 @@ public class ProductVariationService : ServiceBase, IProductVariationService
 
         await _unitOfWork.Complete();
 
-        return true;
+        return await _unitOfWork.ProductVariationRepository.GetByIdProjectedAsync(variationId);
     }
 
-    public async Task<bool> InsertNewMedia(int variationId, AddNewMediaDto newMediaDto)
+    public async Task<ProductMediaDto> InsertNewMedia(int variationId, AddNewMediaDto newMediaDto)
     {
         if (newMediaDto.File is null)
         {
@@ -124,7 +131,7 @@ public class ProductVariationService : ServiceBase, IProductVariationService
 
         await _unitOfWork.Complete();
 
-        return true;
+        return _mapper.Map<ProductMediaDto>(media);
     }
 
     public async Task<bool> deleteVariationsMedia(int variationId, int mediaId)
