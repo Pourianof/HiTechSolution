@@ -360,4 +360,56 @@ public class ProductService(
 
         return products;
     }
+
+    public async Task<ProductBasicInfoDto> UpdateProduct(int productId, UpdateProductDto? updateDto)
+    {
+        var user = await GetUser();
+
+        var product = await unitOfWork.Products.GetModelByIdAsync(productId);
+
+        if (product is null)
+        {
+            throw new NotFoundException($"product with id {productId} not found");
+        }
+
+        if (product.AuthorId != user.Id)
+        {
+            throw new NotAllowedException("you have not authorized to update this product");
+        }
+
+        if (updateDto is not null)
+        {
+            product.Title = updateDto.Title ?? product.Title;
+            product.Description = updateDto.Description ?? product.Description;
+
+            if (updateDto.BrandModelId is not null)
+            {
+
+                var brandModelId = updateDto.BrandModelId.Value;
+
+                if (brandModelId != product.BrandModelId)
+                {
+                    var brandModel = await unitOfWork.BrandModelRepository.GetModelByIdAsync(brandModelId);
+
+                    if (brandModel is null)
+                    {
+                        throw new NotFoundException("brand model not found", $"no brand model with id {brandModelId} exists");
+                    }
+
+                    product.BrandModel = brandModel;
+                }
+
+                await unitOfWork.Complete();
+            }
+        }
+
+        return new()
+        {
+            ProductId = product.ProductId,
+            Title = product.Title,
+            Description = product.Description,
+            AuthorId = product.AuthorId,
+            BrandModel = await unitOfWork.BrandModelRepository.GetByIdProjectedAsync(product.BrandModelId)
+        };
+    }
 }

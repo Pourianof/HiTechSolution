@@ -1,9 +1,9 @@
 
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 using AutoMapper;
 
-using HiTechStore.Controllers.ActionFilters;
 using HiTechStore.Controllers.ExceptionFilters;
 using HiTechStore.Core;
 using HiTechStore.Core.Services.Product;
@@ -13,6 +13,7 @@ using HiTechStore.Data.Queries;
 using HiTechStore.DTOs.Product;
 using HiTechStore.Helpers.URLFilterQuery;
 using HiTechStore.Models;
+using HiTechStore.Presentation.Product;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -97,42 +98,14 @@ namespace HiTechStore.Controllers
         }
 
         [HttpPatch("{id}")]
-        [TypeFilter<HandleModelUpdateActionFilterAttribute<Product, ProductPatchDTO>>]
-        [TypeFilter<SameAuthorValidationActionFilterAttribute<Product>>]
-        public IActionResult UpdateProduct(int id, [FromBody] ProductPatchDTO product)
+        public async Task<IActionResult> UpdateProduct(int id, [FromBody] ProductUpdateRequest updateRequest)
         {
-            var actualProduct = HttpContext.Items["model"] as Product;
-            if (actualProduct == null)
-            {
-                return NotFound();
-            }
+            var result = await _productService.UpdateProduct(id, _mapper.Map<UpdateProductDto>(updateRequest));
 
-            _mapper.Map(product, actualProduct);
-
-            _unitOfWork.Complete();
-            _mapper.Map(actualProduct, product);
-            return Ok(product);
-        }
-
-        [HttpPut("{id}")]
-        [TypeFilter<HandleModelUpdateActionFilterAttribute<Product, ProductCreationDto>>]
-        [TypeFilter<SameAuthorValidationActionFilterAttribute<Product>>]
-        public IActionResult ReplaceProduct([FromBody] ProductCreationDto product)
-        {
-            var actualProduct = HttpContext.Items["model"] as Product;
-            if (actualProduct == null)
-            {
-                return NotFound();
-            }
-
-            _mapper.Map(product, actualProduct);
-
-            _unitOfWork.Complete();
-            return Ok(product);
+            return Ok(result);
         }
 
         [HttpDelete("{id}")]
-        [TypeFilter<SameAuthorValidationActionFilterAttribute<Product>>]
         public async Task<IActionResult> DeleteProduct(int id)
         {
             var product = await _productService.DeleteProduct(id);

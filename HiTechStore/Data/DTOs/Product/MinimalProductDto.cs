@@ -1,4 +1,14 @@
 using HiTechStore.Data.DTOs;
+using HiTechStore.Data.DTOs.Brand;
+
+public class ProductBasicInfoDto
+{
+    public int ProductId { get; set; }
+    public string? Title { get; set; }
+    public string? Description { get; set; }
+    public string? AuthorId { get; set; }
+    public BrandModelDto? BrandModel { get; set; }
+}
 
 public class MinimalProductDto
 {
