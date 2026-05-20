@@ -296,7 +296,7 @@ public class ProductService(
                     );
                 }
                 ppv.Value = pv;
-                createdProduct.Properties.Append(ppv);
+                createdProduct.Properties.Add(ppv);
             }
         }
 
@@ -409,7 +409,7 @@ public class ProductService(
             Title = product.Title,
             Description = product.Description,
             AuthorId = product.AuthorId,
-            BrandModel = await unitOfWork.BrandModelRepository.GetByIdProjectedAsync(product.BrandModelId)
+            BrandModel = product.BrandModelId is null ? default : await unitOfWork.BrandModelRepository.GetByIdProjectedAsync(product.BrandModelId.Value)
         };
     }
 }

@@ -23,7 +23,7 @@ public class Property
 public class PropertyValue
 {
     public int PropertyValueId { get; set; }
-    public int ComponentPropertyValueId { get; set; }
+    public int? ComponentPropertyValueId { get; set; }
     private string? _stringValue;
     public string? ValueString
     {

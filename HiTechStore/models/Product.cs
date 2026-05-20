@@ -10,7 +10,7 @@ namespace HiTechStore.Models
         public string? Title { get; set; }
         public string? Description { get; set; }
         public string? AuthorId { get; set; }
-        public virtual int BrandModelId { get; set; }
+        public int? BrandModelId { get; set; }
         public virtual BrandModel? BrandModel { get; set; }
         public virtual User? Author { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
