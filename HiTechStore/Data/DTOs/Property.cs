@@ -40,13 +40,3 @@ public class PropertyValueDto
     public PropertyType ValueType { get; set; }
 }
 
-public class PropertyValueEntryCreationDto
-{
-    [Required]
-    [JsonPropertyName("propertyId")]
-    public int? PropertyId { get; set; } = null;
-    [Required]
-    [JsonPropertyName("propertyValue")]
-    public object? PropertyValue { get; set; }
-}
-

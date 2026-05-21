@@ -9,9 +9,9 @@ using HiTechStore.Data.DTOs.Product;
 using HiTechStore.Data.DTOs.Component;
 using HiTechStore.DTOs.Category;
 using HiTechStore.Data.DTOs.Brand;
-using HiTechStore.Data.DTOs.Cart;
 using HiTechStore.Data.DTOs.Order;
 using HiTechStore.Data.DTOs.DiscountEntity;
+using HiTechStore.Core.Dto.Product;
 
 public class MappingProfile : Profile
 {

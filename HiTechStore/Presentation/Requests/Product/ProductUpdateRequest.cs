@@ -1,4 +1,4 @@
-using HiTechStore.Core.Services.Product;
+using HiTechStore.Core.Dto.Product;
 using HiTechStore.Helpers.AutoMapper;
 
 namespace HiTechStore.Presentation.Product;

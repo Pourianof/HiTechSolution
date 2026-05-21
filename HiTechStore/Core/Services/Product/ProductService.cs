@@ -4,6 +4,7 @@ using AutoMapper;
 
 using HiTechStore.Core.Auth;
 using HiTechStore.Core.Common.Interfaces.Infra;
+using HiTechStore.Core.Dto.Product;
 using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Helpers;
 using HiTechStore.Core.Services.Authorization;
@@ -180,6 +181,103 @@ public class ProductService(
         }
     }
 
+    private async Task SetProductCategoryValues(Models.Product product, ProductCategoryValuesDto categoryValuesDto)
+    {
+        var categoryId = categoryValuesDto.CategoryId;
+        product.CategoryId = categoryId;
+
+        var productCategory = unitOfWork.Categories.GetByIdProjectedAsync(categoryId).Result;
+
+        if (productCategory is null)
+        {
+            throw new ModelException(
+                title: "Category not found",
+                description: $"Category with id {categoryId} not exist",
+                fieldName: $"{nameof(ProductCreationDto.CategoryValues)}.{nameof(ProductCreationDto.CategoryValues.CategoryId)}"
+            );
+        }
+
+
+        if (categoryValuesDto.ComponentModels != null && categoryValuesDto.ComponentModels.Any())
+        {
+            var componentModelIds = categoryValuesDto.ComponentModels;
+
+            var categoryValidModels = unitOfWork.Categories.GetModelsOfCategory(categoryId, componentModelIds).Result;
+
+            for (var index = 0; index < componentModelIds.Count(); index++)
+            {
+                var modelId = componentModelIds.ElementAt(index);
+                var componentModel = categoryValidModels.FirstOrDefault((cvm) => cvm.ComponentModelId == modelId);
+
+                if (componentModel is null)
+                {
+                    throw new ModelException(
+                        title: "Owning problem",
+                        description: $"specified component model-id is not belong to a component of the '{productCategory.Name}' category",
+                        fieldName: $"{nameof(ProductCreationDto.CategoryValues)}.{nameof(ProductCreationDto.CategoryValues.ComponentModels)}.{index}"
+                    );
+                }
+
+                product.ComponentModels.Add(componentModel);
+            }
+
+        }
+
+        var categoryProperties = productCategory.Properties;
+
+        product.Properties = new List<ProductPropertyValue>();
+
+        for (int index = 0; index < (categoryValuesDto.Properties?.Count() ?? 0); index++)
+        {
+            var prop = categoryValuesDto.Properties!.ElementAt(index);
+
+            // some value must specified for property
+            if (prop.PropertyValue is null)
+            {
+                throw new ModelException(
+                    title: "No value",
+                    description: "PropertyValue is required",
+                    fieldName: $"{nameof(ProductCreationDto.CategoryValues)}.{nameof(ProductCreationDto.CategoryValues.Properties)}.{index}.{nameof(PropertyValueEntryCreationDto.PropertyValue)}"
+                );
+            }
+
+            var ppv = new ProductPropertyValue
+            {
+                PropertyId = prop.PropertyId,
+
+            };
+
+            // get the property which this item target to
+            var actualProp = categoryProperties?.FirstOrDefault((p) => p.PropertyId == prop.PropertyId);
+
+            if (actualProp is null)
+            {
+                throw new ModelException(
+                    title: "Not found",
+                    description: $"No PropertyId with id {prop.PropertyId} exist for specified category.",
+                    fieldName: $"{nameof(ProductCreationDto.CategoryValues)}.{nameof(ProductCreationDto.CategoryValues.Properties)}.{index}.{nameof(PropertyValueEntryCreationDto.PropertyId)}"
+                );
+            }
+
+            var pv = new PropertyValue();
+
+            try
+            {
+                pv.PopulateValue(actualProp.PropertyType!.Value, prop.PropertyValue);
+            }
+            catch (PropertyValueTypeDismatchException ex)
+            {
+                throw new ModelException(
+                    title: "Type dismatch",
+                    description: ex.Message,
+                    fieldName: $"{nameof(ProductCreationDto.CategoryValues)}.{nameof(ProductCreationDto.CategoryValues.Properties)}.{index}.{nameof(PropertyValueEntryCreationDto.PropertyValue)}"
+                );
+            }
+            ppv.Value = pv;
+            product.Properties.Add(ppv);
+        }
+    }
+
     private async Task<Models.Product> _CreateProduct(ProductCreationDto product, string userId)
     {
         var createdProduct = mapper.Map<Models.Product>(product);
@@ -202,102 +300,12 @@ public class ProductService(
         // register product properties
         if (product.CategoryValues is not null)
         {
-
-            // setting product category
-            var categoryId = product.CategoryValues.CategoryId!.Value;
-            createdProduct.CategoryId = categoryId;
-
-            var productCategory = unitOfWork.Categories.GetByIdProjectedAsync(categoryId).Result;
-
-            if (productCategory is null)
+            await SetProductCategoryValues(createdProduct, new()
             {
-                throw new ModelException(
-                    title: "Category not found",
-                    description: $"Category with id {categoryId} not exist",
-                    fieldName: $"{nameof(ProductCreationDto.CategoryValues)}.{nameof(ProductCreationDto.CategoryValues.CategoryId)}"
-                );
-            }
-
-
-            if (product.CategoryValues.ComponentModels != null && product.CategoryValues.ComponentModels.Any())
-            {
-                var componentModelIds = product.CategoryValues.ComponentModels;
-
-                var categoryValidModels = unitOfWork.Categories.GetModelsOfCategory(categoryId, componentModelIds).Result;
-
-                for (var index = 0; index < componentModelIds.Count(); index++)
-                {
-                    var modelId = componentModelIds.ElementAt(index);
-                    var componentModel = categoryValidModels.FirstOrDefault((cvm) => cvm.ComponentModelId == modelId);
-
-                    if (componentModel is null)
-                    {
-                        throw new ModelException(
-                            title: "Owning problem",
-                            description: $"specified component model-id is not belong to a component of the '{productCategory.Name}' category",
-                            fieldName: $"{nameof(ProductCreationDto.CategoryValues)}.{nameof(ProductCreationDto.CategoryValues.ComponentModels)}.{index}"
-                        );
-                    }
-
-                    createdProduct.ComponentModels.Add(componentModel);
-                }
-
-
-            }
-
-            var categoryProperties = productCategory.Properties;
-
-            createdProduct.Properties = new List<ProductPropertyValue>();
-
-            for (int index = 0; index < (product.CategoryValues.Properties?.Count() ?? 0); index++)
-            {
-                var prop = product.CategoryValues.Properties!.ElementAt(index);
-
-                // some value must specified for property
-                if (prop.PropertyValue is null)
-                {
-                    throw new ModelException(
-                        title: "No value",
-                        description: "PropertyValue is required",
-                        fieldName: $"{nameof(ProductCreationDto.CategoryValues)}.{nameof(ProductCreationDto.CategoryValues.Properties)}.{index}.{nameof(PropertyValueEntryCreationDto.PropertyValue)}"
-                    );
-                }
-
-                var ppv = new ProductPropertyValue
-                {
-                    PropertyId = prop.PropertyId!.Value,
-
-                };
-
-                // get the property which this item target to
-                var actualProp = categoryProperties?.FirstOrDefault((p) => p.PropertyId == prop.PropertyId);
-
-                if (actualProp is null)
-                {
-                    throw new ModelException(
-                        title: "Not found",
-                        description: $"No PropertyId with id {prop.PropertyId} exist for specified category.",
-                        fieldName: $"{nameof(ProductCreationDto.CategoryValues)}.{nameof(ProductCreationDto.CategoryValues.Properties)}.{index}.{nameof(PropertyValueEntryCreationDto.PropertyId)}"
-                    );
-                }
-
-                var pv = new PropertyValue();
-
-                try
-                {
-                    pv.PopulateValue(actualProp.PropertyType!.Value, prop.PropertyValue);
-                }
-                catch (PropertyValueTypeDismatchException ex)
-                {
-                    throw new ModelException(
-                        title: "Type dismatch",
-                        description: ex.Message,
-                        fieldName: $"{nameof(ProductCreationDto.CategoryValues)}.{nameof(ProductCreationDto.CategoryValues.Properties)}.{index}.{nameof(PropertyValueEntryCreationDto.PropertyValue)}"
-                    );
-                }
-                ppv.Value = pv;
-                createdProduct.Properties.Add(ppv);
-            }
+                CategoryId = product.CategoryValues.CategoryId,
+                ComponentModels = product.CategoryValues.ComponentModels,
+                Properties = product.CategoryValues.Properties
+            });
         }
 
 
@@ -361,7 +369,8 @@ public class ProductService(
         return products;
     }
 
-    public async Task<ProductBasicInfoDto> UpdateProduct(int productId, UpdateProductDto? updateDto)
+
+    private async Task<Models.Product> GetAuthorizedProduct(int productId)
     {
         var user = await GetUser();
 
@@ -376,6 +385,13 @@ public class ProductService(
         {
             throw new NotAllowedException("you have not authorized to update this product");
         }
+
+        return product;
+    }
+
+    public async Task<ProductBasicInfoDto> UpdateProduct(int productId, UpdateProductDto? updateDto)
+    {
+        var product = await GetAuthorizedProduct(productId);
 
         if (updateDto is not null)
         {
@@ -411,5 +427,39 @@ public class ProductService(
             AuthorId = product.AuthorId,
             BrandModel = product.BrandModelId is null ? default : await unitOfWork.BrandModelRepository.GetByIdProjectedAsync(product.BrandModelId.Value)
         };
+    }
+
+    public async Task<ProductDto> UpdateProductsCategory(int productId, ProductCategoryValuesDto replaceDto)
+    {
+        var product = await GetAuthorizedProduct(productId);
+
+        if (replaceDto is not null)
+        {
+            using var trx = await unitOfWork.StartTransaction();
+
+            try
+            {
+                // remove old data
+                product.Properties.Clear();
+                product.ComponentModels.Clear();
+
+                await unitOfWork.Complete();
+
+
+                // set new data
+                await SetProductCategoryValues(product, replaceDto);
+
+                await unitOfWork.Complete();
+
+                await trx.Commit();
+            }
+            catch
+            {
+                await trx.Rollback();
+                throw;
+            }
+        }
+
+        return (await unitOfWork.Products.GetByIdProjectedAsync(productId))!;
     }
 }

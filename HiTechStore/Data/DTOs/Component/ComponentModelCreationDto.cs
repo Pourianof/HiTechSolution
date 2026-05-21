@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
+using HiTechStore.Core.Dto.Product;
+
 namespace HiTechStore.Data.DTOs.Component;
 
 public class ComponentModelCreationDto

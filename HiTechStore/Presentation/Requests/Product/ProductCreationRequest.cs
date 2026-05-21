@@ -1,15 +1,17 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-using HiTechStore.Data.DTOs;
 using HiTechStore.Data.DTOs.Binders;
-using HiTechStore.Data.DTOs.Product;
 using HiTechStore.Data.DTOs.Product.Validations;
 using HiTechStore.Data.DTOs.Validations;
+using HiTechStore.Helpers.AutoMapper;
+using HiTechStore.Presentation.Product;
 
-namespace HiTechStore.DTOs.Product;
+namespace HiTechStore.Presentation.Requests;
 
-public class ProductCreationDto
+
+[MapTo<ProductCreationDto>]
+public class ProductCreationRequest
 {
     [Required]
     [MinLength(3)]
@@ -23,7 +25,7 @@ public class ProductCreationDto
 
     [Required]
     [FromJson]
-    public ProductCategoryValuesDto? CategoryValues { get; set; }
+    public ProductCategoryValuesRequest? CategoryValues { get; set; }
 
     [Required]
     [ProductVariationValidation]
@@ -35,7 +37,8 @@ public class ProductCreationDto
     public IEnumerable<IFormFile>? Thumbnails { get; set; }
 }
 
-public class ProductVariationCreationDto
+[MapTo<ProductVariationCreationDto>]
+public class ProductVariationCreationRequest
 {
     [Required]
     [PositiveNumber]
@@ -51,19 +54,17 @@ public class ProductVariationCreationDto
     [Required]
     [MinLength(1)]
     [JsonPropertyName("mediaMetaData")]
-    public IEnumerable<MediaMetaDataDto>? MediaMetaData { get; set; }
+    public IEnumerable<MediaMetaDataRequest>? MediaMetaData { get; set; }
 }
 
-
-public class ProductCategoryValuesDto
+[MapTo<MediaMetaDataDto>]
+public class MediaMetaDataRequest
 {
+    [JsonPropertyName("isMain")]
+    public bool IsMain { get; set; } = false;
     [Required]
-    [JsonPropertyName("categoryId")]
-    public int? CategoryId { get; set; } = null; // null just for model binding error
-    [JsonPropertyName("properties")]
-    public IEnumerable<PropertyValueEntryCreationDto>? Properties { get; set; }
-    [JsonPropertyName("componentModels")]
-    public IEnumerable<int>? ComponentModels { get; set; }
-
+    [JsonPropertyName("index")]
+    public int Index { get; set; }
+    [JsonPropertyName("thumbnailIndex")]
+    public int? ThumbnailIndex { get; set; }
 }
-

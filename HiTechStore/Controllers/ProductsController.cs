@@ -1,16 +1,15 @@
 
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 using AutoMapper;
 
 using HiTechStore.Controllers.ExceptionFilters;
 using HiTechStore.Core;
+using HiTechStore.Core.Dto.Product;
 using HiTechStore.Core.Services.Product;
 using HiTechStore.Data.DTOs;
 using HiTechStore.Data.DTOs.Product;
 using HiTechStore.Data.Queries;
-using HiTechStore.DTOs.Product;
 using HiTechStore.Helpers.URLFilterQuery;
 using HiTechStore.Models;
 using HiTechStore.Presentation.Product;
@@ -115,6 +114,14 @@ namespace HiTechStore.Controllers
             }
 
             return NoContent();
+        }
+
+        [HttpPut("{id}/category")]
+        public async Task<ActionResult<ProductDto>> UpdateProductCategory(int id, ProductCategoryValuesRequest categoryReplaceRequest)
+        {
+            var product = await _productService.UpdateProductsCategory(id, _mapper.Map<ProductCategoryValuesDto>(categoryReplaceRequest));
+
+            return product;
         }
 
     }
