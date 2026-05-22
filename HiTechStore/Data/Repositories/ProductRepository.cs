@@ -7,6 +7,7 @@ using HiTechStore.Data.Mapping;
 using HiTechStore.Data.Queries;
 using HiTechStore.Data.Repositories.Helpers;
 using HiTechStore.Helpers.Types;
+using HiTechStore.Helpers.URLFilterQuery;
 using HiTechStore.Models;
 
 using Microsoft.EntityFrameworkCore;
@@ -33,9 +34,9 @@ namespace HiTechStore.Data.Repositories
             to a appropriate sql which give us the component-models which associate to
             target product
         */
-        protected override IQueryable<ProductDto> HandleProject(IQueryable<Product> queryable)
+        protected override IQueryable<ProductDto> HandleProject(IQueryable<Product> queryable, ProductQuery? productQuery = default)
         {
-            return ProductRepositoryHelper.ToDtoProject(queryable);
+            return ProductRepositoryHelper.ToDtoProject(queryable, productQuery?.Include?.GetValue<string>(QueryOperator.Equal)?.Split(","));
         }
 
         protected override IQueryable<Product> GetAllQueryBuilder(IQueryable<Product> queryBuilder, ProductQuery? productQueryParams)
@@ -51,14 +52,14 @@ namespace HiTechStore.Data.Repositories
             return queryBuilder;
         }
 
-        public async Task<ProductDto?> GetByIdAsync(int id, string? userId)
+        public async Task<ProductDto?> GetByIdAsync(int id, string? userId, ProductQuery? productQuery = default)
         {
             var query = _dbSet.Where(p => p.ProductId == id);
             if (userId is string)
             {
                 query.Where(p => p.AuthorId == userId);
             }
-            return await Project(query).FirstOrDefaultAsync();
+            return await Project(query, productQuery).FirstOrDefaultAsync();
 
         }
 
@@ -86,7 +87,7 @@ namespace HiTechStore.Data.Repositories
             ).Include(pv => pv.Product).ToListAsync();
         }
 
-        public async Task<IEnumerable<ProductDto>> GetSimilarProductsOf(int productId)
+        public async Task<IEnumerable<ProductDto>> GetSimilarProductsOf(int productId, ProductQuery? productQuery = default)
         {
             // this similarity not contained Components and their properties and brands matching
             // just based on these criterias: 
@@ -134,7 +135,7 @@ namespace HiTechStore.Data.Repositories
              ).Take(10).Select(p => p.Similar);
 
 
-            return await Project(query)
+            return await Project(query, productQuery)
             .ToListAsync();
         }
 

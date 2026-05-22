@@ -317,25 +317,26 @@ public class ProductService(
         return createdProduct;
     }
 
-    public async Task<PagedResultDto<ProductDto>> GetOnSaleProducts()
+    public async Task<PagedResultDto<ProductDto>> GetOnSaleProducts(ProductQuery? productQuery)
     {
 
         var activeDiscounts = await GetAppliableActiveDiscount();
 
-        var products = await unitOfWork.DiscountedProductsRepository.GetDiscountedProducts(activeDiscounts);
+        var products = await unitOfWork.DiscountedProductsRepository.GetDiscountedProducts(activeDiscounts, productQuery);
 
         ApplyRulesToProducts(products.Items, activeDiscounts);
 
         return products;
     }
 
-    public async Task<ProductDto?> GetProductById(int productId, ProductAccessAdditionalProcessing? discountCalculation = default)
+    public async Task<ProductDto?> GetProductById(int productId, ProductAccessAdditionalProcessing? discountCalculation = default, ProductQuery? query = default)
     {
         var activeDiscounts = await GetAppliableActiveDiscount();
 
         var product = await unitOfWork.Products.GetByIdAsync(
             productId,
-            discountCalculation?.UsersScore == true ? UserId : default
+            discountCalculation?.UsersScore == true ? UserId : default,
+            query
         );
 
         if (discountCalculation?.DiscountCalculation == true && product is not null)
@@ -346,7 +347,7 @@ public class ProductService(
         return product;
     }
 
-    public async Task<IEnumerable<ProductDto>> GetSimilarProductsOf(int productId)
+    public async Task<IEnumerable<ProductDto>> GetSimilarProductsOf(int productId, ProductQuery? productQuery = default)
     {
         var isProductExist = await unitOfWork.Products.IsExistsAsync(productId);
 
@@ -355,7 +356,7 @@ public class ProductService(
             throw new NotFoundException($"No product with id {productId} found");
         }
 
-        var similarProducts = await unitOfWork.Products.GetSimilarProductsOf(productId);
+        var similarProducts = await unitOfWork.Products.GetSimilarProductsOf(productId, productQuery);
 
         return similarProducts;
     }

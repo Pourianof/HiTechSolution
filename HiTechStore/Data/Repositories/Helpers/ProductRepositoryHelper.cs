@@ -6,6 +6,7 @@ using HiTechStore.Data.DTOs.Brand;
 using HiTechStore.Data.DTOs.Component;
 using HiTechStore.Data.DTOs.Product;
 using HiTechStore.Data.Queries;
+using HiTechStore.Helpers.Expressions;
 using HiTechStore.Helpers.Repository;
 using HiTechStore.Helpers.URLFilterQuery;
 using HiTechStore.Helpers.URLFilterQuery.QueryAppliers;
@@ -15,10 +16,12 @@ namespace HiTechStore.Data.Repositories.Helpers;
 
 public class ProductRepositoryHelper
 {
-    static public IQueryable<ProductDto> ToDtoProject(IQueryable<Product> baseQuery)
+    static public IQueryable<ProductDto> ToDtoProject(IQueryable<Product> baseQuery, IEnumerable<string>? inclusions = default)
     {
-        return baseQuery.Select(p => new ProductDto
+        inclusions ??= [];
+        Expression<Func<Product, ProductDto>> projector = p => new ProductDto
         {
+            Inclusions = inclusions,
             ProductId = p.ProductId,
             Title = p.Title,
             AverageScore = p.Scores.Any()
@@ -33,71 +36,111 @@ public class ProductRepositoryHelper
                 Description = p.BrandModel.Description,
                 ModelId = p.BrandModel.BrandModelId
             },
-            Components = p.Category!.Components!.Select(
-                    (c) => new ProductComponentDto()
-                    {
-                        Name = c.Component!.Name,
-                        ComponentTypeId = c.ComponentTypeId,
-                        Description = c.Component!.Description,
-                        Models = p.ComponentModels.Where(m => m.ComponentTypeId == c.ComponentTypeId).Select(
-                            (m) => new ComponentModelDto()
-                            {
-                                BrandModel = m.BrandModel != null ? new BrandModelDto()
-                                {
-                                    BrandName = m.BrandModel.Brand!.Name,
-                                    Description = m.BrandModel.Description,
-                                    ModelId = m.BrandModel.BrandModelId,
-                                    ModelName = m.BrandModel.Name
-                                } : null,
-                                ComponentModelId = m.ComponentModelId,
-                                ComponentTypeId = c.ComponentTypeId,
-                                Description = m.Description,
-                                Properties = m.Properties!.Select(
-                                    (prop) => new PropertyValueDto()
-                                    {
-                                        Name = prop.Property!.Name,
-                                        PropertyId = prop.PropertyId,
-                                        Value = prop.Value!.ValueNumber != null ? (object?)prop.Value!.ValueNumber :
-                                                prop.Value!.ValueDateTime != null ? (object?)prop.Value!.ValueDateTime :
-                                                prop.Value!.ValueBoolean != null ? (object?)prop.Value!.ValueBoolean :
-                                                prop.Value!.ValueString,
-                                        ValueType = prop.Property.PropertyType
-                                    }
-                                )
-                            }
-                        )
-                    }
-                ).ToList(),
-            Variations = p.Variations.Select(pv => new ProductVariationDto()
-            {
-                ProductVariationId = pv.ProductVariationId,
-                Color = pv.Color,
-                Inventory = pv.Inventory,
-                Media = pv.Media.Select(m => new ProductMediaDto()
-                {
-                    IsMain = m.IsMain,
-                    ProductMediaId = m.ProductMediaId,
-                    Url = m.FilePath,
-                    Type = m.Type == MediaType.Image ? "Image" : "Video",
-                    ThumbnailUrl = m.ThumnailPath
-                }).ToList(),
-                Price = pv.Price
-            }).ToList(),
             CategoryId = p.CategoryId,
             Description = p.Description,
-            Properties = p.Properties.Select(
-                    (prop) => new PropertyValueDto()
+        };
+
+        if (inclusions is not null && inclusions.Count() > 0)
+        {
+            foreach (var includedPropertyName in inclusions)
+            {
+                if (string.Equals(includedPropertyName, nameof(ProductDto.Components), StringComparison.OrdinalIgnoreCase))
+                {
+                    Expression<Func<Product, List<ProductComponentDto>>> expression = (Product p) => p.Category!.Components!.Select(
+                                (c) => new ProductComponentDto()
+                                {
+                                    Name = c.Component!.Name,
+                                    ComponentTypeId = c.ComponentTypeId,
+                                    Description = c.Component!.Description,
+                                    Models = p.ComponentModels.Where(m => m.ComponentTypeId == c.ComponentTypeId).Select(
+                                        (m) => new ComponentModelDto()
+                                        {
+                                            BrandModel = m.BrandModel != null ? new BrandModelDto()
+                                            {
+                                                BrandName = m.BrandModel.Brand!.Name,
+                                                Description = m.BrandModel.Description,
+                                                ModelId = m.BrandModel.BrandModelId,
+                                                ModelName = m.BrandModel.Name
+                                            } : null,
+                                            ComponentModelId = m.ComponentModelId,
+                                            ComponentTypeId = c.ComponentTypeId,
+                                            Description = m.Description,
+                                            Properties = m.Properties!.Select(
+                                                (prop) => new PropertyValueDto()
+                                                {
+                                                    Name = prop.Property!.Name,
+                                                    PropertyId = prop.PropertyId,
+                                                    Value = prop.Value!.ValueNumber != null ? (object?)prop.Value!.ValueNumber :
+                                                            prop.Value!.ValueDateTime != null ? (object?)prop.Value!.ValueDateTime :
+                                                            prop.Value!.ValueBoolean != null ? (object?)prop.Value!.ValueBoolean :
+                                                            prop.Value!.ValueString,
+                                                    ValueType = prop.Property.PropertyType
+                                                }
+                                            )
+                                        }
+                                    )
+                                }
+                            ).ToList();
+
+                    projector = projector.ModifyProjection(
+                        new()
+                        {
+                            [nameof(ProductDto.Components)] = ExpressionParameterReplacer.ReplaceParameter(expression, projector.Parameters.First()).Body
+                        }
+                    );
+                }
+                else if (string.Equals(includedPropertyName, nameof(ProductDto.Variations), StringComparison.OrdinalIgnoreCase))
+                {
+                    Expression<Func<Product, List<ProductVariationDto>>> expression = (Product p) => p.Variations.Select(pv => new ProductVariationDto()
                     {
-                        Name = prop.Property!.Name,
-                        PropertyId = prop.ProductId,
-                        Value = prop.Value!.ValueNumber != null ? (object?)prop.Value!.ValueNumber :
-                                prop.Value!.ValueDateTime != null ? (object?)prop.Value!.ValueDateTime :
-                                prop.Value!.ValueBoolean != null ? (object?)prop.Value!.ValueBoolean :
-                                prop.Value!.ValueString,
-                        ValueType = prop.Property.PropertyType
-                    }
-                ).ToList()
-        });
+                        ProductVariationId = pv.ProductVariationId,
+                        Color = pv.Color,
+                        Inventory = pv.Inventory,
+                        Media = pv.Media.Select(m => new ProductMediaDto()
+                        {
+                            IsMain = m.IsMain,
+                            ProductMediaId = m.ProductMediaId,
+                            Url = m.FilePath,
+                            Type = m.Type == MediaType.Image ? "Image" : "Video",
+                            ThumbnailUrl = m.ThumnailPath
+                        }).ToList(),
+                        Price = pv.Price
+                    }).ToList();
+
+                    projector = projector.ModifyProjection(
+                        new()
+                        {
+                            [nameof(ProductDto.Variations)] = ExpressionParameterReplacer.ReplaceParameter(expression, projector.Parameters.First()).Body
+                        }
+                    );
+                }
+                else if (string.Equals(includedPropertyName, nameof(ProductDto.Properties), StringComparison.OrdinalIgnoreCase))
+                {
+                    Expression<Func<Product, List<PropertyValueDto>>> expression = (Product p) => p.Properties.Select(
+                            (prop) => new PropertyValueDto()
+                            {
+                                Name = prop.Property!.Name,
+                                PropertyId = prop.ProductId,
+                                Value = prop.Value!.ValueNumber != null ? (object?)prop.Value!.ValueNumber :
+                                        prop.Value!.ValueDateTime != null ? (object?)prop.Value!.ValueDateTime :
+                                        prop.Value!.ValueBoolean != null ? (object?)prop.Value!.ValueBoolean :
+                                        prop.Value!.ValueString,
+                                ValueType = prop.Property.PropertyType
+                            }
+                        ).ToList();
+
+                    projector = projector.ModifyProjection(
+                        new()
+                        {
+                            [nameof(ProductDto.Properties)] = ExpressionParameterReplacer.ReplaceParameter(expression, projector.Parameters.First()).Body
+                        }
+                    );
+                }
+            }
+        }
+
+
+        return baseQuery.Select(projector);
     }
 
     public static IQueryable<TProduct> ApplyQueryParams<TProduct>(

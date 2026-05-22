@@ -8,6 +8,7 @@ public class ProductQuery : BaseQuery
     public QueryFilterItem? Color { get; set; }
     public QueryFilterItem? Brand { get; set; }
     public QueryFilterItem? Price { get; set; }
+    public QueryFilterItem? Include { get; set; }
     [NamespacedQueryFiltersMarker("ct")]
     public Dictionary<string, QueryFilterItem>? CategoryProperties { get; set; }
     public QueryFilterItem? Discount { get; set; }
@@ -24,7 +25,8 @@ public class ProductQuery : BaseQuery
             Page = query?.Page ?? Page,
             Price = query?.Price ?? Price,
             SortBy = query?.SortBy ?? SortBy,
-            SortDir = query?.SortDir ?? SortDir
+            SortDir = query?.SortDir ?? SortDir,
+            Include = query?.Include
         };
     }
 }

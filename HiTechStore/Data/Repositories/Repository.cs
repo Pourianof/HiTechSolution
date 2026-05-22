@@ -148,7 +148,7 @@ namespace HiTechStore.Data.Repositories
             var query = BuildQueryBuilderBasedOnQueryParams(baseQuery, queryParams);
             return new PagedResultDto<TOut>()
             {
-                Items = await Project<TOut>(query.AppliedQuery!).ToListAsync(),
+                Items = await Project<TOut>(query.AppliedQuery!, queryParams).ToListAsync(),
                 PageNumber = query.Page,
                 PageSize = query.PageSize,
                 TotalCount = await query.BaseQuery!.CountAsync()
@@ -174,17 +174,17 @@ namespace HiTechStore.Data.Repositories
             return GetPagedResult<O>(queryParams);
         }
 
-        protected virtual IQueryable<O> HandleProject(IQueryable<T> queryable)
+        protected virtual IQueryable<O> HandleProject(IQueryable<T> queryable, Q? queryParams = default)
         {
-            return HandleProject<O>(queryable);
+            return HandleProject<O>(queryable, queryParams);
         }
 
-        protected virtual IQueryable<TOut> HandleProject<TOut>(IQueryable<T> queryable)
+        protected virtual IQueryable<TOut> HandleProject<TOut>(IQueryable<T> queryable, Q? queryParams = default)
         {
             return queryable.ProjectTo<TOut>(_mapper.ConfigurationProvider);
         }
 
-        protected IQueryable<TOut> Project<TOut>(IQueryable<T> queryable)
+        protected IQueryable<TOut> Project<TOut>(IQueryable<T> queryable, Q? queryParams = default)
         {
             var outType = typeof(TOut);
             if (outType == typeof(T))
@@ -193,15 +193,15 @@ namespace HiTechStore.Data.Repositories
             }
             if (outType == typeof(O))
             {
-                return (IQueryable<TOut>)HandleProject(queryable);
+                return (IQueryable<TOut>)HandleProject(queryable, queryParams);
             }
 
-            return queryable.ProjectTo<TOut>(_mapper.ConfigurationProvider);
+            return queryable.ProjectTo<TOut>(_mapper.ConfigurationProvider, queryParams);
         }
 
-        protected IQueryable<O> Project(IQueryable<T> queryable)
+        protected IQueryable<O> Project(IQueryable<T> queryable, Q? queryParams = default)
         {
-            return Project<O>(queryable);
+            return Project<O>(queryable, queryParams);
         }
 
         public async Task<IEnumerable<O>> GetAllProjectedAsync()

@@ -43,13 +43,13 @@ namespace HiTechStore.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ProductDto>> GetProduct(int id)
+        public async Task<ActionResult<ProductDto>> GetProduct(int id, [ToQuery] ProductQuery query)
         {
             var product = await _productService.GetProductById(id, new()
             {
                 UsersScore = true,
                 DiscountCalculation = true
-            });
+            }, query);
 
             if (product == null)
             {
@@ -60,17 +60,17 @@ namespace HiTechStore.Controllers
         }
 
         [HttpGet("{id}/similars")]
-        public async Task<ActionResult<IEnumerable<ProductDto>>> GetSimilarProducts(int id)
+        public async Task<ActionResult<IEnumerable<ProductDto>>> GetSimilarProducts(int id, [ToQuery] ProductQuery? productQuery)
         {
-            var products = await _productService.GetSimilarProductsOf(id);
+            var products = await _productService.GetSimilarProductsOf(id, productQuery);
 
             return Ok(products);
         }
 
         [HttpGet("on-sales")]
-        public async Task<ActionResult<IEnumerable<ProductDto>>> GetOnSaleProducts()
+        public async Task<ActionResult<IEnumerable<ProductDto>>> GetOnSaleProducts([ToQuery] ProductQuery? productQuery)
         {
-            var onSaleProducts = await _productService.GetOnSaleProducts();
+            var onSaleProducts = await _productService.GetOnSaleProducts(productQuery);
 
             return Ok(
                 onSaleProducts

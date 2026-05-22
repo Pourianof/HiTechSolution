@@ -19,7 +19,7 @@ public class CommentRepository : Repository<Comment, CommentDto>, ICommentReposi
     {
     }
 
-    protected override IQueryable<CommentDto> HandleProject(IQueryable<Comment> queryable)
+    protected override IQueryable<CommentDto> HandleProject(IQueryable<Comment> queryable, BaseQuery? query = default)
     {
         return queryable.Select(
              cmnt => new CommentDto
