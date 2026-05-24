@@ -2,7 +2,9 @@
 
 using HiTechStore.Core.Auth;
 using HiTechStore.Core.Common.Interfaces.Infra;
+using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Services.Authorization;
+using HiTechStore.Models;
 
 namespace HiTechStore.Core.Services.UserService;
 
@@ -23,6 +25,14 @@ public class UserService : ServiceBase, IUserService
 
     public async Task<string> UpdateProfileAvatar(IFormFile avatar)
     {
+        var isImage = MediaTypeHelper.IsImage(avatar.FileName);
+
+        if (!isImage)
+        {
+            throw new ModelException("Invalid data", $"specified file is not valid image with one of these formats: {MediaTypeHelper.GetValidImageTypes()}", nameof(avatar));
+        }
+
+
         var user = await GetUser();
 
         string? filePath = default;
