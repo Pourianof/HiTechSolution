@@ -45,4 +45,8 @@ public class UserRepository(UserManager<User> userManager) : IUserRepository
         return await userManager.GetRolesAsync(user);
     }
 
+    public async Task<bool> UpdateUser(User user)
+    {
+        return (await userManager.UpdateAsync(user)).Succeeded;
+    }
 }

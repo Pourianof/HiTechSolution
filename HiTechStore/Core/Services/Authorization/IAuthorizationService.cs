@@ -1,5 +1,6 @@
 using System.Security.Claims;
 
+using HiTechStore.Core.Services.UserService;
 using HiTechStore.Data.DTOs.Authorization;
 using HiTechStore.Models;
 

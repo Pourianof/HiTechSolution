@@ -14,4 +14,5 @@ public interface IUserRepository
     Task<IEnumerable<Claim>> GetUserClaims(User user);
     Task AddClaimUser(User user, IEnumerable<Claim> claims);
     Task<IEnumerable<string>> GetUserRoles(User user);
+    Task<bool> UpdateUser(User user);
 }

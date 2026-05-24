@@ -10,6 +10,7 @@ namespace HiTechStore.Models
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public DateTime RegisteredAt { get; set; }
+        public string? AvatarUrl { get; set; }
         virtual public IEnumerable<Order>? Orders { get; set; }
         virtual public Cart? ActiveCart { get; set; }
         // maybe it better to include these two props in dto, but im tired

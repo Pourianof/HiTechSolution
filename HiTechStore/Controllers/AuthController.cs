@@ -173,7 +173,8 @@ public class AuthController : ControllerBase
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Email = user.Email,
-                Roles = user.Roles
+                Roles = user.Roles,
+                AvatarUrl = user.AvatarUrl
             }
         };
         return Ok(authData);

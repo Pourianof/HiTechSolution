@@ -1,4 +1,5 @@
 using HiTechStore.Core.Services.Product;
+using HiTechStore.Core.Services.UserService;
 using HiTechStore.Data.DTOs;
 using HiTechStore.Data.DTOs.Authorization;
 using HiTechStore.Data.DTOs.Product;
@@ -15,7 +16,7 @@ namespace HiTechStore.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class UsersController(UserManager<User> userManager, IProductService productService) : ControllerBase
+public class UsersController(UserManager<User> userManager, IProductService productService, IUserService userService) : ControllerBase
 {
     private UserManager<User> _userManager = userManager;
 
@@ -44,15 +45,31 @@ public class UsersController(UserManager<User> userManager, IProductService prod
             FirstName = user.FirstName,
             LastName = user.LastName,
             Email = user.Email,
+            AvatarUrl = user.AvatarUrl
             // Role = role
         };
     }
 
     [HttpGet("me/products")]
+    [Authorize]
     public async Task<ActionResult<PagedResultDto<ProductDto>>> GetMyProducts([ToQuery] ProductQuery productQuery)
     {
         var usersProduct = await productService.GetUsersProducts(productQuery);
 
         return Ok(usersProduct);
+    }
+
+    [HttpPut("me/avatar")]
+    [Authorize]
+    public async Task<ActionResult> UpdateProfileAvatar(IFormFile avatar)
+    {
+        var newAvatarUrl = await userService.UpdateProfileAvatar(avatar);
+
+        return Ok(
+            new UserDto
+            {
+                AvatarUrl = newAvatarUrl
+            }
+        );
     }
 }
