@@ -1,6 +1,7 @@
 using System.Security.Claims;
 
-using HiTechStore.Core.Services.UserService;
+using HiTechStore.Core.Dto.Auth;
+using HiTechStore.Core.Helpers.Result;
 using HiTechStore.Data.DTOs.Authorization;
 using HiTechStore.Models;
 
@@ -11,4 +12,5 @@ public interface IAuthorizationService
     Task<User?> LoginAsync(LoginDto loginDto);
     Task<User?> GetUserAsync(IEnumerable<Claim> claims);
     Task<User?> GetUserByIdAsync(string userId);
+    Task<Result<bool>> ChangePassword(ChangePasswordDto changePasswordDto);
 }

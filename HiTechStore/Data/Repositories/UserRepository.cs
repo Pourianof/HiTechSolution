@@ -1,6 +1,8 @@
 
 using System.Security.Claims;
 
+using HiTechStore.Core.Dto.Auth;
+using HiTechStore.Core.Helpers.Result;
 using HiTechStore.Core.Repositories;
 using HiTechStore.Models;
 
@@ -48,5 +50,33 @@ public class UserRepository(UserManager<User> userManager) : IUserRepository
     public async Task<bool> UpdateUser(User user)
     {
         return (await userManager.UpdateAsync(user)).Succeeded;
+    }
+
+    public async Task<Result<bool>> ChangePassword(User user, string oldPassowrd, string newPassword)
+    {
+        var result = await userManager.ChangePasswordAsync(user, oldPassowrd, newPassword);
+
+        return new()
+        {
+            Value = result.Succeeded,
+            Errors = result.Errors.MapToResultError()
+        };
+    }
+}
+
+public static class IdentityErrorExtension
+{
+    public static IEnumerable<ResultError> MapToResultError(this IEnumerable<IdentityError> errors)
+    {
+        return errors.Select(ie => ie.Code switch
+        {
+            "PasswordMismatch" => (ResultError)Core.Services.Authorization.AuthorizationErrors.PasswordMismatch(ie.Description),
+            "PasswordRequiresDigit" => Core.Services.Authorization.AuthorizationErrors.PasswordRequiresDigit(),
+            "PasswordRequiresLower" => Core.Services.Authorization.AuthorizationErrors.PasswordRequiresLower(),
+            "PasswordRequiresUpper" => Core.Services.Authorization.AuthorizationErrors.PasswordRequiresUpper(),
+            "PasswordRequiresNonAlphanumeric" => Core.Services.Authorization.AuthorizationErrors.PasswordRequiresNonAlphanumeric(),
+            "PasswordTooShort" => Core.Services.Authorization.AuthorizationErrors.PasswordTooShort(ie.Description),
+            _ => Core.Services.Authorization.AuthorizationErrors.GenericPassword(ie.Description ?? ie.Code, ie.Description, ie.Code, nameof(ChangePasswordDto.NewPassword))
+        });
     }
 }

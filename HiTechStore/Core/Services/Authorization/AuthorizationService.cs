@@ -1,13 +1,16 @@
 using System.Security.Claims;
 
+using HiTechStore.Core.Auth;
+using HiTechStore.Core.Dto.Auth;
 using HiTechStore.Core.Exceptions;
+using HiTechStore.Core.Helpers.Result;
 using HiTechStore.Data.DTOs.Authorization;
 using HiTechStore.Models;
 
 namespace HiTechStore.Core.Services.Authorization;
 
 
-public class AuthorizationService(IUnitOfWork unitOfWork) : IAuthorizationService
+public class AuthorizationService(IUnitOfWork unitOfWork, ICurrentUserProvider currentUserProvider) : IAuthorizationService
 {
 
     private async Task<User?> EnrichUserWithClaimsAndRoles(User user)
@@ -98,6 +101,55 @@ public class AuthorizationService(IUnitOfWork unitOfWork) : IAuthorizationServic
         user = await EnrichUserWithClaimsAndRoles(user);
 
         return user;
+    }
+
+    public async Task<Result<bool>> ChangePassword(ChangePasswordDto changePasswordDto)
+    {
+        var validationErrors = new List<ResultError>();
+
+        if (string.IsNullOrWhiteSpace(changePasswordDto.OldPassword))
+        {
+            validationErrors.Add(AuthorizationErrors.OldPasswordRequired());
+        }
+
+        if (string.IsNullOrWhiteSpace(changePasswordDto.NewPassword))
+        {
+            validationErrors.Add(AuthorizationErrors.NewPasswordRequired());
+        }
+
+        if (string.IsNullOrWhiteSpace(changePasswordDto.PasswordConfirmation))
+        {
+            validationErrors.Add(AuthorizationErrors.PasswordConfirmationRequired());
+        }
+        else if (changePasswordDto.NewPassword != changePasswordDto.PasswordConfirmation)
+        {
+            validationErrors.Add(AuthorizationErrors.PasswordConfirmationMismatch());
+        }
+
+        if (validationErrors.Any())
+        {
+            return new Result<bool>
+            {
+                Value = false,
+                Errors = validationErrors
+            };
+        }
+
+        if (!currentUserProvider.IsAuthorized)
+        {
+            throw new NotAllowedException();
+        }
+
+        var user = await GetUserByIdAsync(currentUserProvider.UserId!);
+
+        if (user is null)
+        {
+            throw new NotAllowedException();
+        }
+
+        var result = await unitOfWork.UserRepository.ChangePassword(user, changePasswordDto.OldPassword!, changePasswordDto.NewPassword!);
+
+        return result;
     }
 }
 

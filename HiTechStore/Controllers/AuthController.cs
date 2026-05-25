@@ -3,16 +3,21 @@ using System.Security.Claims;
 using AutoMapper;
 
 using HiTechStore.ApiTokenHandler.Core;
+using HiTechStore.Core.Dto.Auth;
 using HiTechStore.Data.DTOs.Authorization;
 using HiTechStore.Models;
+using HiTechStore.Presentation.Requests.Auth;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using HiTechStore.Core.Helpers.Result;
+using HiTechStore.Presentation.Helpers.Result;
+using HiTechStore.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController : ControllerBase
+public class AuthController : AppControllerBase
 {
     private readonly UserManager<User> _userManager;
     private readonly IMapper _mapper;
@@ -239,4 +244,35 @@ public class AuthController : ControllerBase
 
         return Ok();
     }
+
+    [HttpPatch("change-password")]
+    public async Task<ActionResult> ChangePassword(ChangePaswordRequest changePaswordRequest)
+    {
+        var result = await _authorizationService.ChangePassword(_mapper.Map<ChangePasswordDto>(changePaswordRequest));
+
+        if (result.IsValid && result.Value)
+        {
+            return Ok(new
+            {
+                Message = "Password changed successfully"
+            });
+        }
+
+        // If there are validation errors, convert them to ModelState and return a ValidationProblemDetails
+        if (result.Errors != null && result.Errors.OfType<ValidationResultError>().Any())
+        {
+            return ValidationResult(result.Errors.OfType<ValidationResultError>());
+        }
+
+        return BadRequest(new
+        ProblemDetails
+        {
+            Title = "Password change failed",
+            Detail = string.Join(
+                "\n",
+                result.Errors?.Select(err => $"{err.Title}:${err.Description}") ?? []
+            )
+        });
+    }
 }
+

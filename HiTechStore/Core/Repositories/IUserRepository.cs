@@ -1,5 +1,6 @@
 using System.Security.Claims;
 
+using HiTechStore.Core.Helpers.Result;
 using HiTechStore.Models;
 
 namespace HiTechStore.Core.Repositories;
@@ -15,4 +16,5 @@ public interface IUserRepository
     Task AddClaimUser(User user, IEnumerable<Claim> claims);
     Task<IEnumerable<string>> GetUserRoles(User user);
     Task<bool> UpdateUser(User user);
+    Task<Result<bool>> ChangePassword(User user, string oldPassowrd, string newPassword);
 }
