@@ -333,7 +333,8 @@ public class DiscountedProductsRepository(
         return await ProductRepositoryHelper.ToDtoProject(
             _dbSet.Where(
                 conditionLambda
-            )
+            ),
+            [nameof(Product.Variations)]
         ).ToListAsync();
     }
 }
