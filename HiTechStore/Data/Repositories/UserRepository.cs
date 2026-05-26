@@ -62,6 +62,22 @@ public class UserRepository(UserManager<User> userManager) : IUserRepository
             Errors = result.Errors.MapToResultError()
         };
     }
+
+    public async Task<string> GenerateChangePasswordToken(User user)
+    {
+        return await userManager.GeneratePasswordResetTokenAsync(user);
+    }
+
+    public async Task<Result<bool>> ResetPasswordByToken(User user, string token, string newPassword)
+    {
+        var result = await userManager.ResetPasswordAsync(user, token, newPassword);
+
+        return new Result<bool>
+        {
+            Value = result.Succeeded,
+            Errors = result.Errors.MapToResultError()
+        };
+    }
 }
 
 public static class IdentityErrorExtension
@@ -78,5 +94,6 @@ public static class IdentityErrorExtension
             "PasswordTooShort" => Core.Services.Authorization.AuthorizationErrors.PasswordTooShort(ie.Description),
             _ => Core.Services.Authorization.AuthorizationErrors.GenericPassword(ie.Description ?? ie.Code, ie.Description, ie.Code, nameof(ChangePasswordDto.NewPassword))
         });
+
     }
 }

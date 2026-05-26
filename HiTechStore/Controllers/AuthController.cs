@@ -7,6 +7,7 @@ using HiTechStore.Core.Dto.Auth;
 using HiTechStore.Data.DTOs.Authorization;
 using HiTechStore.Models;
 using HiTechStore.Presentation.Requests.Auth;
+using HiTechStore.Presentation.Requests.User;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -183,6 +184,74 @@ public class AuthController : AppControllerBase
             }
         };
         return Ok(authData);
+    }
+
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest dto)
+    {
+        if (dto == null || !ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        if (string.IsNullOrWhiteSpace(dto.ReturnUrl) || !Uri.TryCreate(dto.ReturnUrl, UriKind.Absolute, out var baseUri))
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Title = "Invalid Return URL",
+                Detail = "ReturnUrl must be an absolute URL where the client will display the reset form.",
+                Status = StatusCodes.Status400BadRequest
+            });
+        }
+
+        await _authorizationService.RequestPasswordResetAsync(dto.Email!, token =>
+        {
+            var encodedToken = Uri.EscapeDataString(token);
+            var encodedEmail = Uri.EscapeDataString(dto.Email!);
+
+            var builder = new UriBuilder(baseUri);
+            var query = $"token={encodedToken}&email={encodedEmail}";
+            if (!string.IsNullOrEmpty(builder.Query))
+            {
+                builder.Query = builder.Query.TrimStart('?') + "&" + query;
+            }
+            else
+            {
+                builder.Query = query;
+            }
+
+            return builder.Uri.ToString();
+        });
+
+        return Ok(new { Message = "Email with password reset link will send to your email" });
+    }
+
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest dto)
+    {
+        if (dto == null || !ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var result = await _authorizationService.ResetPasswordAsync(dto.Email!, dto.Token!, dto.NewPassword!);
+
+        if (result.IsValid && result.Value)
+        {
+            return Ok(new { Message = "Your password changed succussfully." });
+        }
+
+        if (result.Errors != null && result.Errors.OfType<ValidationResultError>().Any())
+        {
+            return ValidationResult(result.Errors.OfType<ValidationResultError>());
+        }
+
+        return BadRequest(new ProblemDetails
+        {
+            Title = "Reset password failed",
+            Detail = string.Join("\n", result.Errors?.Select(err => $"{err.Title}:${err.Description}") ?? []),
+            Status = StatusCodes.Status400BadRequest
+        });
     }
 
     [HttpGet("refresh")]

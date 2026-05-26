@@ -13,4 +13,6 @@ public interface IAuthorizationService
     Task<User?> GetUserAsync(IEnumerable<Claim> claims);
     Task<User?> GetUserByIdAsync(string userId);
     Task<Result<bool>> ChangePassword(ChangePasswordDto changePasswordDto);
+    Task RequestPasswordResetAsync(string email, Func<string, string> accessPointProvider);
+    Task<Result<bool>> ResetPasswordAsync(string email, string token, string newPassword);
 }
