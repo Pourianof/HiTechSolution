@@ -1,3 +1,5 @@
+using System.Reflection;
+
 using AutoMapper.Internal;
 
 using Castle.Core.Internal;
@@ -46,6 +48,16 @@ public class Queries
                  }
              ).ToList();
 
+        var bindingProperties = props.Where(prop => prop.Has<BindingQueryAttribute>())
+           .Select(
+               (prop) => new BindingPropertyContainer()
+               {
+                   Property = prop,
+                   PropName = prop.Name,
+                   PropType = prop.PropertyType
+               }
+           ).ToList();
+
         foreach (var (key, val) in _queries)
         {
             var matchedProp = props.FirstOrDefault((prop) => string.Equals(prop.Name, val.FilterKey, StringComparison.OrdinalIgnoreCase)
@@ -73,6 +85,28 @@ public class Queries
                 continue;
             }
 
+            var matchedBindedProperty = bindingProperties.FirstOrDefault(
+                (bp) => val.FilterKey.StartsWith($"{bp.Property.Name}.", StringComparison.OrdinalIgnoreCase)
+            );
+
+            if (matchedBindedProperty is not null)
+            {
+                var bindingField = val.FilterKey.Substring(matchedBindedProperty.PropName.Length + 1);
+                var boundedProp = matchedBindedProperty.PropType.GetProperties().FirstOrDefault(bindingProp => string.Equals(bindingProp.Name, bindingField, StringComparison.OrdinalIgnoreCase));
+
+                if (boundedProp is not null)
+                {
+                    if (boundedProp.GetType() == typeof(QueryFilterItem))
+                    {
+                        // for now we just populate one level binding
+                        // maybe on next updates we populate nested scenario recursively
+                        var filter = new QueryFilterItem(bindingField);
+                        boundedProp.SetValue(matchedBindedProperty.BindingModel, filter);
+                        continue;
+                    }
+                }
+            }
+
             unMatchedKeys.Add(key);
         }
 
@@ -86,6 +120,11 @@ public class Queries
             nsp.Property.SetValue(
                 obj, nsp.Storage
             );
+        }
+
+        foreach (var bp in bindingProperties)
+        {
+
         }
 
         if (unMatchedKeys.Count() > 0)
@@ -112,4 +151,20 @@ public class Queries
         return (T?)MapTo(targetType);
     }
 
+}
+
+
+public class BindingPropertyContainer
+{
+    required public PropertyInfo Property { get; set; }
+    required public string PropName { get; set; }
+    required public Type PropType { get; set; }
+    private object? _bindingModel = default;
+    public object BindingModel
+    {
+        get
+        {
+            return _bindingModel ??= PropType.GetConstructors().FirstOrDefault()!.Invoke(null);
+        }
+    }
 }

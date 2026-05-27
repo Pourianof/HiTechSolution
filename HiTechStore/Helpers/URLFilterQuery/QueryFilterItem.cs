@@ -2,6 +2,7 @@ namespace HiTechStore.Helpers.URLFilterQuery;
 
 using System.Collections;
 using System.Diagnostics;
+using System.Numerics;
 
 using Microsoft.Extensions.Primitives;
 
@@ -95,20 +96,56 @@ public class QueryFilterItem
     {
         return _opValuePairs.GetEnumerator();
     }
-
-    private static QueryFilterItem CreateDefaultItem(ValueType value)
+    public static QueryFilterItem From(object? value)
     {
-        return new QueryFilterItem("no-key").AddOperatorValuePair(QueryOperator.Equal, value.ToString());
+        return CreateDefaultItem(ToStringValues(value));
     }
 
-    public static implicit operator QueryFilterItem(ValueType value)
+    public static implicit operator QueryFilterItem(int value)
+        => From(value);
+    public static implicit operator QueryFilterItem(double value)
+        => From(value);
+
+    public static implicit operator QueryFilterItem(string value)
+        => CreateDefaultItem(new StringValues(value));
+
+    public static implicit operator QueryFilterItem(string[] value)
+        => CreateDefaultItem(new StringValues(value));
+
+    public static implicit operator QueryFilterItem(StringValues value)
+        => CreateDefaultItem(value);
+
+    private static StringValues ToStringValues(object? value)
     {
-        return CreateDefaultItem(value);
+        if (value is null)
+            return StringValues.Empty;
+
+        if (value is StringValues sv)
+            return sv;
+
+        if (value is string s)
+            return new StringValues(s);
+
+        if (value is IEnumerable<string> strEnum)
+            return new StringValues(strEnum.ToArray());
+
+        if (value is IEnumerable enumerable and not string)
+        {
+            var arr = enumerable
+                .Cast<object?>()
+                .Select(x => x?.ToString() ?? string.Empty)
+                .ToArray();
+
+            return new StringValues(arr);
+        }
+
+        return new StringValues(value.ToString());
     }
 
-    public static implicit operator QueryFilterItem(object[] value)
+    private static QueryFilterItem CreateDefaultItem(StringValues values)
     {
-        return CreateDefaultItem(new StringValues(string.Join(",", value.Select(v => v.ToString()))));
+        return new QueryFilterItem("no-key")
+            .AddOperatorValuePair(QueryOperator.Equal, values);
     }
 }
 

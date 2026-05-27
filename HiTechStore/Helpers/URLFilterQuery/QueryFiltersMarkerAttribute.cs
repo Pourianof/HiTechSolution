@@ -23,3 +23,6 @@ public class NamespacedQueryFiltersMarkerAttribute : Attribute
         Namespace = ns;
     }
 }
+
+public class BindingQueryAttribute : Attribute
+{ }
