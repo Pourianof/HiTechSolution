@@ -12,4 +12,10 @@ namespace HiTechStore.Core.Repositories
         Task<IEnumerable<ProductDto>> GetSimilarProductsOf(int productId, ProductQuery? productQuery = default);
         Task<PagedResultDto<ProductDto>> GetPoductsOfUser(string userId, ProductQuery? productQuery = default);
     }
+
+    public class TimeRange
+    {
+        public DateTime From { get; set; }
+        public DateTime Until { get; set; }
+    }
 }

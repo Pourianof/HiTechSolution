@@ -12,6 +12,8 @@ using HiTechStore.Helpers.URLFilterQuery;
 using HiTechStore.Helpers.URLFilterQuery.QueryAppliers;
 using HiTechStore.Models;
 
+using Microsoft.EntityFrameworkCore;
+
 namespace HiTechStore.Data.Repositories.Helpers;
 
 public class ProductRepositoryHelper
@@ -193,8 +195,29 @@ public class ProductRepositoryHelper
             var sortBy = productQueryParams.SortBy?.GetValue<string>(QueryOperator.Equal);
             if (sortBy is not null)
             {
+                Func<Expression<Func<TProduct, object>>> bestSellerFilter = () =>
+                {
+                    var bestSellingRange = productQueryParams?.BestSeller?.GetValue<string>(QueryOperator.Equal) ?? "month"; // "week", "month", "year"
+
+                    var until = DateTime.UtcNow;
+                    var from = bestSellingRange.ToLower() switch
+                    {
+                        "week" => until.AddDays(-7),
+                        "year" => until.AddYears(-1),
+                        _ => until.AddMonths(-1),
+                    };
+
+                    return (TProduct p) =>
+
+                                // total sales count in range
+                                p.Variations.Sum(pv => pv.Orders!.Count(o => o.Order!.PaymentState == OrderPaymentState.Paid && o.Order!.CreatedAt >= from && o.Order.CreatedAt <= until))
+                                // plus score
+                                + ((p.AverageScore ?? 0) / 5 * p.ScoreCounts);
+                };
+
                 Expression<Func<TProduct, object>> sorter = sortBy switch
                 {
+                    "best_sellers" => bestSellerFilter(),
                     "created_at" => (TProduct p) => p.CreatedAt,
                     "price" => productQueryParams.SortDir?.GetValue<string>(QueryOperator.Equal) == "des" ?
                             (TProduct p) =>
