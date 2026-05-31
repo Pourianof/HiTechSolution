@@ -2,7 +2,7 @@ using HiTechStore.Core.Common.Interfaces.Infra;
 using HiTechStore.Core.Common.Interfaces.Presentation;
 using HiTechStore.Core.Exceptions;
 using HiTechStore.Infrastructure.Utils;
-using HiTechStore.Models;
+using HiTechStore.Core.Models;
 
 public class LocalWWWRootAssetRegisterer(
     IApplicationContext applicationContext,

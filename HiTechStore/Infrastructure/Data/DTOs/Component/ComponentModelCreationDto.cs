@@ -1,0 +1,14 @@
+using System.ComponentModel.DataAnnotations;
+
+using HiTechStore.Core.Dto.Product;
+
+namespace HiTechStore.Infrastructure.Data.DTOs.Component;
+
+public class ComponentModelCreationDto
+{
+    public int? BrandModelId { get; set; }
+    public string? Description { get; set; }
+    [Required]
+    [MinLength(1)]
+    public IEnumerable<PropertyValueEntryCreationDto>? Properties { get; set; }
+}

@@ -1,7 +1,7 @@
 using HiTechStore.Core.Dto.Comment;
 using HiTechStore.Core.Dto.ProductComment;
-using HiTechStore.Data.DTOs;
-using HiTechStore.Data.Queries;
+using HiTechStore.Infrastructure.Data.DTOs;
+using HiTechStore.Infrastructure.Data.Queries;
 
 namespace HiTechStore.Core.Services.ProductComment;
 

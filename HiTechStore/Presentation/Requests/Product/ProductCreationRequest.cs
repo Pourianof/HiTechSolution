@@ -1,9 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-using HiTechStore.Data.DTOs.Binders;
-using HiTechStore.Data.DTOs.Product.Validations;
-using HiTechStore.Data.DTOs.Validations;
+using HiTechStore.Infrastructure.Data.DTOs.Binders;
+using HiTechStore.Infrastructure.Data.DTOs.Product.Validations;
+using HiTechStore.Infrastructure.Data.DTOs.Validations;
 using HiTechStore.Helpers.AutoMapper;
 using HiTechStore.Presentation.Product;
 

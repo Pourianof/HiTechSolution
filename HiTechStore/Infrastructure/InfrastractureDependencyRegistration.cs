@@ -1,5 +1,5 @@
 using HiTechStore.Core.Common.Interfaces.Infra;
-using HiTechStore.Data.Storage;
+using HiTechStore.Infrastructure.Data.Storage;
 using HiTechStore.Infrastructure.Email;
 using HiTechStore.Infrastructure.ThumbnailGenerator;
 using HiTechStore.Infrastructure.Utils;

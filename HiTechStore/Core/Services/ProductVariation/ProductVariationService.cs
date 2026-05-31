@@ -1,12 +1,12 @@
 using AutoMapper;
 
-using HiTechStore.Core.Auth;
+using HiTechStore.Core.Common.Interfaces.Presentation;
 using HiTechStore.Core.Dto.ProductVariation;
 using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Services.Authorization;
-using HiTechStore.Data.DTOs;
-using HiTechStore.Data.DTOs.Product;
-using HiTechStore.Data.Storage;
+using HiTechStore.Infrastructure.Data.DTOs;
+using HiTechStore.Infrastructure.Data.DTOs.Product;
+using HiTechStore.Infrastructure.Data.Storage;
 
 namespace HiTechStore.Core.Services.ProductVariation;
 
@@ -29,7 +29,7 @@ public class ProductVariationService : ServiceBase, IProductVariationService
         _mapper = mapper;
     }
 
-    private async Task<Models.ProductVariation> GetVariation(int variationId)
+    private async Task<Core.Models.ProductVariation> GetVariation(int variationId)
     {
         var user = await GetUser();
 

@@ -1,6 +1,7 @@
 using System.Security.Claims;
 
-using HiTechStore.Core.Auth;
+using HiTechStore.Core.Common.Interfaces.Presentation;
+
 
 
 namespace HiTechStore.Presentation.Auth;

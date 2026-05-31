@@ -2,7 +2,7 @@ using HiTechStore.Helpers.AutoMapper;
 
 namespace HiTechStore.Core.Dto.Comment;
 
-[MapTo<Models.Comment>]
+[MapTo<Core.Models.Comment>]
 public class CommentCreationDto
 {
     public int? ProductId { get; set; }

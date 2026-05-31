@@ -1,5 +1,5 @@
 using HiTechStore.Core;
-using HiTechStore.Core.Repositories;
+using HiTechStore.Core.Common.Interfaces.Infra.Repositories;
 
 namespace HiTechStore.Helpers.Types;
 

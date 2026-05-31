@@ -1,6 +1,6 @@
-using HiTechStore.Data.Storage;
+using HiTechStore.Infrastructure.Data.Storage;
 using HiTechStore.DTOs.Product;
-using HiTechStore.Models;
+using HiTechStore.Core.Models;
 
 public class ProductServiceHelper(ProductMediaRegisterer productMediaRegisterer)
 {

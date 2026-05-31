@@ -3,7 +3,7 @@ namespace HiTechStore.Core.Services.ProductScore;
 
 public interface IProductScoreService
 {
-    Task<Models.ProductScore> AddScoreForProduct(
+    Task<Core.Models.ProductScore> AddScoreForProduct(
         ProdcutScoreCreationServiceDto prodcutScoreCreationDto
     );
 }

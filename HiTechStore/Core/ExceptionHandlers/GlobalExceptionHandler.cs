@@ -3,7 +3,7 @@ using HiTechStore.Core.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace HiTechStore.Controllers.ExceptionFilters;
+namespace HiTechStore.Presentation.Controllers.ExceptionFilters;
 
 public class GlobalExceptionHandler : IExceptionHandler
 {

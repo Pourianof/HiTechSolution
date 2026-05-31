@@ -1,6 +1,6 @@
 using AutoMapper;
 
-using HiTechStore.Core.Auth;
+using HiTechStore.Core.Common.Interfaces.Presentation;
 using HiTechStore.Core.Dto.Comment;
 using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Services.Authorization;
@@ -17,7 +17,7 @@ public class CommentService : ServiceBase, ICommentService
         _mapper = mapper;
     }
 
-    public async Task<Models.Comment> CreateComment(CommentCreationDto commentDto)
+    public async Task<Core.Models.Comment> CreateComment(CommentCreationDto commentDto)
     {
         var commentText = commentDto.Text?.Trim();
         if (commentText is null)
@@ -52,7 +52,7 @@ public class CommentService : ServiceBase, ICommentService
                 throw new NotFoundException($"Parent comment with id {parentCommentId} not found");
             }
 
-            comment = _mapper.Map<Models.Comment>(commentDto);
+            comment = _mapper.Map<Core.Models.Comment>(commentDto);
             comment.RateId = null;
             comment.ProductId = null;
             comment.UserId = user.Id!;

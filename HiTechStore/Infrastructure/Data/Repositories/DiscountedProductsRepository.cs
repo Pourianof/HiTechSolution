@@ -1,0 +1,360 @@
+using System.Linq.Expressions;
+
+using HiTechStore.Core.Common.Interfaces.Infra.Repositories;
+using HiTechStore.Infrastructure.Data.DTOs;
+using HiTechStore.Infrastructure.Data.DTOs.Brand;
+using HiTechStore.Infrastructure.Data.DTOs.Component;
+using HiTechStore.Infrastructure.Data.DTOs.Product;
+using HiTechStore.Infrastructure.Data.Mapping;
+using HiTechStore.Infrastructure.Data.Queries;
+using HiTechStore.Infrastructure.Data.Repositories.Helpers;
+using HiTechStore.Helpers.Expressions;
+using HiTechStore.Helpers.URLFilterQuery;
+using HiTechStore.Core.Models;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Primitives;
+
+namespace HiTechStore.Infrastructure.Data.Repositories;
+
+public class DiscountedProductsRepository(
+    IConditionComponentTreeToLambdaExpression _conditionToExpressionMapper,
+    HiTechStoreDbContext dbContext
+) : IDiscountedProductsRepository
+{
+    private DbSet<Product> _dbSet = dbContext.Products;
+
+    private class DiscountedProductPageResultData
+    {
+        public IQueryable<ProductDto>? MainQuery { get; set; }
+        public IQueryable<Product>? CountingQuery { get; set; }
+    }
+    private DiscountedProductPageResultData ProjectWithDiscountData(IEnumerable<RuleCondition> ruleConditions, ProductQuery? productQuery)
+    {
+        Expression<Func<ProductWithMinMaxPrice, ProductWithMinMaxDiscount>> productDiscount =
+                        (ProductWithMinMaxPrice p) => new ProductWithMinMaxDiscount
+                        {
+                            AuthorId = p.AuthorId,
+                            BrandModel = p.BrandModel,
+                            Category = p.Category,
+                            ComponentModels = p.ComponentModels,
+                            CreatedAt = p.CreatedAt,
+                            Description = p.Description,
+                            IsDeleled = p.IsDeleled,
+                            ProductId = p.ProductId,
+                            Properties = p.Properties,
+                            Title = p.Title,
+                            Variations = p.Variations,
+                            Scores = p.Scores,
+                        };
+
+        var param = productDiscount.Parameters[0];
+
+        Expression minDiscountSumExpression = Expression.Constant(0d);
+        Expression maxDiscountSumExpression = Expression.Constant(0d);
+
+        Expression isDiscountApply = Expression.Constant(false);
+
+        foreach (var rCondition in ruleConditions)
+        {
+
+            if (rCondition.Action!.Value == 0)
+            {
+                continue;
+            }
+
+            var conditionBody = ExpressionParameterReplacer.ReplaceParameter(rCondition.Expression!, param).Body;
+
+            isDiscountApply = Expression.OrElse(
+                isDiscountApply,
+                conditionBody
+            );
+
+            var value = Expression.Constant((double)rCondition.Action!.Value);
+            var minPriceParam = Expression.Property(param, nameof(ProductWithMinMaxPrice.MinPrice));
+            var maxPriceParam = Expression.Property(param, nameof(ProductWithMinMaxPrice.MaxPrice));
+
+            var isPercentageBaseDiscount = rCondition.Action!.Type == DiscountActionType.Percent;
+
+            // 1- maxPrice for min discount because in fixed-discounts division of 
+            //    price/discountInDollar create smaller number
+            // 2- if the rule is appliable and the condition established, then we 
+            //    apply the discount to product
+            Expression minDiscount = Expression.Condition(
+                    conditionBody,
+                    isPercentageBaseDiscount ?
+                    value :
+                    Expression.Multiply(
+                        Expression.Divide(value, maxPriceParam),
+                        Expression.Constant(100.0)),
+                    Expression.Constant(0.0)
+                );
+
+            Expression maxDiscount = Expression.Condition(
+                    conditionBody,
+                    isPercentageBaseDiscount ?
+                    value :
+                    Expression.Multiply(
+                        Expression.Divide(value, minPriceParam),
+                        Expression.Constant(100.0)),
+                    Expression.Constant(0.0)
+                );
+
+            minDiscountSumExpression = Expression.Add(
+                minDiscountSumExpression, minDiscount
+            );
+
+            maxDiscountSumExpression = Expression.Add(
+                maxDiscountSumExpression, maxDiscount
+            );
+        }
+
+        // setting the MinDiscount/MaxDiscount initializing Expression
+        var productDiscountToProductDtoProjection = productDiscount.ModifyProjection(
+            new()
+            {
+                [nameof(ProductWithMinMaxDiscount.MinDiscount)] = minDiscountSumExpression,
+                [nameof(ProductWithMinMaxDiscount.MaxDiscount)] = maxDiscountSumExpression
+            }
+        );
+
+        // query with minimum side filtering and processing
+
+        var paramForLightQueryFilter = Expression.Parameter(typeof(Product));
+        var baseLightQuery = _dbSet.Where(
+            Expression.Lambda<Func<Product, bool>>(
+                // Maybe this is the worst code a person could write
+                // but im tired and just wanna finnish it
+                ExpressionParameterReplacer.ReplaceParameter(
+                    Expression.Lambda(isDiscountApply, [param]),
+                    paramForLightQueryFilter
+                ).Body,
+                [
+                    paramForLightQueryFilter
+                ]
+            )
+        );
+
+        if (productQuery is not null)
+        {
+            baseLightQuery = ProductRepositoryHelper.ApplyQueryParams(
+                baseLightQuery,
+                productQuery
+            );
+        }
+
+        // 1- query for calculate products min/max variation's price 
+        // 1/1- along with filtering the discounted products
+        // 2- then calculate the min/max total discount based-on percentage
+        var baseQuery = _dbSet.Select(p => new ProductWithMinMaxPrice
+        {
+            MinPrice = p.Variations.Min(pv => pv.Price),
+            MaxPrice = p.Variations.Max(pv => pv.Price),
+            AuthorId = p.AuthorId,
+            BrandModel = p.BrandModel,
+            Category = p.Category,
+            ComponentModels = p.ComponentModels,
+            CreatedAt = p.CreatedAt,
+            Description = p.Description,
+            IsDeleled = p.IsDeleled,
+            ProductId = p.ProductId,
+            Properties = p.Properties,
+            Title = p.Title,
+            Variations = p.Variations,
+            Scores = p.Scores,
+        })
+        .Where(
+            Expression.Lambda<Func<ProductWithMinMaxPrice, bool>>(
+                isDiscountApply,
+                [param]
+            )
+        ).Select(productDiscountToProductDtoProjection);
+
+
+        var isDes = productQuery?.SortDir?.GetValue<string>(QueryOperator.Equal) == "des";
+
+        // default sort by discount-amount
+        productQuery ??= new();
+        productQuery.SortBy ??= new QueryFilterItem("sortBy")
+            .AddOperatorValuePair(QueryOperator.Equal, new StringValues("discount"));
+        productQuery.SortDir ??= new QueryFilterItem("sortDir")
+        .AddOperatorValuePair(QueryOperator.Equal, new StringValues("des"));
+
+        // product-specific query applier
+        var discountBaseQuery = ProductRepositoryHelper.ApplyQueryParams(
+            baseQuery,
+            productQuery,
+            new()
+            {
+                ["discount"] = isDes ? (p) => p.MaxDiscount : (p) => p.MinDiscount
+            }
+        );
+
+        // general query applier
+        discountBaseQuery = RepositoryHelper.ApplyGenericQuery(
+            discountBaseQuery,
+            productQuery
+        );
+
+
+        // map to ProductDto
+        var mainQuery = discountBaseQuery
+        .Select(p => new ProductDto
+        {
+            ProductId = p.ProductId,
+            Title = p.Title,
+            AverageScore = p.Scores.Any()
+                                ? p.Scores.Average(s => (double)s.Score)
+                                : 0.0,
+            ScoreCounts = p.Scores.Count(),
+            AuthorId = p.AuthorId,
+            Variations = p.Variations.Select(
+                    pv => new ProductVariationDto()
+                    {
+                        ProductVariationId = pv.ProductVariationId,
+                        Color = pv.Color,
+                        Inventory = pv.Inventory,
+                        Media = pv.Media.Select(m => new ProductMediaDto()
+                        {
+                            IsMain = m.IsMain,
+                            ProductMediaId = m.ProductMediaId,
+                            Url = m.FilePath,
+                            Type = m.Type == MediaType.Image ? "Image" : "Video"
+                        }).ToList(),
+                        Price = pv.Price,
+                    }
+                ).ToList(),
+            BrandModel = new BrandModelDto
+            {
+                BrandName = p.BrandModel!.Brand!.Name,
+                ModelName = p.BrandModel.Name,
+                Description = p.BrandModel.Description,
+                ModelId = p.BrandModel.BrandModelId
+            },
+            Components = p.Category!.Components!.Select(
+                    (c) => new ProductComponentDto()
+                    {
+                        Name = c.Component!.Name,
+                        ComponentTypeId = c.ComponentTypeId,
+                        Description = c.Component!.Description,
+                        Models = p.ComponentModels.Where(m => m.ComponentTypeId == c.ComponentTypeId).Select(
+                            (m) => new ComponentModelDto()
+                            {
+                                BrandModel = m.BrandModel != null ? new BrandModelDto()
+                                {
+                                    BrandName = m.BrandModel.Brand!.Name,
+                                    Description = m.BrandModel.Description,
+                                    ModelId = m.BrandModel.BrandModelId,
+                                    ModelName = m.BrandModel.Name
+                                } : null,
+                                ComponentModelId = m.ComponentModelId,
+                                ComponentTypeId = c.ComponentTypeId,
+                                Description = m.Description,
+                                Properties = m.Properties!.Select(
+                                    (prop) => new PropertyValueDto()
+                                    {
+                                        Name = prop.Property!.Name,
+                                        PropertyId = prop.PropertyId,
+                                        Value = prop.Value!.ValueNumber != null ? (object?)prop.Value!.ValueNumber :
+                                                prop.Value!.ValueDateTime != null ? (object?)prop.Value!.ValueDateTime :
+                                                prop.Value!.ValueBoolean != null ? (object?)prop.Value!.ValueBoolean :
+                                                prop.Value!.ValueString,
+                                        ValueType = prop.Property.PropertyType
+                                    }
+                                )
+                            }
+                        )
+                    }
+                ).ToList(),
+            CategoryId = p.CategoryId,
+            Description = p.Description,
+            Properties = p.Properties.Select(
+                    (prop) => new PropertyValueDto()
+                    {
+                        Name = prop.Property!.Name,
+                        PropertyId = prop.ProductId,
+                        Value = prop.Value!.ValueNumber != null ? (object?)prop.Value!.ValueNumber :
+                                prop.Value!.ValueDateTime != null ? (object?)prop.Value!.ValueDateTime :
+                                prop.Value!.ValueBoolean != null ? (object?)prop.Value!.ValueBoolean :
+                                prop.Value!.ValueString,
+                        ValueType = prop.Property.PropertyType
+                    }
+                ).ToList()
+        }
+        );
+
+        return new()
+        {
+            MainQuery = mainQuery,
+            CountingQuery = baseLightQuery
+        };
+    }
+
+    public async Task<PagedResultDto<ProductDto>> GetDiscountedProducts(IEnumerable<DiscountRule> rules, ProductQuery? productQuery = default)
+    {
+        if (!rules.Any())
+        {
+            return new()
+            {
+                Items = [],
+                PageNumber = 0,
+                PageSize = 0,
+                TotalCount = 0
+            };
+        }
+
+        var ruleConditions = rules.Select(
+            r => new RuleCondition
+            {
+                Action = r.DiscountAction,
+                Expression = _conditionToExpressionMapper.Map<Product>(r.ProductConditionTree!)
+            }
+        );
+
+        var pageData = ProjectWithDiscountData(ruleConditions, productQuery);
+        var totalCounts = await pageData.CountingQuery!.CountAsync();
+
+        var page = productQuery?.Page?.GetValue<int>(QueryOperator.Equal);
+        var limit = productQuery?.Limit?.GetValue<int>(QueryOperator.Equal);
+
+        return new()
+        {
+            Items = await pageData.MainQuery!.ToListAsync(),
+            PageSize = limit ?? totalCounts,
+            PageNumber = page ?? 0,
+            TotalCount = totalCounts
+        };
+    }
+
+    public async Task<IEnumerable<ProductDto>> GetProductsByCondition(ConditionComponent conditionTree)
+    {
+        var conditionLambda = _conditionToExpressionMapper.Map<Product>(conditionTree);
+
+        return await ProductRepositoryHelper.ToDtoProject(
+            _dbSet.Where(
+                conditionLambda
+            ),
+            [nameof(Product.Variations)]
+        ).ToListAsync();
+    }
+}
+
+
+class RuleCondition
+{
+    public DiscountAction? Action { get; set; }
+    public Expression<Func<Product, bool>>? Expression { get; set; }
+}
+
+class ProductWithMinMaxPrice : Product
+{
+    public double MinPrice { get; set; }
+    public double MaxPrice { get; set; }
+
+}
+
+class ProductWithMinMaxDiscount : Product
+{
+    public double MinDiscount { get; set; }
+    public double MaxDiscount { get; set; }
+}

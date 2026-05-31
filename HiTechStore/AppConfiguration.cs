@@ -1,5 +1,5 @@
-using HiTechStore.Core.Auth;
-using HiTechStore.Data.Seeders;
+using HiTechStore.Infrastructure.Data.Seeders;
+using HiTechStore.Presentation.Auth;
 
 namespace HiTechStore;
 

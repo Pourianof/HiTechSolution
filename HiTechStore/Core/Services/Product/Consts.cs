@@ -1,4 +1,4 @@
-using HiTechStore.Data.Queries;
+using HiTechStore.Infrastructure.Data.Queries;
 
 namespace HiTechStore.Core.Services.Product;
 

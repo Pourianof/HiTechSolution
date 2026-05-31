@@ -1,7 +1,7 @@
 using Castle.Components.DictionaryAdapter.Xml;
 
 using HiTechStore.Core.Exceptions;
-using HiTechStore.Models;
+using HiTechStore.Core.Models;
 
 namespace HiTechStore.Helpers.Types;
 

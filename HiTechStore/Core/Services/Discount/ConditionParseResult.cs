@@ -1,4 +1,4 @@
-using HiTechStore.Data.DTOs.Product;
+using HiTechStore.Infrastructure.Data.DTOs.Product;
 
 namespace HiTechStore.Core.Services.Discount;
 

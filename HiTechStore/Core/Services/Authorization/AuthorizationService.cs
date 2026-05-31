@@ -1,12 +1,12 @@
 using System.Security.Claims;
 
-using HiTechStore.Core.Auth;
+using HiTechStore.Core.Common.Interfaces.Presentation;
 using HiTechStore.Core.Dto.Auth;
 using HiTechStore.Core.Common.Interfaces.Infra;
 using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Helpers.Result;
-using HiTechStore.Data.DTOs.Authorization;
-using HiTechStore.Models;
+using HiTechStore.Infrastructure.Data.DTOs.Authorization;
+using HiTechStore.Core.Models;
 
 namespace HiTechStore.Core.Services.Authorization;
 

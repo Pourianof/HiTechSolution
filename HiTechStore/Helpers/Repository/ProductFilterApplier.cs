@@ -3,7 +3,7 @@ using System.Reflection;
 
 using HiTechStore.Helpers.URLFilterQuery;
 using HiTechStore.Helpers.URLFilterQuery.QueryAppliers;
-using HiTechStore.Models;
+using HiTechStore.Core.Models;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Primitives;

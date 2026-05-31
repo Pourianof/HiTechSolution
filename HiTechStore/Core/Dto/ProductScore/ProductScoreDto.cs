@@ -3,7 +3,7 @@ using HiTechStore.Helpers.AutoMapper;
 namespace HiTechStore.Core.Dto.ProductScore;
 
 
-[MapFrom<Models.ProductScore>]
+[MapFrom<Core.Models.ProductScore>]
 public class ProductScoreDto
 {
     [MapFromProperty(nameof(Models.ProductScore.Score))]

@@ -1,4 +1,4 @@
-using HiTechStore.Models;
+using HiTechStore.Core.Models;
 
 namespace HiTechStore.Core.Helpers;
 

@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
 using HiTechStore.Core.Dto.ProductComment;
-using HiTechStore.Data.DTOs.Validations;
+using HiTechStore.Infrastructure.Data.DTOs.Validations;
 using HiTechStore.Helpers.AutoMapper;
 
 namespace HiTechStore.Presentation.Requests.Comment;

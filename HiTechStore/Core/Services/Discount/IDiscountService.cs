@@ -1,6 +1,6 @@
-using HiTechStore.Data.DTOs;
-using HiTechStore.Data.DTOs.Discount;
-using HiTechStore.Data.Queries;
+using HiTechStore.Infrastructure.Data.DTOs;
+using HiTechStore.Infrastructure.Data.DTOs.Discount;
+using HiTechStore.Infrastructure.Data.Queries;
 
 namespace HiTechStore.Core.Services.Discount;
 
@@ -14,6 +14,6 @@ public interface IDiscountService
     Task<bool> DeleteDiscountCode(int id);
     // check is discount code usable for current cart/order by user
     Task<DiscountResultDto> CheckDiscountCodeUsability(string discountCode, string userId);
-    Task<Models.Discount?> GetActiveDiscountCodeOf(string discountCode);
+    Task<Core.Models.Discount?> GetActiveDiscountCodeOf(string discountCode);
     Task<ConditionParseResult> GetConditionScriptProducts(string conditionScript);
 }

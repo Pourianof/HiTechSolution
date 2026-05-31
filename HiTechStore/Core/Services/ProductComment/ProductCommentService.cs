@@ -1,6 +1,6 @@
 using AutoMapper;
 
-using HiTechStore.Core.Auth;
+using HiTechStore.Core.Common.Interfaces.Presentation;
 using HiTechStore.Core.Dto.Comment;
 using HiTechStore.Core.Dto.ProductComment;
 using HiTechStore.Core.Exceptions;
@@ -8,9 +8,9 @@ using HiTechStore.Core.Services.Authorization;
 using HiTechStore.Core.Services.Comment;
 using HiTechStore.Core.Services.Product;
 using HiTechStore.Core.Services.ProductScore;
-using HiTechStore.Data.DTOs;
-using HiTechStore.Data.DTOs.Product;
-using HiTechStore.Data.Queries;
+using HiTechStore.Infrastructure.Data.DTOs;
+using HiTechStore.Infrastructure.Data.DTOs.Product;
+using HiTechStore.Infrastructure.Data.Queries;
 
 namespace HiTechStore.Core.Services.ProductComment;
 

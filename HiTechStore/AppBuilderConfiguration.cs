@@ -1,15 +1,13 @@
-using System.Reflection;
-
-using HiTechStore.Controllers.ExceptionFilters;
-using HiTechStore.Core.Auth;
+using HiTechStore.Presentation.Controllers.ExceptionFilters;
 using HiTechStore.Core.BackgroundJobs;
 using HiTechStore.Core.ExceptionHandlers;
 using HiTechStore.Core.Services;
-using HiTechStore.Data;
-using HiTechStore.Data.Mapping;
+using HiTechStore.Infrastructure.Data;
+using HiTechStore.Infrastructure.Data.Mapping;
 using HiTechStore.Helpers.URLFilterQuery;
 using HiTechStore.Infrastructure;
 using HiTechStore.Presentation;
+using HiTechStore.Core.Common.Interfaces.Presentation;
 
 namespace HiTechStore;
 

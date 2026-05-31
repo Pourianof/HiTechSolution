@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-using HiTechStore.Data.DTOs.Validations;
+using HiTechStore.Infrastructure.Data.DTOs.Validations;
 
 namespace HiTechStore.Presentation.Requests.Comment;
 

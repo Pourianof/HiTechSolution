@@ -1,10 +1,10 @@
 
 
-using HiTechStore.Core.Auth;
+using HiTechStore.Core.Common.Interfaces.Presentation;
 using HiTechStore.Core.Common.Interfaces.Infra;
 using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Services.Authorization;
-using HiTechStore.Models;
+using HiTechStore.Core.Models;
 
 namespace HiTechStore.Core.Services.UserService;
 

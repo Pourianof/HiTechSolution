@@ -2,15 +2,15 @@ using System.Security.Claims;
 
 using AutoMapper;
 
-using HiTechStore.Core.Auth;
+using HiTechStore.Core.Common.Interfaces.Presentation;
 using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Helpers;
-using HiTechStore.Data.DTOs;
-using HiTechStore.Data.DTOs.Discount;
-using HiTechStore.Data.Mapping;
-using HiTechStore.Data.Queries;
+using HiTechStore.Infrastructure.Data.DTOs;
+using HiTechStore.Infrastructure.Data.DTOs.Discount;
+using HiTechStore.Infrastructure.Data.Mapping;
+using HiTechStore.Infrastructure.Data.Queries;
 using HiTechStore.Helpers.URLFilterQuery;
-using HiTechStore.Models;
+using HiTechStore.Core.Models;
 
 using Microsoft.Extensions.Primitives;
 
@@ -128,7 +128,7 @@ public class DiscountService(
     {
 
         await ValidateDiscount(discountCodeCreationDto);
-        var discount = mapper.Map<Models.Discount>(discountCodeCreationDto);
+        var discount = mapper.Map<Core.Models.Discount>(discountCodeCreationDto);
 
         var dbDiscountCodes = await unitOfWork.DiscountRepository.GetDiscountCodeByNameAsync(discount.Code!);
 
@@ -166,7 +166,7 @@ public class DiscountService(
         await ValidateDiscount(discountCreationDto);
 
         // IMapper also convert script string to ConditionComponent by parser
-        var discount = mapper.Map<Models.Discount>(discountCreationDto);
+        var discount = mapper.Map<Core.Models.Discount>(discountCreationDto);
 
         discount.CreatorId = userProvider.UserId!;
         discount.IsDiscountCode = false;
@@ -287,7 +287,7 @@ public class DiscountService(
         };
     }
 
-    public async Task<Models.Discount?> GetActiveDiscountCodeOf(string discountCode)
+    public async Task<Core.Models.Discount?> GetActiveDiscountCodeOf(string discountCode)
     {
         var now = DateTime.UtcNow;
 

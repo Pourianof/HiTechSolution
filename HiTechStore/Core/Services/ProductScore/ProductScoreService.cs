@@ -1,4 +1,4 @@
-using HiTechStore.Core.Auth;
+using HiTechStore.Core.Common.Interfaces.Presentation;
 using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Services.Authorization;
 
@@ -17,7 +17,7 @@ public class ProductScoreService : ServiceBase, IProductScoreService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<Models.ProductScore> AddScoreForProduct(
+    public async Task<Core.Models.ProductScore> AddScoreForProduct(
          ProdcutScoreCreationServiceDto productScoreCreationDto
      )
     {

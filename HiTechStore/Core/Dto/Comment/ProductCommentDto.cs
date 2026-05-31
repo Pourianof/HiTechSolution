@@ -1,10 +1,10 @@
 using HiTechStore.Helpers.AutoMapper;
-using HiTechStore.Models;
+using HiTechStore.Core.Models;
 
 namespace HiTechStore.Core.Dto.Comment;
 
 
-[MapFrom<Models.Comment>]
+[MapFrom<Core.Models.Comment>]
 public class CommentDto
 {
     public int CommentId { get; set; }

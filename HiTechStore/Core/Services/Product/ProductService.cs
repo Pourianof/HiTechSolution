@@ -2,20 +2,20 @@
 
 using AutoMapper;
 
-using HiTechStore.Core.Auth;
+using HiTechStore.Core.Common.Interfaces.Presentation;
 using HiTechStore.Core.Common.Interfaces.Infra;
 using HiTechStore.Core.Dto.Product;
 using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Helpers;
 using HiTechStore.Core.Services.Authorization;
-using HiTechStore.Data.DTOs;
-using HiTechStore.Data.DTOs.Product;
-using HiTechStore.Data.Mapping;
-using HiTechStore.Data.Queries;
-using HiTechStore.Data.Storage;
+using HiTechStore.Infrastructure.Data.DTOs;
+using HiTechStore.Infrastructure.Data.DTOs.Product;
+using HiTechStore.Infrastructure.Data.Mapping;
+using HiTechStore.Infrastructure.Data.Queries;
+using HiTechStore.Infrastructure.Data.Storage;
 using HiTechStore.DTOs.Product;
 using HiTechStore.Helpers.Types;
-using HiTechStore.Models;
+using HiTechStore.Core.Models;
 
 namespace HiTechStore.Core.Services.Product;
 
@@ -123,7 +123,7 @@ public class ProductService(
         return products;
     }
 
-    public async Task<Models.Product?> DeleteProduct(int id)
+    public async Task<Core.Models.Product?> DeleteProduct(int id)
     {
         var product = await unitOfWork.Products.GetModelByIdAsync(id);
         if (product == null)
@@ -278,9 +278,9 @@ public class ProductService(
         }
     }
 
-    private async Task<Models.Product> _CreateProduct(ProductCreationDto product, string userId)
+    private async Task<Core.Models.Product> _CreateProduct(ProductCreationDto product, string userId)
     {
-        var createdProduct = mapper.Map<Models.Product>(product);
+        var createdProduct = mapper.Map<Core.Models.Product>(product);
 
         if (product.BrandModel is not null)
         {
@@ -371,7 +371,7 @@ public class ProductService(
     }
 
 
-    private async Task<Models.Product> GetAuthorizedProduct(int productId)
+    private async Task<Core.Models.Product> GetAuthorizedProduct(int productId)
     {
         var user = await GetUser();
 

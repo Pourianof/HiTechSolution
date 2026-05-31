@@ -1,6 +1,6 @@
 using HiTechStore.Core;
 using HiTechStore.Core.Helpers;
-using HiTechStore.Models;
+using HiTechStore.Core.Models;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
