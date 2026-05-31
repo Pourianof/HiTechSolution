@@ -97,6 +97,9 @@ namespace HiTechStore.Controllers
 
             var categoryDto = await _unitOfWork.Categories.GetByIdProjectedAsync(category.CategoryId);
 
+            CategoryAssetHelper.Image = createCategoryDto?.Image;
+            CategoryAssetHelper.Icon = createCategoryDto?.Icon;
+
             await CategoryAssetHelper.Write(category.CategoryId);
 
             categoryDto!.Image = CategoryAssetHelper.GetIconPath(category.CategoryId);

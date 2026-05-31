@@ -15,8 +15,8 @@ public enum CategoryAssetType
 
 public interface ICategoryAssetHelper
 {
-    IFormFile? Icon { get; init; }
-    IFormFile? Image { get; init; }
+    IFormFile? Icon { get; set; }
+    IFormFile? Image { get; set; }
     bool DeleteOnError { get; set; }
 
     string? GetCategoryAssetPathIfExist(int categoryId, CategoryAssetType type);
@@ -30,8 +30,8 @@ public interface ICategoryAssetHelper
 
 internal class CategoryAssetHelper : ICategoryAssetHelper
 {
-    public IFormFile? Icon { get; init; }
-    public IFormFile? Image { get; init; }
+    public IFormFile? Icon { get; set; }
+    public IFormFile? Image { get; set; }
     public bool DeleteOnError { get; set; }
     private IUnitOfWork _unitOfWork { get; }
     private IPublicAssetRegisterer AssetRegisterer { get; }
