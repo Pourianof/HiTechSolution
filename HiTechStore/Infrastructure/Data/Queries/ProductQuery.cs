@@ -9,6 +9,7 @@ public class ProductQuery : BaseQuery
     public QueryFilterItem? Brand { get; set; }
     public QueryFilterItem? Price { get; set; }
     public QueryFilterItem? Include { get; set; }
+    public QueryFilterItem? SearchTerm { get; set; }
     // [BindingQuery]
     // public BestSellerQuery? BestSeller { get; set; }
     public QueryFilterItem? BestSeller { get; set; }
@@ -29,7 +30,7 @@ public class ProductQuery : BaseQuery
             SortBy = query?.SortBy ?? SortBy,
             SortDir = query?.SortDir ?? SortDir,
             Include = query?.Include ?? Include,
-
+            SearchTerm = query?.SearchTerm ?? SearchTerm
         };
     }
 }

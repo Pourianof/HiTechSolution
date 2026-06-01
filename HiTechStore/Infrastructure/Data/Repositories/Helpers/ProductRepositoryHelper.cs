@@ -188,7 +188,6 @@ public class ProductRepositoryHelper
                         )
                 );
             }
-
             queryBuilder = ProductFilterApplier.Apply(queryBuilder, productQueryParams.FilterMaps,
                             new CategoryFilters([categoryId], productQueryParams.CategoryProperties));
 

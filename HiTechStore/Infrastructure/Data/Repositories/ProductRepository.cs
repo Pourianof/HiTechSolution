@@ -41,6 +41,40 @@ namespace HiTechStore.Infrastructure.Data.Repositories
 
         protected override IQueryable<Product> GetAllQueryBuilder(IQueryable<Product> queryBuilder, ProductQuery? productQueryParams)
         {
+            var searchTerm = productQueryParams?.SearchTerm?.GetValue<string>(QueryOperator.Equal);
+
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+
+                var escapedTerms = searchTerm
+                    .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(term => term
+                        .Replace("\\", "\\\\")
+                        .Replace("'", "''")
+                        .Replace("&", "\\&")
+                        .Replace("|", "\\|")
+                        .Replace(":", "\\:")
+                        .Replace("!", "\\!")
+                        .Replace("(", "\\(")
+                        .Replace(")", "\\)")
+                    );
+
+                var tsQuery = string.Join(" & ", escapedTerms);
+
+                queryBuilder = _dbSet
+                    .FromSqlInterpolated(
+                        $"""
+                        SELECT p.*
+                        FROM "Products" p
+                        LEFT JOIN "Categories" c ON c."CategoryId" = p."CategoryId"
+                        LEFT JOIN "BrandModel" b ON b."BrandModelId" = p."BrandModelId"
+                        WHERE to_tsvector('simple', coalesce(p."Title", '') || ' ' || coalesce(p."Description", '') || ' ' || coalesce(b."Name", '') || ' ' || coalesce(b."Description", '') || ' ' || coalesce(c."Name", ''))
+                            @@ to_tsquery('simple', {tsQuery})
+                    """
+                    )
+                    .Include(p => p.Category);
+            }
+
             return ProductRepositoryHelper.ApplyQueryParams(
                 queryBuilder,
                 productQueryParams
