@@ -105,16 +105,16 @@ public class ConditionComponentTreeToExpression : ConditionComponentTreeVisitor<
         }
 
 
-
+        Expression ToDoubleExp(Expression expr) => Expression.Convert(expr, typeof(double));
 
         return condition.Type switch
         {
             ConditionComponentType.And => Expression.AndAlso(left!, right!),
             ConditionComponentType.Or => Expression.OrElse(left!, right!),
-            ConditionComponentType.GreaterThan => Expression.GreaterThan(left!, right!),
-            ConditionComponentType.GreaterThanOrEqual => Expression.GreaterThanOrEqual(left!, right!),
-            ConditionComponentType.LessThan => Expression.LessThan(left!, right!),
-            ConditionComponentType.LessThanOrEqual => Expression.LessThanOrEqual(left!, right!),
+            ConditionComponentType.GreaterThan => Expression.GreaterThan(ToDoubleExp(left!), ToDoubleExp(right!)),
+            ConditionComponentType.GreaterThanOrEqual => Expression.GreaterThanOrEqual(ToDoubleExp(left!), ToDoubleExp(right!)),
+            ConditionComponentType.LessThan => Expression.LessThan(ToDoubleExp(left!), ToDoubleExp(right!)),
+            ConditionComponentType.LessThanOrEqual => Expression.LessThanOrEqual(ToDoubleExp(left!), ToDoubleExp(right!)),
             ConditionComponentType.Equality => Expression.Equal(left!, right!),
             ConditionComponentType.NotEquality => Expression.NotEqual(left!, right!),
             _ => null,
