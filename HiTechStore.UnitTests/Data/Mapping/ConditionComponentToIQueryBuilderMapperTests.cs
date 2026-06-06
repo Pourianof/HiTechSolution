@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using System.Text.Json;
 
-using HiTechStore.Data.Mapping;
+using HiTechStore.Infrastructure.Data.Mapping;
 using HiTechStore.UnitTests.Constants;
 
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +10,7 @@ namespace HiTechStore.UnitTests.Data.Mapping;
 
 public class ConditionComponentToIQueryBuilderMapperTests
 {
-    public Models.ConditionComponent ConditionTree { get; set; }
+    public HiTechStore.Core.Models.ConditionComponent ConditionTree { get; set; }
     public IConditionComponentTreeToLambdaExpression SUT { get; set; }
     public ConditionComponentToIQueryBuilderMapperTests()
     {
@@ -23,7 +23,7 @@ public class ConditionComponentToIQueryBuilderMapperTests
 
         var conditionTreeJson = File.ReadAllText(testDataPath);
 
-        ConditionTree = JsonSerializer.Deserialize<Models.ConditionComponent>(conditionTreeJson)!;
+        ConditionTree = JsonSerializer.Deserialize<HiTechStore.Core.Models.ConditionComponent>(conditionTreeJson)!;
 
         SUT = new ConditionComponentTreeToExpression();
     }

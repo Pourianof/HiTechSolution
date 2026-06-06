@@ -3,9 +3,9 @@ using System.Text.Json;
 
 using HiTechStore.Core;
 using HiTechStore.Core.Helpers;
-using HiTechStore.Core.Repositories;
+using HiTechStore.Core.Common.Interfaces.Infra.Repositories;
 using HiTechStore.Helpers.ConditionParser;
-using HiTechStore.Models;
+using HiTechStore.Core.Models;
 using HiTechStore.UnitTests.Constants;
 
 using Moq;
