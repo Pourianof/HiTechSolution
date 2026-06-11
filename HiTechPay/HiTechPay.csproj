@@ -5,10 +5,13 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <EnableDefaultWatchItems>false</EnableDefaultWatchItems>
+    <UserSecretsId>b09accaf-2282-41b7-bd5c-37ce6953dded</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.5" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
     <UpToDateCheckBuilt Include="frontend/input.css" Set="Css" />
     <UpToDateCheckBuilt Include="tailwind.config.js" Set="Css" />
     <Watch Include="**/*.cshtml" />
@@ -27,7 +30,7 @@
     https://github.com/dotnet/aspnetcore/issues/59625
   -->
   <Target Name="CustomClean" BeforeTargets="Restore">
-    <Message Text=">>> Custom clean is running" Importance="high" />
+    <Message Text="&gt;&gt;&gt; Custom clean is running" Importance="high" />
     <RemoveDir Directories="$(BaseIntermediateOutputPath)" />
     <RemoveDir Directories="$(BaseOutputPath)" />
   </Target>

@@ -16,6 +16,9 @@ obj/
 # vscode
 .vscode*/
 
+# Visual Studio
+.vs/
+
 # Rider
 .idea/
 *.sln.iml
