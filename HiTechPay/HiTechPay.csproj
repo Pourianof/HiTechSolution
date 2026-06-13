@@ -21,8 +21,9 @@
     <ProjectReference Include="..\HiTechPay.Sdk\HiTechPay.Sdk.csproj" />
   </ItemGroup>
 
-  <Target Name="Tailwind" BeforeTargets="Build">
-    <Exec Command="npm run watch" WorkingDirectory="./frontend" />
+  <Target Name="Tailwind" BeforeTargets="Build"
+        Condition="'$(Configuration)' == 'Debug'">
+  <Exec Command="npm run watch" WorkingDirectory="./frontend" />
   </Target>
 
     <!-- 
