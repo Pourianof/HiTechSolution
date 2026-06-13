@@ -1,137 +1,194 @@
-# HiTech Solution
+# HiTech Store Backend
 
-A full-stack e-commerce platform built with .NET, featuring a product store (HiTechStore) and an integrated payment system simulator (HiTechPay) along with an SDK for payment integration.
+HiTech Store is the backend implementation of a digital products e-commerce platform, focused on smart devices such as computers, laptops, mobile phones, smart gadgets and their accessories.
 
-## Features
+The project is developed using **ASP.NET Core**, **Entity Framework Core**, and **PostgreSQL**, with an emphasis on maintainability, modularity, and extensibility.
 
-- **HiTechStore**: Complete e-commerce backend with product management, categories, brands, shopping cart, orders, and user authentication.
-- **HiTechPay**: A dummy payment system simulator
-- **HiTechPay.Sdk**: SDK for easy integration of payment services into other applications.
-- **Database**: Entity Framework Core with migrations for data persistence.
-- **Docker Support**: Containerized deployment options.
+---
 
-## Architecture
+## ✨ Overview
 
-The solution consists of three main projects:
+This repository contains the backend services required to run the HiTech Store ecosystem.
 
-- **HiTechStore**: ASP.NET Core Web API for the e-commerce store.
-- **HiTechPay**: ASP.NET Core Web API for payment processing.
-- **HiTechPay.Sdk**: Class library providing payment integration utilities.
+It consists of multiple projects, each responsible for a dedicated part of the system.
 
-## Prerequisites
-
-- .NET 8.0 or later (check `global.json` for exact version)
-- Node.js 16+ (for payment simulator frontend development)
-- Docker (optional, for containerized deployment)
-- PostgreSQL or compatible database (configured in `appsettings.json`)
-
-## Installation
-
-1. Clone the repository:
-
-   ```bash
-   git clone <repository-url>
-   cd HiTechSolution
-   ```
-
-2. Restore .NET dependencies:
-
-   ```bash
-   dotnet restore
-   ```
-
-3. Install frontend dependencies:
-
-   ```bash
-   cd HiTechPay/frontend
-   npm install
-   cd ../..
-   ```
-
-4. Update database connection strings in `appsettings.json` files if needed.
-5. Run database migrations:
-   ```bash
-   dotnet ef database update --project ./HiTechStore
-   ```
-
-## Running the Application
-
-For both `HiTechStore` and `HiTechPay` projects to run, run them in two seperate bash:
-
-```bash
-dotnet run --project ./HiTechStore
+```
+HiTechStore.sln
+│
+├── HiTechStore
+├── HiTechPay
+├── HiTechStore.ApiTokenHandler
+└── HiTechPay.SDK
 ```
 
-and
+---
 
-```bash
-dotnet run --project ./HiTechPay
-```
+# Projects
 
-### Development Mode
+## HiTechStore
 
-````bash
-# Terminal 1: HiTechStore
-cd HiTechStore
-dotnet watch run
+The main REST API of the online store.
 
-# Terminal 2: HiTechPay
-cd HiTechPay
-dotnet watch run
+This project is implemented with an architecture inspired by **Clean Architecture** principles.
 
+> **Note**
+>
+> The project was initially started before I became familiar with Clean Architecture. After learning its concepts during development, I gradually migrated newer sections toward this architecture.
+>
+> As a result, some older parts of the project still follow a more traditional **SOLID-oriented layered design**, while newer modules try to respect Clean Architecture boundaries.
 
-### Production Mode
+---
 
-```bash
-# Build and run HiTechStore
-cd HiTechStore
-dotnet build --configuration Release
-dotnet run --configuration Release
+## HiTechPay
 
-# Build and run HiTechPay
-cd HiTechPay
-dotnet build --configuration Release
-dotnet run --configuration Release
-````
+A standalone payment simulator service built with **ASP.NET Core Razor Pages**.
 
-### Docker (if configured)
+Its purpose is to simulate an external payment gateway during development and testing.
 
-```bash
-docker-compose up --build
-```
+The payment page simply allows the user to select between:
 
-## API Documentation
+- ✅ Success
+- ❌ Failed
 
-### HiTechStore Endpoints
+and redirects back to the store with the corresponding payment result.
 
-- `/api/products` - Product management
-- `/api/categories` - Category management
-- `/api/brands` - Brand management
-- `/api/carts` - Shopping cart operations
-- `/api/orders` - Order management
-- `/api/auth` - Authentication
+---
 
-## SDK Usage
+## HiTechStore.ApiTokenHandler
 
-To use the HiTechPay SDK in your project:
+A separate authentication module designed according to **Modular Monolithic Architecture** concepts.
 
-```csharp
-using HiTechPay.Sdk;
+Its responsibility is handling:
 
-// Register services
-builder.Services.UseHiTechPaySdk();
-```
+- Refresh Token generation
+- Access Token generation
+- Token validation
+- Token rotation
+- Authentication-related utilities
 
-## Configuration
+Separating this module makes the authentication subsystem more maintainable and reusable.
 
-- **HiTechStore**: Configure database and authentication in `appsettings.json`
-- **HiTechPay**: Configure payment keys and RSA settings in `appsettings.json` and key files
-- **Frontend**: Configure API endpoints in frontend configuration
+---
 
-## License
+## HiTechPay.SDK
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+A client SDK for communicating with **HiTechPay**.
 
-## Contact
+It provides a standardized integration layer for:
 
-For questions or support, please open an issue in this repository.
+- Secure communication
+- Public key exchange
+- Encryption/Decryption
+- Payment request creation
+- Payment verification
+
+allowing the store API to interact with the payment simulator in a clean and reusable way.
+
+---
+
+# Technologies
+
+- ASP.NET Core
+- Entity Framework Core
+- PostgreSQL
+- Razor Pages
+- Roslyn Compiler Platform
+- JWT Authentication
+- Refresh Token Authentication
+- Docker Support
+
+---
+
+# Database
+
+The project uses **PostgreSQL** as its primary relational database and **Entity Framework Core** as the ORM.
+
+Migrations are fully supported through EF Core.
+
+---
+
+# Interesting Features
+
+## Script-Based Discount Engine
+
+The discount system supports **dynamic script-based discount codes** instead of fixed discount types.
+
+Discount rules can be written as scripts and interpreted at runtime, providing a highly flexible way to implement promotional campaigns.
+
+The scripting engine is powered by **Roslyn**, allowing C# scripts to be compiled and executed dynamically.
+
+Examples of possible rules:
+
+- First purchase discounts
+- VIP customer discounts
+- Time-limited campaigns
+- Product-specific discounts
+- Cart total based discounts
+- Complex business rules
+
+---
+
+## Video Media Support
+
+Products can contain video media.
+
+The system automatically generates thumbnails for uploaded videos, making media management easier for the frontend.
+
+---
+
+## Product Gallery
+
+Support for multiple images and media files for each product.
+
+---
+
+## Category & Brand Management
+
+Flexible management of product categories and brands with hierarchical organization.
+
+---
+
+## Shopping Cart
+
+Complete shopping cart workflow including quantity management and price calculation.
+
+---
+
+## User Authentication
+
+Authentication based on **JWT Access Tokens** and **Refresh Tokens** for improved security and user experience.
+
+---
+
+## Payment Gateway Abstraction
+
+The payment process is abstracted from the main store logic through the **HiTechPay.SDK**, making it easy to replace the payment provider in the future.
+
+---
+
+## Docker Support
+
+The project includes Docker support for the executable services, making local development and deployment significantly easier.
+
+---
+
+# Purpose
+
+This project is primarily intended as a personal learning and portfolio project while exploring modern backend development concepts including:
+
+- Clean Architecture
+- Modular Monolith Architecture
+- Domain separation
+- Secure authentication
+- Payment integration
+- Docker & CI/CD
+- Dynamic scripting with Roslyn
+- Media processing
+
+The architecture and implementation continue to evolve as new concepts and improvements are introduced.
+
+---
+
+# License
+
+This project is released for educational and portfolio purposes.
