@@ -189,6 +189,62 @@ The architecture and implementation continue to evolve as new concepts and impro
 
 ---
 
+## Frontend
+
+The frontend of this project is developed separately using **Next.js** and is available in the following repository:
+
+**GitHub Repository**
+
+[hi_tech_store_next](https://github.com/Pourianof/hi_tech_store_next?utm_source=chatgpt.com)
+
+---
+
+# Docker Images
+
+Pre-built Docker images for the executable services are published on Docker Hub and can be pulled directly without building the source code.
+
+**Docker Hub Repository**
+
+[Pourianof Docker Hub Repository](https://hub.docker.com/repositories/pourianof?utm_source=chatgpt.com)
+
+### HiTechStore API
+
+```bash
+docker run -d \
+  --name hitechstore-api \
+  pourianof/hitechstore-api:latest
+```
+
+### HiTechPay
+
+```bash
+docker run -d \
+  --name hitechpay \
+  pourianof/hitechpay:latest
+```
+
+---
+
+# Deployment
+
+Docker Compose configurations supporting multiple deployment scenarios (development, production, and other environments) are planned and will be published in a separate repository in the near future.
+
+The goal is to provide a simple one-command deployment experience for the complete ecosystem.
+
+---
+
+# Contributing
+
+This project is primarily developed as a learning and portfolio project, but suggestions, ideas, and constructive feedback are always welcome.
+
+If you discover a bug or have an idea for improvement, feel free to open an Issue or submit a Pull Request.
+
+---
+
+# Disclaimer
+
+This project is intended for educational and portfolio purposes and is **not intended for production use without further hardening, security review, and optimization**.
+
 # License
 
 This project is released for educational and portfolio purposes.
