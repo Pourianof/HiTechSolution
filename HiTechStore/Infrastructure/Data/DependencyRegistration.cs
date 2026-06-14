@@ -1,5 +1,6 @@
 using HiTechStore.Core;
 using HiTechStore.Core.Common.Interfaces.Infra;
+using HiTechStore.Helpers.Types;
 using HiTechStore.Infrastructure.Data.Repositories;
 using HiTechStore.Infrastructure.Data.Storage;
 
@@ -13,19 +14,9 @@ public static class DataDependencyRegistration
 {
     public static IHostApplicationBuilder UseDataAccess(this IHostApplicationBuilder builder)
     {
-        var baseConnStr = builder.Configuration.GetConnectionString("DefaultConnection");
-        var username = builder.Configuration["Db:Username"];
-        var password = builder.Configuration["Db:Password"];
-
-        var fullConnStr = new NpgsqlConnectionStringBuilder(baseConnStr)
-        {
-            Username = username,
-            Password = password,
-        }.ConnectionString;
-
         builder.Services.AddDbContext<HiTechStoreDbContext>(options =>
             {
-                options.UseNpgsql(fullConnStr);
+                options.UseNpgsql(builder.Configuration.ProviderConnectionString());
                 if (builder.Environment.IsDevelopment())
                 {
                     options.EnableSensitiveDataLogging();
