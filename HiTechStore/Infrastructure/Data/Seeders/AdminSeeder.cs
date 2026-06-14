@@ -1,7 +1,6 @@
 using HiTechStore.Core.Models;
 
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace HiTechStore.Infrastructure.Data.Seeders
 {
@@ -31,7 +30,7 @@ namespace HiTechStore.Infrastructure.Data.Seeders
             {
                 adminUser = new User
                 {
-                    UserName = adminEmail,
+                    UserName = "admin",
                     Email = adminEmail,
                     EmailConfirmed = true
                 };
