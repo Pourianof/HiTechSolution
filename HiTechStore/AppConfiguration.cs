@@ -26,6 +26,7 @@ public static class AppConfiguration
                 }
             }
         );
+        app.UseRateLimiter();
         app.MapControllers();
         app.UseExceptionHandler();
 

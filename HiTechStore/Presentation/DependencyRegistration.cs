@@ -24,6 +24,7 @@ public static class DependencyRegistration
 
         builder.Services.AddTokenHandler(fullConnStr);
         builder.Services.AddSingleton<IApplicationContext, ApplicationContext>();
+        builder.Services.WithRateLimiter();
 
         return builder;
     }
