@@ -5,6 +5,8 @@ using HiTechStore.Infrastructure.Data.Storage;
 
 using Microsoft.EntityFrameworkCore;
 
+using Npgsql;
+
 namespace HiTechStore.Infrastructure.Data;
 
 public static class DataDependencyRegistration
@@ -15,7 +17,11 @@ public static class DataDependencyRegistration
         var username = builder.Configuration["Db:Username"];
         var password = builder.Configuration["Db:Password"];
 
-        var fullConnStr = $"{baseConnStr}Username={username};Password={password}";
+        var fullConnStr = new NpgsqlConnectionStringBuilder(baseConnStr)
+        {
+            Username = username,
+            Password = password,
+        }.ConnectionString;
 
         builder.Services.AddDbContext<HiTechStoreDbContext>(options =>
             {
