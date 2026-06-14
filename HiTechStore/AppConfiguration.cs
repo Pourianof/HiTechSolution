@@ -1,3 +1,4 @@
+using HiTechStore.ApiTokenHandler;
 using HiTechStore.Infrastructure.Data;
 using HiTechStore.Presentation.Auth;
 
@@ -33,5 +34,15 @@ public static class AppConfiguration
         app.UseHealthChecks("/_health");
 
         await app.DbInitialize();
+
+        using (var scope = app.Services.CreateScope())
+        {
+            await TokenHandlerInitializer.Initialize(new()
+            {
+                ServiceProvider = scope.ServiceProvider,
+                Environment = app.Environment.IsProduction() ? AppEnvironment.Production : AppEnvironment.Development
+            });
+        }
+
     }
 }
