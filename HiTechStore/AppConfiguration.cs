@@ -1,4 +1,4 @@
-using HiTechStore.Infrastructure.Data.Seeders;
+using HiTechStore.Infrastructure.Data;
 using HiTechStore.Presentation.Auth;
 
 namespace HiTechStore;
@@ -32,6 +32,6 @@ public static class AppConfiguration
 
         app.UseHealthChecks("/_health");
 
-        await app.SeedDatabase();
+        await app.DbInitialize();
     }
 }
