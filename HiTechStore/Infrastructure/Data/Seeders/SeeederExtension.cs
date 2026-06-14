@@ -14,6 +14,7 @@ public static class SeederExtension
         var userManager = service.ServiceProvider.GetRequiredService<UserManager<User>>();
         var configs = service.ServiceProvider.GetRequiredService<IConfiguration>();
 
+        await RoleSeeder.SeedAsync(service.ServiceProvider);
         await AdminSeeder.SeedAsync(userManager, configs);
         await ColorSeeder.SeedAsync(uow);
         await uow.SeedDiscountEntitiesAsync();
