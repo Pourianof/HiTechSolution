@@ -1,7 +1,7 @@
 using HiTechStore.Core.Common.Interfaces.Infra;
 using HiTechStore.Core.Models;
 
-namespace HiTechStore.Infrastructure.Data.Storage;
+namespace HiTechStore.Infrastructure.AssetStorage;
 
 public class ProductMediaRegisterer(
     IPublicAssetRegisterer assetRegisterer,

@@ -4,9 +4,9 @@ using HiTechStore.Core.Common.Interfaces.Presentation;
 using HiTechStore.Core.Dto.ProductVariation;
 using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Services.Authorization;
+using HiTechStore.Infrastructure.AssetStorage;
 using HiTechStore.Infrastructure.Data.DTOs;
 using HiTechStore.Infrastructure.Data.DTOs.Product;
-using HiTechStore.Infrastructure.Data.Storage;
 
 namespace HiTechStore.Core.Services.ProductVariation;
 

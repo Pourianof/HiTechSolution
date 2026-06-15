@@ -1,6 +1,7 @@
 using HiTechStore.Core;
 using HiTechStore.Core.Common.Interfaces.Infra;
 using HiTechStore.Helpers.Types;
+using HiTechStore.Infrastructure.AssetStorage;
 using HiTechStore.Infrastructure.Data.Repositories;
 using HiTechStore.Infrastructure.Data.Storage;
 
