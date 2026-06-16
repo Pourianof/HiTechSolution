@@ -165,7 +165,15 @@ public class ProductService(
 
                 await unitOfWork.Complete();
 
-                return (await unitOfWork.Products.GetByIdProjectedAsync(createdProduct.ProductId))!;
+                return (await unitOfWork.Products.GetByIdProjectTo<ProductDto>(
+                    createdProduct.ProductId,
+                    ProductsDefaultQuery.Query.CopyWith(
+                        new ProductQuery
+                        {
+                            Include = "variations,components"
+                        }
+                     )
+                ))!;
 
             }
             catch
