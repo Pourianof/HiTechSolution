@@ -69,7 +69,8 @@ public class UsersController(UserManager<User> userManager, IProductService prod
             new AppFile
             {
                 File = avatarStream,
-                FileName = avatar.FileName
+                FileName = avatar.FileName,
+                ContentType = avatar.ContentType
             }
         );
 

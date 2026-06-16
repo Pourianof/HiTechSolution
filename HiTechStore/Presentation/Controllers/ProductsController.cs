@@ -92,14 +92,16 @@ namespace HiTechStore.Presentation.Controllers
                 (m) => new AppFile
                 {
                     File = m.OpenReadStream(),
-                    FileName = m.FileName
+                    FileName = m.FileName,
+                    ContentType = m.ContentType
                 }
             );
             productCreationDto.Thumbnails = product.Thumbnails?.Select(
                 (thumb) => new AppFile
                 {
                     File = thumb.OpenReadStream(),
-                    FileName = thumb.FileName
+                    FileName = thumb.FileName,
+                    ContentType = thumb.ContentType
                 }
             );
 

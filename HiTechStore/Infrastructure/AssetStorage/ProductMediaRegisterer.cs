@@ -58,7 +58,8 @@ public class ProductMediaRegisterer(
                     var thumbnailAccessPath = await assetRegisterer.SaveFileAsync(new()
                     {
                         File = thumbnailStream,
-                        FileName = $"thumbnail-{media.Media.FileName}"
+                        FileName = $"thumbnail-{media.Media.FileName}",
+                        ContentType = media.Media.ContentType
                     }, new WriteFileOptions
                     {
                         PathParts = ["thumbnails", productIdString]

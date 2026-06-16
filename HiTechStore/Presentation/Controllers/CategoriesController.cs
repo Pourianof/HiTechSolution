@@ -103,7 +103,8 @@ namespace HiTechStore.Presentation.Controllers
             CategoryAssetHelper.Image = categoryImageStream is not null ? new AppFile()
             {
                 File = categoryImageStream,
-                FileName = createCategoryDto!.Image!.FileName
+                FileName = createCategoryDto!.Image!.FileName,
+                ContentType = createCategoryDto!.Image.ContentType
             } : null;
 
             using var categoryIconStream = createCategoryDto?.Icon?.OpenReadStream();
@@ -111,7 +112,8 @@ namespace HiTechStore.Presentation.Controllers
             CategoryAssetHelper.Icon = categoryIconStream is not null ? new AppFile
             {
                 File = categoryIconStream,
-                FileName = createCategoryDto!.Icon!.FileName
+                FileName = createCategoryDto!.Icon!.FileName,
+                ContentType = createCategoryDto!.Icon!.ContentType
             } : null;
 
             await CategoryAssetHelper.Write(category.CategoryId);

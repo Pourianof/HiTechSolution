@@ -70,7 +70,8 @@ public class BrandsController : ControllerBase
             await AssetRegisterer.SaveFileAsync(new AppFile
             {
                 File = brandImageStream,
-                FileName = brandDto.Image.FileName
+                FileName = brandDto.Image.FileName,
+                ContentType = brandDto.Image.ContentType
             }, imagePath);
         }
 
