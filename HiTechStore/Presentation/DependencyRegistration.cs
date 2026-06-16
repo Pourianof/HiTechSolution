@@ -9,6 +9,16 @@ public static class DependencyRegistration
 {
     public static WebApplicationBuilder UsePresentation(this WebApplicationBuilder builder)
     {
+
+        builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
+        {
+            if (int.TryParse(builder.Configuration["FormLimit"], out var limit))
+            {
+                options.MultipartBodyLengthLimit = limit;
+            }
+
+        });
+
         builder.Services.AddScoped<ICurrentUserProvider>(
             sp =>
             {
