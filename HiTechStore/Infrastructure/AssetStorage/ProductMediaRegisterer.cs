@@ -10,56 +10,61 @@ public class ProductMediaRegisterer(
 {
     public async Task<ProductMedia> RegisterMedia(int productId, MediaData media)
     {
-        var isImage = MediaTypeHelper.IsImage(media.File!.FileName);
-
-        string fileName = Guid.NewGuid().ToString() + Path.GetExtension(media.File.FileName);
+        var isImage = MediaTypeHelper.IsImage(media.Media.FileName);
 
         var productIdString = productId.ToString();
 
-        string fileRelativePath = isImage ?
-            Path.Combine("images", "products", productIdString, fileName) :
-            Path.Combine("videos", "products", productIdString, fileName);
-
-        await assetRegisterer.WriteIFormFile(media.File, fileRelativePath);
+        var fileAccessPath = await assetRegisterer.SaveFileAsync(media.Media, new WriteFileOptions()
+        {
+            PathParts = isImage ? ["images", "products", productIdString] : ["videos", "products", productIdString]
+        });
 
         var productMedia = new ProductMedia
         {
-            FilePath = $"/{fileRelativePath}",
+            FilePath = fileAccessPath,
             IsMain = media.IsMain,
-            Type = MediaTypeHelper.GetMediaType(fileRelativePath)
+            Type = MediaTypeHelper.GetMediaType(fileAccessPath)
         };
 
         if (!isImage)
         {
-            var thumbnailPath = Path.ChangeExtension(
-                   Path.Combine("thumbnails", productIdString, Guid.NewGuid().ToString()),
-                   MediaTypeHelper.Jpg
-               );
-
+            string thumbnailPath;
 
             if (media.Thumbnail is not null)
             {
                 // save thumbnail
-                await assetRegisterer.WriteIFormFile(
-                    media.Thumbnail, thumbnailPath
+                thumbnailPath = await assetRegisterer.SaveFileAsync(
+                    media.Thumbnail, new WriteFileOptions()
+                    {
+                        PathParts = ["thumbnails", productIdString]
+                    }
                 );
 
-                productMedia.ThumnailPath = $"/{thumbnailPath}";
+                productMedia.ThumnailPath = thumbnailPath;
             }
             else
             {
-                var fullPath = assetRegisterer.GetAssetPhysicalFullPath(thumbnailPath);
-
                 // create and save a thumbnail 
-                var hasCreated = await thumbnailGenerator.GenerateThumbnail(
-                    fileRelativePath,
-                    fullPath,
-                    TimeSpan.FromMicroseconds(1)
+                var thumbnailStream = await thumbnailGenerator.GenerateThumbnail(
+                    new()
+                    {
+                        InputVideoStream = media.Media.File,
+                        CaptureTime = TimeSpan.FromMicroseconds(1)
+                    }
                 );
 
-                if (hasCreated)
+                if (thumbnailStream is not null)
                 {
-                    productMedia.ThumnailPath = $"/{thumbnailPath}";
+                    var thumbnailAccessPath = await assetRegisterer.SaveFileAsync(new()
+                    {
+                        File = thumbnailStream,
+                        FileName = $"thumbnail-{media.Media.FileName}"
+                    }, new WriteFileOptions
+                    {
+                        PathParts = ["thumbnails", productIdString]
+                    });
+
+                    productMedia.ThumnailPath = thumbnailAccessPath;
                 }
             }
         }
@@ -70,7 +75,7 @@ public class ProductMediaRegisterer(
 
 public class MediaData
 {
-    public IFormFile? File { get; set; }
+    required public AppFile Media { get; set; }
     public bool IsMain { get; set; }
-    public IFormFile? Thumbnail { get; set; }
+    public AppFile? Thumbnail { get; set; }
 }

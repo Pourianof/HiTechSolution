@@ -15,8 +15,8 @@ public enum CategoryAssetType
 
 public interface ICategoryAssetHelper
 {
-    IFormFile? Icon { get; set; }
-    IFormFile? Image { get; set; }
+    AppFile? Icon { get; set; }
+    AppFile? Image { get; set; }
     bool DeleteOnError { get; set; }
 
     string? GetCategoryAssetPathIfExist(int categoryId, CategoryAssetType type);
@@ -30,8 +30,8 @@ public interface ICategoryAssetHelper
 
 internal class CategoryAssetHelper : ICategoryAssetHelper
 {
-    public IFormFile? Icon { get; set; }
-    public IFormFile? Image { get; set; }
+    public AppFile? Icon { get; set; }
+    public AppFile? Image { get; set; }
     public bool DeleteOnError { get; set; }
     private IUnitOfWork _unitOfWork { get; }
     private IPublicAssetRegisterer AssetRegisterer { get; }
@@ -106,7 +106,7 @@ internal class CategoryAssetHelper : ICategoryAssetHelper
         if (Image is not null)
         {
             var publicPath = ProvideCategoryAssetPublicPath(categoryId, CategoryAssetType.Image);
-            await AssetRegisterer.WriteIFormFile(Image, publicPath!);
+            await AssetRegisterer.SaveFileAsync(Image, publicPath!);
         }
     }
 
@@ -115,7 +115,7 @@ internal class CategoryAssetHelper : ICategoryAssetHelper
         if (Icon is not null)
         {
             var publicPath = ProvideCategoryAssetPublicPath(categoryId, CategoryAssetType.Icon);
-            await AssetRegisterer.WriteIFormFile(Icon, publicPath);
+            await AssetRegisterer.SaveFileAsync(Icon, publicPath);
         }
     }
 

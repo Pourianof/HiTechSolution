@@ -14,6 +14,7 @@ using HiTechStore.Core.Models;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using HiTechStore.Core.Common.Interfaces.Infra;
 
 namespace HiTechStore.Presentation.Controllers
 {
@@ -97,8 +98,21 @@ namespace HiTechStore.Presentation.Controllers
 
             var categoryDto = await _unitOfWork.Categories.GetByIdProjectedAsync(category.CategoryId);
 
-            CategoryAssetHelper.Image = createCategoryDto?.Image;
-            CategoryAssetHelper.Icon = createCategoryDto?.Icon;
+            using var categoryImageStream = createCategoryDto?.Image?.OpenReadStream();
+
+            CategoryAssetHelper.Image = categoryImageStream is not null ? new AppFile()
+            {
+                File = categoryImageStream,
+                FileName = createCategoryDto!.Image!.FileName
+            } : null;
+
+            using var categoryIconStream = createCategoryDto?.Icon?.OpenReadStream();
+
+            CategoryAssetHelper.Icon = categoryIconStream is not null ? new AppFile
+            {
+                File = categoryIconStream,
+                FileName = createCategoryDto!.Icon!.FileName
+            } : null;
 
             await CategoryAssetHelper.Write(category.CategoryId);
 

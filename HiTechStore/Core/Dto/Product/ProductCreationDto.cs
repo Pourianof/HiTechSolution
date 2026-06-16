@@ -1,4 +1,5 @@
 
+using HiTechStore.Core.Common.Interfaces.Infra;
 using HiTechStore.Core.Dto.Product;
 
 public class ProductCreationDto
@@ -8,8 +9,8 @@ public class ProductCreationDto
     public string? Description { get; set; }
     public ProductCategoryValuesDto? CategoryValues { get; set; }
     public IEnumerable<ProductVariationCreationDto>? Variations { get; set; }
-    public IEnumerable<IFormFile>? Media { get; set; }
-    public IEnumerable<IFormFile>? Thumbnails { get; set; }
+    public IEnumerable<AppFile>? Media { get; set; }
+    public IEnumerable<AppFile>? Thumbnails { get; set; }
 }
 
 public class ProductVariationCreationDto

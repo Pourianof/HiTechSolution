@@ -1,7 +1,9 @@
+using HiTechStore.Core.Common.Interfaces.Infra;
+
 namespace HiTechStore.Core.Dto.ProductVariation;
 
 public class AddNewMediaDto
 {
-    public IFormFile? File { get; set; }
-    public IFormFile? Thumbnail { get; set; }
+    public AppFile? File { get; set; }
+    public AppFile? Thumbnail { get; set; }
 }

@@ -23,7 +23,7 @@ public class UserService : ServiceBase, IUserService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<string> UpdateProfileAvatar(IFormFile avatar)
+    public async Task<string> UpdateProfileAvatar(AppFile avatar)
     {
         var isImage = MediaTypeHelper.IsImage(avatar.FileName);
 
@@ -39,7 +39,7 @@ public class UserService : ServiceBase, IUserService
 
         try
         {
-            filePath = await _assetRegisterer.WriteIFormFile(avatar, new WriteFileOptions
+            filePath = await _assetRegisterer.SaveFileAsync(avatar, new WriteFileOptions
             {
                 PathParts = ["images", "avatars"],
                 WellDistributedPath = true

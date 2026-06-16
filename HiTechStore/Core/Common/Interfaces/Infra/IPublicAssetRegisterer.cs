@@ -3,8 +3,8 @@ namespace HiTechStore.Core.Common.Interfaces.Infra;
 public interface IPublicAssetRegisterer
 {
     bool IsExist(string? publicPath);
-    Task WriteIFormFile(IFormFile file, string filePublicPath);
-    Task<string> WriteIFormFile(IFormFile file, WriteFileOptions options);
+    Task SaveFileAsync(AppFile file, string filePublicPath);
+    Task<string> SaveFileAsync(AppFile file, WriteFileOptions options);
     void DeleteFile(string publicPath);
     string GetAssetPhysicalFullPath(string relativePath);
 }

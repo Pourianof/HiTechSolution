@@ -122,7 +122,7 @@ public class ProductVariationService : ServiceBase, IProductVariationService
 
         var media = await _mediaRegisterer.RegisterMedia(productVariation.ProductId, new()
         {
-            File = newMediaDto.File,
+            Media = newMediaDto.File,
             IsMain = false,
             Thumbnail = newMediaDto.Thumbnail
         });

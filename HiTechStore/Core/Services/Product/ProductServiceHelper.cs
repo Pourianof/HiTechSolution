@@ -14,7 +14,7 @@ public class ProductServiceHelper(ProductMediaRegisterer productMediaRegisterer)
             var variationMedia = variation.MediaMetaData!.Select(
                 (meta) => new MediaData
                 {
-                    File = productCreationDto.Media!.ElementAt(meta.Index),
+                    Media = productCreationDto.Media!.ElementAt(meta.Index),
                     IsMain = meta.IsMain,
                     Thumbnail = meta.ThumbnailIndex is not null ?
                         productCreationDto.Thumbnails?.ElementAt(meta.ThumbnailIndex.Value) :

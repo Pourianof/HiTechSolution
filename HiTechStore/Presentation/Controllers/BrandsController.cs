@@ -66,7 +66,12 @@ public class BrandsController : ControllerBase
         if (brandDto.Image is not null)
         {
             imagePath = $"images/brands/{brand.Name}.png";
-            await AssetRegisterer.WriteIFormFile(brandDto.Image, imagePath);
+            using var brandImageStream = brandDto.Image.OpenReadStream();
+            await AssetRegisterer.SaveFileAsync(new AppFile
+            {
+                File = brandImageStream,
+                FileName = brandDto.Image.FileName
+            }, imagePath);
         }
 
         await UnitOfWork.BrandRepository.AddAsync(brand);

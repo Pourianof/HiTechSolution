@@ -2,21 +2,33 @@
 using System.Diagnostics;
 
 using HiTechStore.Core.Common.Interfaces.Infra;
-using HiTechStore.Core.Common.Interfaces.Presentation;
 
 
 namespace HiTechStore.Infrastructure.ThumbnailGenerator;
 
-public class FfmpegProcessThumbnailGenerator() : IThumbnailGenerator
+public class FfmpegProcessThumbnailGenerator(ILogger<FfmpegProcessThumbnailGenerator> logger) : IThumbnailGenerator
 {
-    public async Task<bool> GenerateThumbnail(string videoPath, string thumbnailPath, TimeSpan captureTime, int width = 320)
+    public async Task<Stream?> GenerateThumbnail(ThumbnailOptions thumbnailOptions)
     {
-        string arguments = $"-ss {captureTime.TotalSeconds} -i \"{videoPath}\" -frames:v 1 -vf \"scale={width}:-1\" \"{thumbnailPath}\"";
+
+        string arguments = $"-ss {thumbnailOptions.CaptureTime.TotalSeconds}  -frames:v 1 -vf \"scale={thumbnailOptions.Width}:-1\"";
+
+        var isStreamMode = true;
+
+        if (!string.IsNullOrEmpty(thumbnailOptions.InputVideoPath))
+        {
+            arguments += $" -i \"{thumbnailOptions.InputVideoPath}\"";
+            isStreamMode = false;
+        }
+        else if (thumbnailOptions.InputVideoStream is null)
+        {
+            throw new InvalidDataException("Neither input stream nor input video file path specified");
+        }
 
         var processStartInfo = new ProcessStartInfo
         {
             FileName = "ffmpeg",
-            Arguments = arguments,
+            Arguments = arguments + " pipe:1",
             UseShellExecute = false,
             RedirectStandardError = true,
             CreateNoWindow = true
@@ -31,24 +43,35 @@ public class FfmpegProcessThumbnailGenerator() : IThumbnailGenerator
                     throw new Exception("Ffmpeg process could not launch");
                 }
 
+                if (isStreamMode)
+                {
+                    await thumbnailOptions.InputVideoStream!.CopyToAsync(process.StandardInput.BaseStream);
+                    process.StandardInput.Close();
+                }
+
+                var outputStream = new MemoryStream();
+                await process.StandardOutput.BaseStream.CopyToAsync(outputStream);
+                outputStream.Position = 0;
+
                 string errorOutput = await process.StandardError.ReadToEndAsync();
                 await process.WaitForExitAsync();
 
-                if (process.ExitCode == 0 && File.Exists(thumbnailPath))
+                if (process.ExitCode == 0)
                 {
-                    return true;
+                    return outputStream;
                 }
                 else
                 {
-                    Console.WriteLine($"FFmpeg Error: {errorOutput}");
-                    return false;
+                    logger.LogError("FFmpeg Error: {error}", errorOutput);
+                    return default;
                 }
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Exception: {ex.Message}");
-            return false;
+            logger.LogError("Exception: {error}", ex);
+            return default;
+
         }
     }
 }

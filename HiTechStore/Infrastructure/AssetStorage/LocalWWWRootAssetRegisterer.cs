@@ -5,19 +5,26 @@ using HiTechStore.Infrastructure.Utils;
 
 namespace HiTechStore.Infrastructure.AssetStorage;
 
-public class LocalWWWRootAssetRegisterer(
-    IApplicationContext applicationContext,
-    IWellDistributedPathGenerator distributedPathGenerator
-    ) : IPublicAssetRegisterer
+public class LocalWWWRootAssetRegisterer : AssetRegistererBase
 {
-    public bool IsExist(string? publicPath)
+    private IApplicationContext _applicationContext;
+
+    public LocalWWWRootAssetRegisterer(
+        IApplicationContext applicationContext,
+        IWellDistributedPathGenerator distributedPathGenerator
+        ) : base(distributedPathGenerator)
     {
-        return publicPath is not null && File.Exists(Path.Combine(applicationContext.GetAssetPath(), publicPath));
+        _applicationContext = applicationContext;
     }
 
-    public async Task WriteIFormFile(IFormFile file, string filePublicPath)
+    override public bool IsExist(string? publicPath)
     {
-        var filePath = Path.Combine(applicationContext.GetAssetPath(), filePublicPath);
+        return publicPath is not null && File.Exists(Path.Combine(_applicationContext.GetAssetPath(), publicPath));
+    }
+
+    override public async Task SaveFileAsync(AppFile file, string filePublicPath)
+    {
+        var filePath = Path.Combine(_applicationContext.GetAssetPath(), filePublicPath);
         var dirPath = Path.GetDirectoryName(filePath);
         try
         {
@@ -28,7 +35,7 @@ public class LocalWWWRootAssetRegisterer(
 
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
-                await file.CopyToAsync(stream);
+                await file.File.CopyToAsync(stream);
             }
         }
         catch (Exception ex)
@@ -37,44 +44,22 @@ public class LocalWWWRootAssetRegisterer(
         }
     }
 
-    public void DeleteFile(string publicPath)
+    override public void DeleteFile(string publicPath)
     {
-        var filePath = Path.Combine(applicationContext.GetAssetPath(), publicPath);
+        var filePath = Path.Combine(_applicationContext.GetAssetPath(), publicPath);
         File.Delete(filePath);
     }
 
-    public string GetAssetPhysicalFullPath(string relativePath)
+    override public string GetAssetPhysicalFullPath(string relativePath)
     {
-        return Path.Combine(applicationContext.GetAssetPath(), relativePath);
+        return Path.Combine(_applicationContext.GetAssetPath(), relativePath);
     }
 
-    public async Task<string> WriteIFormFile(IFormFile file, WriteFileOptions options)
+    override public async Task<string> SaveFileAsync(AppFile file, WriteFileOptions options)
     {
-        string filePath = "";
-        if (options.WellDistributedPath)
-        {
-            var distPath = await distributedPathGenerator.Generate(file.FileName);
+        var filePath = await ProvidePath(options, file.FileName);
 
-            filePath = Path.Combine(filePath, distPath);
-        }
-
-        if (options.PathParts?.Count() > 0)
-        {
-            var tempPath = "";
-            foreach (var p in options.PathParts)
-            {
-                tempPath = Path.Combine(tempPath, p);
-            }
-
-            filePath = Path.Combine(tempPath, filePath);
-        }
-
-        var guid = Guid.NewGuid().ToString();
-
-        filePath = Path.Combine(filePath, guid);
-        filePath = Path.ChangeExtension(filePath, Path.GetExtension(file.FileName));
-
-        await WriteIFormFile(file, filePath);
+        await SaveFileAsync(file, filePath);
 
         return filePath;
     }

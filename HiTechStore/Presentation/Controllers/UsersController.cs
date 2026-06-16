@@ -11,6 +11,7 @@ using HiTechStore.Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using HiTechStore.Core.Common.Interfaces.Infra;
 
 namespace HiTechStore.Presentation.Controllers;
 
@@ -63,7 +64,14 @@ public class UsersController(UserManager<User> userManager, IProductService prod
     [Authorize]
     public async Task<ActionResult> UpdateProfileAvatar(IFormFile avatar)
     {
-        var newAvatarUrl = await userService.UpdateProfileAvatar(avatar);
+        using var avatarStream = avatar.OpenReadStream();
+        var newAvatarUrl = await userService.UpdateProfileAvatar(
+            new AppFile
+            {
+                File = avatarStream,
+                FileName = avatar.FileName
+            }
+        );
 
         return Ok(
             new UserDto

@@ -16,6 +16,8 @@ using HiTechStore.Presentation.Product;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using HiTechStore.Presentation.Requests;
+using HiTechStore.Core.Common.Interfaces.Infra;
 
 namespace HiTechStore.Presentation.Controllers
 {
@@ -81,10 +83,38 @@ namespace HiTechStore.Presentation.Controllers
         [HttpPost]
         [Authorize(Roles = $"{IdentityRoles.Admin},{IdentityRoles.Manager}")]
         [ViolateForeignKeyExceptionFilter]
-        public async Task<IActionResult> CreateProduct([FromForm] ProductCreationDto product)
+        public async Task<IActionResult> CreateProduct([FromForm] ProductCreationRequest product)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var createdProductDto = await _productService.CreateProduct(product, userId!);
+            var productCreationDto = _mapper.Map<ProductCreationDto>(product);
+
+            productCreationDto.Media = product.Media!.Select(
+                (m) => new AppFile
+                {
+                    File = m.OpenReadStream(),
+                    FileName = m.FileName
+                }
+            );
+            productCreationDto.Thumbnails = product.Thumbnails?.Select(
+                (thumb) => new AppFile
+                {
+                    File = thumb.OpenReadStream(),
+                    FileName = thumb.FileName
+                }
+            );
+
+            var createdProductDto = await _productService.CreateProduct(productCreationDto, userId!);
+
+            foreach (var m in productCreationDto.Media)
+            {
+                await m.File.DisposeAsync();
+            }
+
+            foreach (var thumb in productCreationDto.Thumbnails ?? [])
+            {
+                await thumb.File.DisposeAsync();
+            }
+
             if (createdProductDto?.ProductId is null)
             {
                 return Problem(
