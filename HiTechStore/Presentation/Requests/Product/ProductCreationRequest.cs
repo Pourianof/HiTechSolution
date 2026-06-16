@@ -31,9 +31,11 @@ public class ProductCreationRequest
     [ProductVariationValidation]
     [FromJson]
     [MinLength(1)]
-    public IEnumerable<ProductVariationCreationDto>? Variations { get; set; }
+    public IEnumerable<ProductVariationCreationRequest>? Variations { get; set; }
     [ProductMediaValidation]
+    [MapIgnore]
     public IEnumerable<IFormFile>? Media { get; set; }
+    [MapIgnore]
     public IEnumerable<IFormFile>? Thumbnails { get; set; }
 }
 
