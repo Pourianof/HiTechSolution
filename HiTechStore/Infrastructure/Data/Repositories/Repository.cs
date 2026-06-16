@@ -242,6 +242,12 @@ namespace HiTechStore.Infrastructure.Data.Repositories
             var query = GetByIdAsyncQueryBuilder(_dbSet);
             return Project<TProject>(query.FindById(id)).FirstOrDefaultAsync();
         }
+
+        public Task<TProject?> GetByIdProjectTo<TProject>(int id, Q queryParams)
+        {
+            var query = GetByIdAsyncQueryBuilder(_dbSet);
+            return Project<TProject>(query.FindById(id), queryParams).FirstOrDefaultAsync();
+        }
     }
 
     public class Repository<T, O> : Repository<T, O, BaseQuery>

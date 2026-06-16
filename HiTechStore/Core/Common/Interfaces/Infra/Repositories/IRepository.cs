@@ -45,6 +45,7 @@ namespace HiTechStore.Core.Common.Interfaces.Infra.Repositories
         Task<PagedResultDto<O>> GetAllProjectedAsync(Q query);
         Task<PagedResultDto<TProject>> GetAllProjectToAsync<TProject>(Q? query = default);
         Task<TProject?> GetByIdProjectTo<TProject>(int id);
+        Task<TProject?> GetByIdProjectTo<TProject>(int id, Q queryParams);
     }
 
     public interface IRepository<T, O> : IRepository<T, O, BaseQuery>
