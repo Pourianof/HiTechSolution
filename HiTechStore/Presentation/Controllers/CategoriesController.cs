@@ -15,6 +15,8 @@ using HiTechStore.Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using HiTechStore.Core.Common.Interfaces.Infra;
+using HiTechStore.Helpers.URLFilterQuery;
+using HiTechStore.Infrastructure.Data.Queries;
 
 namespace HiTechStore.Presentation.Controllers
 {
@@ -36,9 +38,9 @@ namespace HiTechStore.Presentation.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategories()
+        public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategories([ToQuery] BaseQuery query)
         {
-            var categories = await _unitOfWork.Categories.GetPagedProjectedAsync();
+            var categories = await _unitOfWork.Categories.GetAllProjectedAsync(query);
             categories.Items = categories.Items.Select(
                (cat) =>
                {
