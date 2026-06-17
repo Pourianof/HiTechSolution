@@ -52,7 +52,7 @@ public class LocalWWWRootAssetRegisterer : AssetRegistererBase
 
     override public string GetPublicUrl(string relativePath)
     {
-        return Path.Combine(_applicationContext.GetAssetPath(), relativePath);
+        return $"{NormalizeUrl(relativePath).Trim('/')}";
     }
 
     override public async Task<string> SaveFileAsync(AppFile file, WriteFileOptions options)
