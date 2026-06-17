@@ -50,7 +50,7 @@ public class LocalWWWRootAssetRegisterer : AssetRegistererBase
         File.Delete(filePath);
     }
 
-    override public string GetAssetPhysicalFullPath(string relativePath)
+    override public string GetPublicUrl(string relativePath)
     {
         return Path.Combine(_applicationContext.GetAssetPath(), relativePath);
     }

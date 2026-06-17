@@ -8,7 +8,7 @@ namespace HiTechStore.Infrastructure;
 
 public static class IngrastructureDependencyRegistration
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddTransient<IThumbnailGenerator, FfmpegProcessThumbnailGenerator>();
         services.AddTransient<IPublicAssetRegisterer, LocalWWWRootAssetRegisterer>();
@@ -19,6 +19,8 @@ public static class IngrastructureDependencyRegistration
         services.AddScoped<IEmailSender, MailKitEmailSender>();
         services.AddSingleton<IEmailTemplateRenderer, FileEmailTemplateRenderer>();
         services.AddScoped<IEmailNotificationService, EmailNotificationService>();
+
+        services.UseStorage(configuration);
 
         return services;
     }

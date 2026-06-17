@@ -26,7 +26,8 @@ public class ProductService(
     IMapper mapper,
     IConditionComponentTreeToLambdaExpression conditionTreeToLambdaExprMapper,
     ProductServiceHelper productServiceHelper,
-    IAuthorizationService authorizationService
+    IAuthorizationService authorizationService,
+    IPublicAssetRegisterer assetRegisterer
 ) : ServiceBase(authorizationService, currentUserProvider), IProductService
 {
     private void ApplyRulesToProducts(IEnumerable<ProductDto> products, IEnumerable<DiscountRule> rules)
@@ -120,6 +121,11 @@ public class ProductService(
 
         ApplyRulesToProducts(products.Items, rules);
 
+        foreach (var product in products.Items)
+        {
+            ResolveProductMediaUrl(product);
+        }
+
         return products;
     }
 
@@ -165,9 +171,14 @@ public class ProductService(
 
                 await unitOfWork.Complete();
 
-                return (await unitOfWork.Products.GetByIdProjectTo<ProductDto>(
+                return (await GetProductById(
                     createdProduct.ProductId,
-                    ProductsDefaultQuery.Query.CopyWith(
+                    discountCalculation: new()
+                    {
+                        DiscountCalculation = false,
+                        UsersScore = false
+                    },
+                    query: ProductsDefaultQuery.Query.CopyWith(
                         new ProductQuery
                         {
                             Include = "variations,components"
@@ -337,6 +348,18 @@ public class ProductService(
         return products;
     }
 
+    private void ResolveProductMediaUrl(ProductDto product)
+    {
+        foreach (var variation in product.Variations)
+        {
+            foreach (var media in variation.Media)
+            {
+                media.Url = media.Url is not null ? assetRegisterer.GetPublicUrl(media.Url) : null;
+                media.ThumbnailUrl = media.ThumbnailUrl is not null ? assetRegisterer.GetPublicUrl(media.ThumbnailUrl) : null;
+            }
+        }
+    }
+
     public async Task<ProductDto?> GetProductById(int productId, ProductAccessAdditionalProcessing? discountCalculation = default, ProductQuery? query = default)
     {
         var activeDiscounts = await GetAppliableActiveDiscount();
@@ -350,6 +373,11 @@ public class ProductService(
         if (discountCalculation?.DiscountCalculation == true && product is not null)
         {
             ApplyRulesToProducts([product], activeDiscounts);
+        }
+
+        if (product is not null)
+        {
+            ResolveProductMediaUrl(product);
         }
 
         return product;

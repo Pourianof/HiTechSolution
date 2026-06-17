@@ -70,7 +70,7 @@ internal class CategoryAssetHelper : ICategoryAssetHelper
     public string? GetCategoryAssetPathIfExist(int categoryId, CategoryAssetType type)
     {
         var pubPath = ProvideCategoryAssetPublicPath(categoryId, type);
-        return AssetRegisterer.IsExist(pubPath) ? pubPath : null;
+        return AssetRegisterer.IsExist(pubPath) ? AssetRegisterer.GetPublicUrl(pubPath) : null;
     }
 
     public string? GetCategoryImagePathIfExist(int categoryId)

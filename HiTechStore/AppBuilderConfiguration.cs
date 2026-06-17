@@ -43,7 +43,7 @@ public static class DependencyRegistration
         builder.Services.AddExceptionHandler<PgDbExceptionHandler>();
         builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
-        builder.Services.AddInfrastructure();
+        builder.Services.AddInfrastructure(builder.Configuration);
 
         builder.Services.UseHiTechPaySdk();
 

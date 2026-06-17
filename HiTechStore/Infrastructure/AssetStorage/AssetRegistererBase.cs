@@ -12,10 +12,15 @@ abstract public class AssetRegistererBase : IPublicAssetRegisterer
         _wellDistributedPathGenerator = distributedPathGenerator;
     }
     public abstract void DeleteFile(string publicPath);
-    public abstract string GetAssetPhysicalFullPath(string relativePath);
+    public abstract string GetPublicUrl(string relativePath);
     public abstract bool IsExist(string? publicPath);
     public abstract Task SaveFileAsync(AppFile file, string filePublicPath);
     public abstract Task<string> SaveFileAsync(AppFile file, WriteFileOptions options);
+
+    protected string NormalizeUrl(string url)
+    {
+        return url.Replace('\\', '/').TrimStart('/');
+    }
 
     protected async Task<string> ProvidePath(WriteFileOptions options, string fileName)
     {

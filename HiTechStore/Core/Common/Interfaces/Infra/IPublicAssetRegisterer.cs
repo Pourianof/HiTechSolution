@@ -6,7 +6,7 @@ public interface IPublicAssetRegisterer
     Task SaveFileAsync(AppFile file, string filePublicPath);
     Task<string> SaveFileAsync(AppFile file, WriteFileOptions options);
     void DeleteFile(string publicPath);
-    string GetAssetPhysicalFullPath(string relativePath);
+    string GetPublicUrl(string relativePath);
 }
 
 public class WriteFileOptions

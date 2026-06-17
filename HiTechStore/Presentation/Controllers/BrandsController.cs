@@ -30,7 +30,7 @@ public class BrandsController : ControllerBase
     private string? ProvideBrandImage(string? brandName)
     {
         var imagePath = $"images/brands/{brandName}.png";
-        return AssetRegisterer.IsExist(imagePath) ? imagePath : null;
+        return AssetRegisterer.IsExist(imagePath) ? AssetRegisterer.GetPublicUrl(imagePath) : null;
 
     }
 
