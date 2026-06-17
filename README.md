@@ -233,6 +233,32 @@ The goal is to provide a simple one-command deployment experience for the comple
 
 ---
 
+## Configuration
+
+The application supports multiple storage strategies for public assets. The following configuration keys are available:
+
+| Configuration Key     | Required            | Description                                                                                                     | Example                            |
+| --------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| `StorageStrategy`     | Yes                 | Specifies the storage strategy for public assets. Supported values are `Local` and `Supabase`.                  | `Supabase`                         |
+| `Supabase:BaseUrl`    | Only for `Supabase` | Base URL of the Supabase project.                                                                               | `https://your-project.supabase.co` |
+| `Supabase:SecretKey`  | Only for `Supabase` | Supabase Secret API Key used by the backend to access the Storage API. **Never expose this key to the client.** | `sb_secret_xxxxxxxxxxxxxxxxx`      |
+| `Supabase:BucketName` | Only for `Supabase` | Name of the Storage Bucket used for storing public assets.                                                      | `hitechstore-assets`               |
+
+### Storage Strategies
+
+```csharp
+public enum StorageStrategy
+{
+    Local,
+    Supabase
+}
+```
+
+- `Local`: Stores uploaded files in the application's local storage (e.g. `wwwroot`).
+- `Supabase`: Stores uploaded files in a Supabase Storage bucket and serves them through public URLs.
+
+---
+
 # Contributing
 
 This project is primarily developed as a learning and portfolio project, but suggestions, ideas, and constructive feedback are always welcome.
