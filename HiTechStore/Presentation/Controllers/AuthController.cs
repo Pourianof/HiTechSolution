@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using HiTechStore.Core.Helpers.Result;
+using HiTechStore.Core.Common.Interfaces.Infra;
 
 namespace HiTechStore.Presentation.Controllers;
 
@@ -124,7 +125,7 @@ public class AuthController : AppControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
+    public async Task<IActionResult> Login([FromBody] LoginDto loginDto, [FromServices] IPublicAssetRegisterer assetRegisterer)
     {
         if (loginDto == null || !ModelState.IsValid)
         {
@@ -178,7 +179,7 @@ public class AuthController : AppControllerBase
                 LastName = user.LastName,
                 Email = user.Email,
                 Roles = user.Roles,
-                AvatarUrl = user.AvatarUrl
+                AvatarUrl = user.AvatarUrl is null ? default : assetRegisterer.GetPublicUrl(user.AvatarUrl)
             }
         };
         return Ok(authData);

@@ -56,7 +56,7 @@ public class UserService : ServiceBase, IUserService
                 // maybe should delay this task to background jobs
                 _assetRegisterer.DeleteFile(userOldAvatar);
             }
-            return filePath;
+            return _assetRegisterer.GetPublicUrl(filePath);
         }
         catch
         {
