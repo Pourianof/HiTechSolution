@@ -12,7 +12,7 @@ public static class DataDependencyRegistration
     {
         builder.Services.AddDbContext<HiTechStoreDbContext>(options =>
             {
-                options.UseNpgsql(builder.Configuration.ProviderConnectionString());
+                options.UseNpgsql(builder.Configuration.ProvideConnectionString());
                 if (builder.Environment.IsDevelopment())
                 {
                     options.EnableSensitiveDataLogging();

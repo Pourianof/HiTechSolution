@@ -4,7 +4,7 @@ namespace HiTechStore.Helpers.Types;
 
 public static class IConfigurationExtension
 {
-    public static string ProviderConnectionString(this IConfiguration configuration)
+    public static string ProvideConnectionString(this IConfiguration configuration)
     {
         var baseConnStr = configuration.GetConnectionString("DefaultConnection");
         var username = configuration["Db:Username"];

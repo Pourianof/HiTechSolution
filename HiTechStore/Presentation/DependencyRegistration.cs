@@ -27,7 +27,7 @@ public static class DependencyRegistration
             }
         );
 
-        builder.Services.AddTokenHandler(builder.Configuration.ProviderConnectionString());
+        builder.Services.AddTokenHandler(builder.Configuration.ProvideConnectionString());
         builder.Services.AddSingleton<IApplicationContext, ApplicationContext>();
         builder.Services.WithRateLimiter();
 
