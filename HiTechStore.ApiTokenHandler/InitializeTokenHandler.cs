@@ -11,7 +11,7 @@ public static class TokenHandlerInitializer
     {
         if (context.Environment.IsProduction())
         {
-            var db = context.ServiceProvider.GetRequiredService<AuthTokensDbContext>();
+            using var db = context.ServiceProvider.GetRequiredService<AuthTokensDbContext>();
 
             await db.Database.MigrateAsync();
         }

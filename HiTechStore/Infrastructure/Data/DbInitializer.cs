@@ -14,7 +14,7 @@ public static class DbInitializer
         {
             using (var scope = app.Services.CreateScope())
             {
-                var db = scope.ServiceProvider.GetRequiredService<HiTechStoreDbContext>();
+                using var db = scope.ServiceProvider.GetRequiredService<HiTechStoreDbContext>();
 
                 await db.Database.MigrateAsync();
             }
