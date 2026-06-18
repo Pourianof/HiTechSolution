@@ -35,7 +35,7 @@ public class BrandModelsController : ControllerBase
         if (brandModelCreationDto.Brand is not null)
         {
             var brandName = brandModelCreationDto.Brand.name;
-            var dbBrand = _unitOfWork.BrandRepository.GetByNameAsync(brandName!);
+            var dbBrand = await _unitOfWork.BrandRepository.GetByNameAsync(brandName!);
 
             if (dbBrand is null)
             {
@@ -46,7 +46,7 @@ public class BrandModelsController : ControllerBase
             }
             else
             {
-                brandModel.BrandId = dbBrand.Id;
+                brandModel.BrandId = dbBrand.BrandId;
             }
         }
         else
