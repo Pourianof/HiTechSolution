@@ -7,4 +7,5 @@ public interface IApplicationContext
 {
     string GetAssetPath();
     string GetAppRootPath();
+    string GetServerPublicAccessUrl();
 }

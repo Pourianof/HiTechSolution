@@ -243,6 +243,7 @@ The application supports multiple storage strategies for public assets. The foll
 | `Supabase:BaseUrl`    | Only for `Supabase` | Base URL of the Supabase project.                                                                               | `https://your-project.supabase.co` |
 | `Supabase:SecretKey`  | Only for `Supabase` | Supabase Secret API Key used by the backend to access the Storage API. **Never expose this key to the client.** | `sb_secret_xxxxxxxxxxxxxxxxx`      |
 | `Supabase:BucketName` | Only for `Supabase` | Name of the Storage Bucket used for storing public assets.                                                      | `hitechstore-assets`               |
+| `PublicAccessUrl`     | Yes                 | Public Url which out-world can used to access this api                                                          | `https://my-api-server.com`        |
 
 ### Storage Strategies
 
