@@ -13,6 +13,7 @@ using HiTechStore.Helpers.URLFilterQuery;
 using HiTechStore.Core.Models;
 
 using Microsoft.Extensions.Primitives;
+using HiTechStore.Core.Dto.Discount;
 
 namespace HiTechStore.Core.Services.Discount;
 

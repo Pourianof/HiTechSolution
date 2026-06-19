@@ -11,6 +11,7 @@ public class ServiceBase(
 )
 {
     protected string? UserId => currentUserProvider.UserId;
+    protected string UserIdOrThrow => currentUserProvider.UserId ?? Unauthorized();
 
     protected dynamic Unauthorized(
         string? detail = default

@@ -1,4 +1,4 @@
-namespace HiTechStore.Infrastructure.Data.DTOs.Cart;
+namespace HiTechStore.Core.Dto.Cart;
 
 public class CartWithProductsDto
 {

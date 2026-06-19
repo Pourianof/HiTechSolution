@@ -1,4 +1,4 @@
-using HiTechStore.Infrastructure.Data.DTOs.Cart;
+using HiTechStore.Core.Dto.Cart;
 using HiTechStore.Core.Models;
 
 namespace HiTechStore.Core.Common.Interfaces.Infra.Repositories;

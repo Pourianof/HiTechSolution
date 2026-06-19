@@ -8,12 +8,12 @@ using HiTechPay.Sdk.Communication;
 using HiTechStore.Core;
 using HiTechStore.Core.Services.Discount;
 using HiTechStore.Infrastructure.Data.DTOs;
-using HiTechStore.Infrastructure.Data.DTOs.Discount;
 using HiTechStore.Infrastructure.Data.DTOs.Order;
 using HiTechStore.Core.Models;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using HiTechStore.Core.Dto.Discount;
 
 namespace HiTechStore.Presentation.Controllers;
 

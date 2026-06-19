@@ -4,7 +4,7 @@ using AutoMapper.QueryableExtensions;
 
 using HiTechStore.Core.Common.Interfaces.Infra.Repositories;
 using HiTechStore.Infrastructure.Data.DTOs;
-using HiTechStore.Infrastructure.Data.DTOs.Cart;
+using HiTechStore.Core.Dto.Cart;
 using HiTechStore.Infrastructure.Data.DTOs.Product;
 using HiTechStore.Core.Models;
 

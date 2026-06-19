@@ -1,3 +1,4 @@
+using HiTechStore.Core.Dto.Discount;
 using HiTechStore.Infrastructure.Data.DTOs;
 using HiTechStore.Infrastructure.Data.DTOs.Discount;
 using HiTechStore.Infrastructure.Data.Queries;

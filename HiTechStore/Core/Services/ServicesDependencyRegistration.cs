@@ -1,5 +1,6 @@
 using HiTechStore.Core.Helpers;
 using HiTechStore.Core.Services.Authorization;
+using HiTechStore.Core.Services.Cart;
 using HiTechStore.Core.Services.Comment;
 using HiTechStore.Core.Services.Discount;
 using HiTechStore.Core.Services.Product;
@@ -23,6 +24,7 @@ public static class ServicesDependencyRegistration
         services.AddScoped<IProductScoreService, ProductScoreService>();
         services.AddScoped<IProductVariationService, ProductVariationService>();
         services.AddScoped<IUserService, UserService.UserService>();
+        services.AddScoped<ICartService, CartService>();
 
         services.AddTransient<ProductServiceHelper>();
 

@@ -1,4 +1,7 @@
-namespace HiTechStore.Infrastructure.Data.DTOs.Discount;
+using HiTechStore.Infrastructure.Data.DTOs;
+using HiTechStore.Infrastructure.Data.DTOs.Discount;
+
+namespace HiTechStore.Core.Dto.Discount;
 
 public class DiscountResultDto
 {

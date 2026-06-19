@@ -1,23 +1,21 @@
 using System.Security.Claims;
 
-using HiTechStore.Core;
 using HiTechStore.Core.Services.Discount;
 using HiTechStore.Infrastructure.Data.DTOs;
-using HiTechStore.Infrastructure.Data.DTOs.Cart;
-using HiTechStore.Infrastructure.Data.DTOs.Discount;
-using HiTechStore.Core.Models;
+using HiTechStore.Core.Dto.Cart;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using HiTechStore.Core.Dto.Discount;
+using HiTechStore.Core.Services.Cart;
 
 namespace HiTechStore.Presentation.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class CartsController(IUnitOfWork unitOfWork) : ControllerBase
+public class CartsController(ICartService cartService) : AppControllerBase
 {
-    private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
     /*
         the algorithm is simple.
@@ -26,83 +24,17 @@ public class CartsController(IUnitOfWork unitOfWork) : ControllerBase
     [HttpPatch("items")]
     public async Task<IActionResult> SyncCart(CartDto cartDto)
     {
-        var specifiedProductIds = cartDto.Items!.Select(i => i.ProductVariationId);
-        var addingCartItemProducts = await _unitOfWork.Products.GetAllVariations(specifiedProductIds);
-
-        if (addingCartItemProducts.Count() != specifiedProductIds.Count())
-        {
-            var notExistedProducts = specifiedProductIds.Select((p, i) => new { ProductId = p, Index = i }).Where(
-                indexedProd => !addingCartItemProducts.Any(p => p.Product!.ProductId == indexedProd.ProductId)
-            );
-
-            foreach (var product in notExistedProducts)
-            {
-                ModelState.AddModelError(
-                    $"{nameof(CartDto.Items)}.{product.Index}.{nameof(CartItemDto.ProductVariationId)}",
-                    "Specified product id does not exist"
-                );
-
-                return ValidationProblem(ModelState);
-            }
-        }
-
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var cart = await _unitOfWork.CartRepository.GetUserActiveCartAsync(userId);
-
-
-        // check if user has active cart or not
-        if (cart is not null)
-        {
-            var newProductItems = cartDto.Items!
-                .Where(item => !cart.Items.Any(i => i.ProductVariationId == item.ProductVariationId))
-                .Select(
-                    item => new CartItem()
-                    {
-                        Amount = item.Amount,
-                        ProductVariationId = item.ProductVariationId
-                    }
-                );
-
-            cart.Items = cart.Items.Select(
-                item => new CartItem
-                {
-                    ProductVariationId = item.ProductVariationId,
-                    Amount = cartDto.Items!.FirstOrDefault(i => i.ProductVariationId == item.ProductVariationId)?.Amount ?? item.Amount,
-                }
-            ).ToList();
-            cart.Items.AddRange(newProductItems);
-
-            // remove items with 0 count
-            cart.Items = cart.Items.Where(item => item.Amount != 0).ToList();
-        }
-        else
-        {
-            cart = new Cart()
-            {
-                ClientId = userId,
-                Items = cartDto.Items!.Select(item => new CartItem()
-                {
-                    Amount = item.Amount,
-                    ProductVariationId = item.ProductVariationId
-                }).ToList()
-            };
-            // create total new cart
-            await _unitOfWork.CartRepository.AddAsync(cart);
-        }
-
-        await _unitOfWork.Complete();
+        var finalCartResult = await cartService.SyncCart(cartDto);
 
         // return cart with the products
-        return Ok(await _unitOfWork.CartRepository.GetUserActiveCartWithProductAsync(userId));
+        return ResultCheck(finalCartResult);
     }
 
     public async Task<ActionResult<CartWithProductsDto>> GetUserCart()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var cart = await _unitOfWork.CartRepository.GetUserActiveCartWithProductAsync(userId);
+        var cartResult = await cartService.GetUserCart();
 
-        return Ok(cart ?? new CartWithProductsDto() { Items = [] });
-
+        return ResultCheck(cartResult);
     }
 
     [HttpGet("discount/state")]
