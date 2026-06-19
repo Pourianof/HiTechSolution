@@ -154,7 +154,7 @@ public class ProductCommentService(
         var comments = await unitOfWork.CommentRepository.GetCommentsOfProduct(productId, query, user?.Id);
 
         // prepending comments with users comments
-        if (user is not null && query.GetPage() == 0)
+        if (user is not null && query.GetPage() == 1)
         {
             var userComments = await unitOfWork.CommentRepository.GetCommentOfUserForProduct(productId, user.Id);
 
