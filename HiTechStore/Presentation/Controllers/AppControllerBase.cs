@@ -15,4 +15,26 @@ public class AppControllerBase : ControllerBase
         var problem = ResultValidationMapper.ToValidationProblemDetails(errors, "Password change failed");
         return BadRequest(problem);
     }
+
+    protected ObjectResult ResultCheck<T>(Result<T> result)
+    {
+        // If there are validation errors, convert them to ModelState and return a ValidationProblemDetails
+        if (result.Errors != null && result.Errors.OfType<ValidationResultError>().Any())
+        {
+            return ValidationResult(result.Errors.OfType<ValidationResultError>());
+        }
+
+        if (result.HasError)
+        {
+            return new BadRequestObjectResult(
+                new
+                {
+                    Title = "Bad request",
+                    result.Errors
+                }
+            );
+        }
+
+        return Ok(result.Value);
+    }
 }
