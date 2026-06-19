@@ -1,7 +1,7 @@
 using HiTechStore.Core.Models;
 using HiTechStore.Infrastructure.AssetStorage;
 
-public class ProductServiceHelper(ProductMediaRegisterer productMediaRegisterer)
+public class ProductServiceHelper(ProductMediaRegisterer productMediaRegisterer, ILogger<ProductServiceHelper> logger)
 {
     public async Task<IEnumerable<VariationRegisteredMediaData>> RegisterCreatedProductMedia(int productId, ProductCreationDto productCreationDto)
     {
@@ -25,16 +25,22 @@ public class ProductServiceHelper(ProductMediaRegisterer productMediaRegisterer)
             for (int index = 0; index < variationMedia.Count(); index++)
             {
                 var media = variationMedia.ElementAt(index);
+                try
+                {
+                    var productMedia = await productMediaRegisterer.RegisterMedia(productId, media);
 
-                var productMedia = await productMediaRegisterer.RegisterMedia(productId, media);
-
-                variationsMediaData.Add(
-                    new()
-                    {
-                        VariationIndex = variationIndex,
-                        VariationMedia = productMedia
-                    }
-                );
+                    variationsMediaData.Add(
+                        new()
+                        {
+                            VariationIndex = variationIndex,
+                            VariationMedia = productMedia
+                        }
+                    );
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError("Saving product with name:\"{mediaName}\" media failed.\nException: {exception}", media.Media.FileName, ex);
+                }
             }
         }
 
