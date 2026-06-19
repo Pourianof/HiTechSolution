@@ -4,6 +4,7 @@ using HiTechStore.Core.Helpers;
 using HiTechStore.Infrastructure.Data.Mapping.Discount;
 using HiTechStore.Helpers.AutoMapper;
 using HiTechStore.Helpers.ConditionParser;
+using HiTechStore.Presentation.MapConverters;
 
 namespace HiTechStore.Infrastructure.Data.Mapping;
 
@@ -15,6 +16,7 @@ public static class MappingDependenciesRegistration
         services.AddTransient<IDiscountConditionScriptParser, RoslynConditionScriptParser>();
         services.AddTransient<IConditionComponentTreeToLambdaExpression, ConditionComponentTreeToExpression>();
         services.AddTransient<ScriptToConditionComponentResolver>();
+        services.AddTransient<JsonElementToObjectConverter>();
 
         services.AddAutoMapper((cfg) =>
         {
