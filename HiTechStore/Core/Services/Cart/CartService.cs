@@ -13,14 +13,42 @@ namespace HiTechStore.Core.Services.Cart;
 public class CartService : ServiceBase, ICartService
 {
     private IUnitOfWork _unitOfWork;
-    public CartService(IUnitOfWork unitOfWork, IAuthorizationService authorizationService, ICurrentUserProvider currentUserProvider) : base(authorizationService, currentUserProvider)
+    private IPublicAssetRegisterer _assetRegisterer;
+    public CartService(IUnitOfWork unitOfWork, IPublicAssetRegisterer assetRegisterer, IAuthorizationService authorizationService, ICurrentUserProvider currentUserProvider) : base(authorizationService, currentUserProvider)
     {
         _unitOfWork = unitOfWork;
+        _assetRegisterer = assetRegisterer;
+    }
+
+    public async Task ResolveCartMediaPublicUrl(CartWithProductsDto? cart)
+    {
+        if (cart is null)
+        {
+            return;
+        }
+
+        foreach (var item in cart.Items?.SelectMany(i => i.Variations) ?? [])
+        {
+            foreach (var media in item.Variation?.Media ?? [])
+            {
+                if (media.Url is not null)
+                {
+                    media.Url = _assetRegisterer.GetPublicUrl(media.Url);
+                }
+
+                if (media.ThumbnailUrl is not null)
+                {
+                    media.Url = _assetRegisterer.GetPublicUrl(media.ThumbnailUrl);
+                }
+            }
+        }
     }
 
     public async Task<Result<CartWithProductsDto>> GetUserCart()
     {
         var cart = await _unitOfWork.CartRepository.GetUserActiveCartWithProductAsync(UserIdOrThrow);
+
+        await ResolveCartMediaPublicUrl(cart);
 
         return new()
         {
@@ -107,6 +135,8 @@ public class CartService : ServiceBase, ICartService
         await _unitOfWork.Complete();
 
         var finalCart = (await _unitOfWork.CartRepository.GetUserActiveCartWithProductAsync(user.Id))!;
+
+        await ResolveCartMediaPublicUrl(finalCart);
 
         return new()
         {
