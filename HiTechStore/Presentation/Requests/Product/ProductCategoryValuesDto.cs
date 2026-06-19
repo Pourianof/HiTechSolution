@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 
 using HiTechStore.Core.Dto.Product;
 using HiTechStore.Helpers.AutoMapper;
+using HiTechStore.Presentation.MapConverters;
 
 namespace HiTechStore.Presentation.Product;
 
@@ -27,5 +28,9 @@ public class PropertyValueEntryCreationRequest
     public int? PropertyId { get; set; } = null;
     [Required]
     [JsonPropertyName("propertyValue")]
+    [MapToProperty(
+        targetPropertyName: nameof(PropertyValueEntryCreationDto.PropertyValue),
+        converter: typeof(JsonElementToObjectConverter)
+    )]
     public object? PropertyValue { get; set; }
 }

@@ -39,6 +39,7 @@ public abstract class MapPropertyBaseAttribute : Attribute, IMapConfigAttribute
 
     public MapPropertyBaseAttribute(string targetPropertyName, Type? converter) : this(targetPropertyName)
     {
+        Converter = converter;
     }
 
     private bool ConverterSpecified => Converter is not null;
