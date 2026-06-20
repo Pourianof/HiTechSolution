@@ -72,14 +72,27 @@ public class CartService : ServiceBase, ICartService
             foreach (var product in notExistedProducts)
             {
                 result.Errors.Append(
-                    new ValidationResultError()
-                    {
-                        Code = "Product.NotFound",
-                        FieldName = $"{nameof(CartDto.Items)}.{product.Index}.{nameof(CartItemDto.ProductVariationId)}",
-                        Title = "Product not found",
-                        Description = "Specified product id does not exist",
-                    }
+                    CartErrors.NotFoundProduct(product.Index)
                 );
+            }
+
+            if (result.HasError)
+            {
+                return result;
+            }
+
+            // Check requesed amount against available amounts
+            for (int index = 0; index < addingCartItemProducts.Count(); index++)
+            {
+                var pv = addingCartItemProducts.ElementAt(index);
+                var requestedAmount = cartDto.Items!.First(i => i.ProductVariationId == pv.ProductVariationId).Amount;
+
+                if (pv.Inventory > requestedAmount)
+                {
+                    result.Errors.Append(
+                        CartErrors.OutOfAmount(index, requestedAmount, pv.Inventory)
+                    );
+                }
             }
 
             if (result.HasError)
