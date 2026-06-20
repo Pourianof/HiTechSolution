@@ -1,6 +1,6 @@
-namespace HiTechPay.Sdk.Communication;
+namespace HiTechPay.Sdk;
 
-public class ServerConnectionContext
+public class PaySdkOptions
 {
     public string? PaymentServerAddress { private get; init; }
 
@@ -13,4 +13,6 @@ public class ServerConnectionContext
 
         return PaymentServerAddress;
     }
+
+    public string? KeyStorageDirectory { get; set; }
 }

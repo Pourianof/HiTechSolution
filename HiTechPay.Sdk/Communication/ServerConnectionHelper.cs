@@ -7,7 +7,7 @@ public interface IServerConnectionHelper
     Uri GetPaymentUrl(string key, string callbackUrl);
 }
 
-internal class ServerConnectionHelper(ServerConnectionContext connectionContext) : IServerConnectionHelper
+internal class ServerConnectionHelper(PaySdkOptions connectionContext) : IServerConnectionHelper
 {
     public Uri GetPaymentUrl(string key, string callbackUrl)
     {

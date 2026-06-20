@@ -6,11 +6,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceRegistration
 {
-    public static IServiceCollection UseHiTechPaySdk(this IServiceCollection services, string? paymentServerUrl)
+    public static IServiceCollection UseHiTechPaySdk(this IServiceCollection services, PaySdkOptions options)
     {
-        services.AddTransient<ServerConnectionContext>(
-            (provider) => new() { PaymentServerAddress = paymentServerUrl }
-        );
+        services.AddSingleton(options);
+
         services.AddScoped<IVerifier, Verifier>();
         services.AddScoped<IServerConnectionHelper, ServerConnectionHelper>();
         services.AddScoped<IHiTechPaySdkFacade, HiTechPaySdkFacade>();
