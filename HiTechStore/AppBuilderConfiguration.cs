@@ -45,7 +45,7 @@ public static class DependencyRegistration
 
         builder.Services.AddInfrastructure(builder.Configuration);
 
-        builder.Services.UseHiTechPaySdk();
+        builder.Services.UseHiTechPaySdk(builder.Configuration["PaymentServerAddress"]);
 
         return builder;
     }

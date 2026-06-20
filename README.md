@@ -237,13 +237,14 @@ The goal is to provide a simple one-command deployment experience for the comple
 
 The application supports multiple storage strategies for public assets. The following configuration keys are available:
 
-| Configuration Key     | Required            | Description                                                                                                     | Example                            |
-| --------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
-| `StorageStrategy`     | Yes                 | Specifies the storage strategy for public assets. Supported values are `Local` and `Supabase`.                  | `Supabase`                         |
-| `Supabase:BaseUrl`    | Only for `Supabase` | Base URL of the Supabase project.                                                                               | `https://your-project.supabase.co` |
-| `Supabase:SecretKey`  | Only for `Supabase` | Supabase Secret API Key used by the backend to access the Storage API. **Never expose this key to the client.** | `sb_secret_xxxxxxxxxxxxxxxxx`      |
-| `Supabase:BucketName` | Only for `Supabase` | Name of the Storage Bucket used for storing public assets.                                                      | `hitechstore-assets`               |
-| `PublicAccessUrl`     | Yes                 | Public Url which out-world can used to access this api                                                          | `https://my-api-server.com`        |
+| Configuration Key      | Required            | Description                                                                                                                                                                                 | Example                            |
+| ---------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| `StorageStrategy`      | Yes                 | Specifies the storage strategy for public assets. Supported values are `Local` and `Supabase`.                                                                                              | `Supabase`                         |
+| `Supabase:BaseUrl`     | Only for `Supabase` | Base URL of the Supabase project.                                                                                                                                                           | `https://your-project.supabase.co` |
+| `Supabase:SecretKey`   | Only for `Supabase` | Supabase Secret API Key used by the backend to access the Storage API. **Never expose this key to the client.**                                                                             | `sb_secret_xxxxxxxxxxxxxxxxx`      |
+| `Supabase:BucketName`  | Only for `Supabase` | Name of the Storage Bucket used for storing public assets.                                                                                                                                  | `hitechstore-assets`               |
+| `PublicAccessUrl`      | Yes                 | Public Url which out-world can used to access this api                                                                                                                                      | `https://my-api-server.com`        |
+| `PaymentServerAddress` | No                  | Public address for payment server. This is used by HiTechPay.Sdk which is a simulator for payment service. This configue is optional and just required when some payment process happening. | `https://payment-service`          |
 
 ### Storage Strategies
 
