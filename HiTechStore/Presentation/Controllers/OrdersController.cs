@@ -225,24 +225,34 @@ public class OrdersController(IHiTechPaySdkFacade hiTechPaySdkFacade, IUnitOfWor
             ).ToList()
         };
 
+        using var trx = await _unitOfWork.StartTransaction();
 
-
-        await _unitOfWork.OrderRepository.AddAsync(order);
-
-        // remove cart
-        await _unitOfWork.CartRepository.Delete(usersCart);
-
-        await _unitOfWork.Complete();
-
-        string? callbackUrl = GeneratePaymentUrl(order.OrderId, createOrderDto.PaymentCallbackUrl);
-
-        var orderDto = _mapper.Map<OrderWithProductsDto>(order);
-
-        return Ok(new
+        try
         {
-            Order = orderDto,
-            PaymentCallbackUrl = callbackUrl
-        });
+            await _unitOfWork.OrderRepository.AddAsync(order);
+
+            // remove cart
+            await _unitOfWork.CartRepository.Delete(usersCart);
+
+            await _unitOfWork.Complete();
+
+            string? callbackUrl = GeneratePaymentUrl(order.OrderId, createOrderDto.PaymentCallbackUrl);
+
+            await trx.Commit();
+
+            var orderDto = _mapper.Map<OrderWithProductsDto>(order);
+
+            return Ok(new
+            {
+                Order = orderDto,
+                PaymentCallbackUrl = callbackUrl
+            });
+        }
+        catch
+        {
+            await trx.Rollback();
+            throw;
+        }
     }
 
     [HttpGet]
