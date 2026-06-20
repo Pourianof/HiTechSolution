@@ -1,8 +1,10 @@
 @page
 @model dynamic
+@inject IConfiguration Configuration
 @{
     Layout = "_Layout";
     ViewBag.Title = "Home";
+    string? storeUrl = Configuration[key: "StoreUrl"] ?? "";
 }
 
 
@@ -20,7 +22,7 @@
         A simple payment simulator for <span class="inline-block p-1 rounded font-semibold bg-red-400 text-black">HiTechStore</span> App
     </p>
 
-    <a href="http://localhost:5108"
+    <a href="@storeUrl"
         class="mt-6 inline-block bg-linear-to-r from-indigo-500 to-cyan-400 text-black font-semibold px-6 py-3 rounded-xl shadow-md hover:opacity-90 transition">
         Go to store
     </a>
