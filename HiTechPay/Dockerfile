@@ -7,6 +7,7 @@ COPY HiTechPay/frontend/package*.json ./
 RUN npm install
 
 COPY HiTechPay/frontend ./
+COPY HiTechPay/Views ../Views
 
 RUN npm run build
 
