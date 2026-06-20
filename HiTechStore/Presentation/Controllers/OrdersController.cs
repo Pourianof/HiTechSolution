@@ -92,8 +92,15 @@ public class OrdersController(IHiTechPaySdkFacade hiTechPaySdkFacade, IUnitOfWor
 
     private string GeneratePaymentUrl(int orderId, string? callbackUrl)
     {
+        var url = Url.Action(
+            nameof(SuccessfulPaymentCallback),
+            nameof(OrdersController).Replace("Controller", ""),
+            values: null,
+            protocol: Request.Scheme
+        );
+
         return _hiTechPaySdkFacade.ServerConnectionHelper
-                    .GetPaymentUrl(orderId.ToString(), callbackUrl ?? "http://localhost:5018/orders/order-payment-confirmation")
+                    .GetPaymentUrl(orderId.ToString(), callbackUrl ?? url ?? throw new InvalidOperationException("Could not provide callback url"))
                     .ToString();
     }
 
