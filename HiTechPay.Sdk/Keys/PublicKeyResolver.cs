@@ -6,7 +6,7 @@ internal class PublicKeyResolver
 {
     private static string _pubKeyPath = "public_key.pem";
 
-    public async static Task<RSA> Resolve()
+    public async static Task<RSA> Resolve(string serverAddress)
     {
         if (File.Exists(_pubKeyPath))
         {
@@ -19,7 +19,7 @@ internal class PublicKeyResolver
         {
             var client = new HttpClient()
             {
-                BaseAddress = new Uri("http://localhost:5035")
+                BaseAddress = new Uri(serverAddress)
             };
 
             var response = await client.GetAsync("/api/keys/pub-key");

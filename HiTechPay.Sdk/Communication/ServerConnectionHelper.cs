@@ -7,11 +7,14 @@ public interface IServerConnectionHelper
     Uri GetPaymentUrl(string key, string callbackUrl);
 }
 
-internal class ServerConnectionHelper : IServerConnectionHelper
+internal class ServerConnectionHelper(ServerConnectionContext connectionContext) : IServerConnectionHelper
 {
     public Uri GetPaymentUrl(string key, string callbackUrl)
     {
-        var url = new UriBuilder("http://localhost:5035/payment");
+        var url = new UriBuilder(connectionContext.GetPaymentServerAddressOrThrow())
+        {
+            Path = "/payment"
+        };
 
         var query = HttpUtility.ParseQueryString(url.Query);
         query[ConnectionQueryStrings.Key] = key;

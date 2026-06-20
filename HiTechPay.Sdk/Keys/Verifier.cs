@@ -1,6 +1,8 @@
 using System.Security.Cryptography;
 using System.Text;
 
+using HiTechPay.Sdk.Communication;
+
 namespace HiTechPay.Sdk.Keys;
 
 public interface IVerifier
@@ -8,7 +10,7 @@ public interface IVerifier
     Task<bool> Verify(string mainKey, string signatureBase64);
 }
 
-internal class Verifier : IVerifier
+internal class Verifier(ServerConnectionContext connectionContext) : IVerifier
 {
     public async Task<bool> Verify(string mainKey, string signatureBase64)
     {
@@ -25,7 +27,7 @@ internal class Verifier : IVerifier
         byte[] bytes = Encoding.UTF8.GetBytes(mainKey);
         byte[] signature = Convert.FromBase64String(signatureBase64);
 
-        var pubKey = await PublicKeyResolver.Resolve();
+        var pubKey = await PublicKeyResolver.Resolve(connectionContext.GetPaymentServerAddressOrThrow());
 
         return pubKey.VerifyData(
             bytes,
