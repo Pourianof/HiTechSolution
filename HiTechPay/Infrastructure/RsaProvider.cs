@@ -17,6 +17,12 @@ public class RsaProvider : IRsaProvider
     private static RSA RegisterKeys(string path)
     {
         var rsa = RSA.Create(2048);
+
+        if (!Directory.Exists(path))
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        }
+
         File.WriteAllText(path, rsa.ExportRSAPrivateKeyPem());
 
         return rsa;
