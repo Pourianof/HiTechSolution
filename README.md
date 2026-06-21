@@ -1,18 +1,18 @@
 # HiTech Store Backend
 
-HiTech Store is the backend implementation of a digital products e-commerce platform, focused on smart devices such as computers, laptops, mobile phones, smart gadgets and their accessories.
+Backend implementation of a digital products e-commerce platform focused on computers, laptops, smartphones, smart gadgets, and accessories.
 
-The project is developed using **ASP.NET Core**, **Entity Framework Core**, and **PostgreSQL**, with an emphasis on maintainability, modularity, and extensibility.
+Built with **ASP.NET Core**, **Entity Framework Core**, and **PostgreSQL**, with a strong emphasis on modularity, maintainability, and extensibility.
 
 ---
 
-## ✨ Overview
+## 🚀 Overview
 
-This repository contains the backend services required to run the HiTech Store ecosystem.
+HiTech Store is a personal learning and portfolio project designed to explore modern backend development concepts and enterprise application patterns.
 
-It consists of multiple projects, each responsible for a dedicated part of the system.
+The solution consists of multiple projects, each responsible for a dedicated domain within the ecosystem.
 
-```
+```text
 HiTechStore.sln
 │
 ├── HiTechStore
@@ -23,70 +23,158 @@ HiTechStore.sln
 
 ---
 
-# Projects
+## 🏗 Architecture
 
-## HiTechStore
+The project follows a hybrid architectural approach.
 
-The main REST API of the online store.
+Initially, the project started with a traditional layered architecture based on SOLID principles. As development progressed and my understanding of Clean Architecture improved, newer modules were gradually redesigned to follow Clean Architecture concepts.
 
-This project is implemented with an architecture inspired by **Clean Architecture** principles.
+As a result:
 
-> **Note**
->
-> The project was initially started before I became familiar with Clean Architecture. After learning its concepts during development, I gradually migrated newer sections toward this architecture.
->
-> As a result, some older parts of the project still follow a more traditional **SOLID-oriented layered design**, while newer modules try to respect Clean Architecture boundaries.
+- Older modules follow a layered architecture.
+- Newer modules are organized around Clean Architecture boundaries.
+- Authentication functionality is separated into an independent module inspired by Modular Monolith principles.
 
----
-
-## HiTechPay
-
-A standalone payment simulator service built with **ASP.NET Core Razor Pages**.
-
-Its purpose is to simulate an external payment gateway during development and testing.
-
-The payment page simply allows the user to select between:
-
-- ✅ Success
-- ❌ Failed
-
-and redirects back to the store with the corresponding payment result.
+This repository therefore reflects both the project's evolution and my learning journey.
 
 ---
 
-## HiTechStore.ApiTokenHandler
+## 📦 Projects
 
-A separate authentication module designed according to **Modular Monolithic Architecture** concepts.
+### HiTechStore
 
-Its responsibility is handling:
+Main REST API of the e-commerce platform.
 
-- Refresh Token generation
-- Access Token generation
+**Responsibilities**
+
+- Product management
+- Category & brand management
+- Shopping cart
+- Order processing
+- Media management
+- Authentication integration
+- Payment integration
+
+---
+
+### HiTechPay
+
+A lightweight payment gateway simulator built with ASP.NET Core Razor Pages.
+
+Used during development and testing to emulate a real payment provider.
+
+Supported outcomes:
+
+- ✅ Successful payment
+- ❌ Failed payment
+
+After selection, the simulator redirects users back to the store with the corresponding payment result.
+
+---
+
+### HiTechStore.ApiTokenHandler
+
+Dedicated authentication module inspired by Modular Monolith Architecture.
+
+**Responsibilities**
+
+- Access token generation
+- Refresh token generation
 - Token validation
 - Token rotation
-- Authentication-related utilities
+- Authentication utilities
 
-Separating this module makes the authentication subsystem more maintainable and reusable.
+Separating authentication logic improves maintainability and promotes reuse across services.
 
 ---
 
-## HiTechPay.SDK
+### HiTechPay.SDK
 
-A client SDK for communicating with **HiTechPay**.
+Client SDK used for communication with HiTechPay.
 
-It provides a standardized integration layer for:
+**Features**
 
-- Secure communication
-- Public key exchange
-- Encryption/Decryption
 - Payment request creation
 - Payment verification
+- Public key exchange
+- Encryption / Decryption
+- Secure communication
 
-allowing the store API to interact with the payment simulator in a clean and reusable way.
+Provides a clean abstraction layer between the store and payment provider.
 
 ---
 
-# Technologies
+## ✨ Key Features
+
+### Dynamic Discount Engine
+
+Unlike traditional fixed discount implementations, HiTech Store supports script-based discount rules.
+
+Discount codes can execute custom business logic at runtime using the Roslyn Compiler Platform.
+
+Examples include:
+
+- First purchase discounts
+- VIP customer campaigns
+- Product-specific discounts
+- Time-limited promotions
+- Cart-value discounts
+- Custom business rules
+
+---
+
+### Product Media Management
+
+Supports:
+
+- Multiple product images
+- Video uploads
+- Automatic video thumbnail generation
+
+---
+
+### Category & Brand Management
+
+Flexible management of product categories and brands with hierarchical organization support.
+
+---
+
+### Shopping Cart
+
+Complete shopping cart workflow including:
+
+- Item management
+- Quantity updates
+- Price calculations
+- Discount application
+
+---
+
+### JWT Authentication
+
+Authentication is implemented using:
+
+- JWT Access Tokens
+- Refresh Tokens
+- Token rotation
+
+for improved security and user experience.
+
+---
+
+### Payment Gateway Abstraction
+
+Payment processing is isolated through HiTechPay.SDK, making it possible to replace the payment provider with minimal changes to business logic.
+
+---
+
+### Docker Support
+
+Docker images are available for executable services, simplifying local development and deployment.
+
+---
+
+## 🛠 Technologies
 
 - ASP.NET Core
 - Entity Framework Core
@@ -95,117 +183,59 @@ allowing the store API to interact with the payment simulator in a clean and reu
 - Roslyn Compiler Platform
 - JWT Authentication
 - Refresh Token Authentication
-- Docker Support
+- Docker
 
 ---
 
-# Database
+## 🗄 Database
 
-The project uses **PostgreSQL** as its primary relational database and **Entity Framework Core** as the ORM.
+The application uses:
 
-Migrations are fully supported through EF Core.
+- PostgreSQL as the primary relational database
+- Entity Framework Core as the ORM
 
----
-
-# Interesting Features
-
-## Script-Based Discount Engine
-
-The discount system supports **dynamic script-based discount codes** instead of fixed discount types.
-
-Discount rules can be written as scripts and interpreted at runtime, providing a highly flexible way to implement promotional campaigns.
-
-The scripting engine is powered by **Roslyn**, allowing C# scripts to be compiled and executed dynamically.
-
-Examples of possible rules:
-
-- First purchase discounts
-- VIP customer discounts
-- Time-limited campaigns
-- Product-specific discounts
-- Cart total based discounts
-- Complex business rules
+EF Core migrations are fully supported.
 
 ---
 
-## Video Media Support
+## ⚙ Configuration
 
-Products can contain video media.
+### Storage Strategies
 
-The system automatically generates thumbnails for uploaded videos, making media management easier for the frontend.
+```csharp
+public enum StorageStrategy
+{
+    Local,
+    Supabase
+}
+```
 
----
+| Configuration Key            | Required      | Description                              |
+| ---------------------------- | ------------- | ---------------------------------------- |
+| FormLimit                    | No            | Maximum upload size for multipart forms  |
+| StorageStrategy              | Yes           | Storage provider (`Local` or `Supabase`) |
+| Supabase:BaseUrl             | Supabase only | Supabase project URL                     |
+| Supabase:SecretKey           | Supabase only | Secret API key used by backend           |
+| Supabase:BucketName          | Supabase only | Storage bucket name                      |
+| PublicAccessUrl              | Yes           | Public API URL                           |
+| PaymentServer:Url            | Payment only  | Payment server address                   |
+| PaymentServer:KeyStoragePath | Payment only  | Path used for public keys                |
 
-## Product Gallery
+### Supported Providers
 
-Support for multiple images and media files for each product.
+#### Local Storage
 
----
+Stores files directly within the application storage.
 
-## Category & Brand Management
+#### Supabase Storage
 
-Flexible management of product categories and brands with hierarchical organization.
-
----
-
-## Shopping Cart
-
-Complete shopping cart workflow including quantity management and price calculation.
-
----
-
-## User Authentication
-
-Authentication based on **JWT Access Tokens** and **Refresh Tokens** for improved security and user experience.
-
----
-
-## Payment Gateway Abstraction
-
-The payment process is abstracted from the main store logic through the **HiTechPay.SDK**, making it easy to replace the payment provider in the future.
+Stores files in a Supabase Storage bucket and serves them through public URLs.
 
 ---
 
-## Docker Support
+## 🐳 Docker Images
 
-The project includes Docker support for the executable services, making local development and deployment significantly easier.
-
----
-
-# Purpose
-
-This project is primarily intended as a personal learning and portfolio project while exploring modern backend development concepts including:
-
-- Clean Architecture
-- Modular Monolith Architecture
-- Domain separation
-- Secure authentication
-- Payment integration
-- Docker & CI/CD
-- Dynamic scripting with Roslyn
-- Media processing
-
-The architecture and implementation continue to evolve as new concepts and improvements are introduced.
-
----
-
-## Frontend
-
-The frontend of this project is developed separately using **Next.js** and is available in the following repository:
-
-**GitHub Repository**
-
-[hi_tech_store_next](https://github.com/Pourianof/hi_tech_store_next?utm_source=chatgpt.com)
-
----
-
-# Docker Images
-
-Pre-built Docker images for the executable services are published on Docker Hub and can be pulled directly without building the source code.
-
-**Docker Hub Repository**
-
-[Pourianof Docker Hub Repository](https://hub.docker.com/repositories/pourianof?utm_source=chatgpt.com)
+Pre-built Docker images are available on Docker Hub.
 
 ### HiTechStore API
 
@@ -225,54 +255,55 @@ docker run -d \
 
 ---
 
-# Deployment
+## 🔗 Related Repositories
 
-Docker Compose configurations supporting multiple deployment scenarios (development, production, and other environments) are planned and will be published in a separate repository in the near future.
+### Frontend
 
-The goal is to provide a simple one-command deployment experience for the complete ecosystem.
+The frontend is implemented separately using Next.js.
 
----
+GitHub Repository:
 
-## Configuration
+https://github.com/Pourianof/hi_tech_store_next
 
-The application supports multiple storage strategies for public assets. The following configuration keys are available:
+### Docker Hub
 
-| Configuration Key      | Required            | Description                                                                                                                                                                                 | Example                            |
-| ---------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
-| `StorageStrategy`      | Yes                 | Specifies the storage strategy for public assets. Supported values are `Local` and `Supabase`.                                                                                              | `Supabase`                         |
-| `Supabase:BaseUrl`     | Only for `Supabase` | Base URL of the Supabase project.                                                                                                                                                           | `https://your-project.supabase.co` |
-| `Supabase:SecretKey`   | Only for `Supabase` | Supabase Secret API Key used by the backend to access the Storage API. **Never expose this key to the client.**                                                                             | `sb_secret_xxxxxxxxxxxxxxxxx`      |
-| `Supabase:BucketName`  | Only for `Supabase` | Name of the Storage Bucket used for storing public assets.                                                                                                                                  | `hitechstore-assets`               |
-| `PublicAccessUrl`      | Yes                 | Public Url which out-world can used to access this api                                                                                                                                      | `https://my-api-server.com`        |
-| `PaymentServerAddress` | No                  | Public address for payment server. This is used by HiTechPay.Sdk which is a simulator for payment service. This configue is optional and just required when some payment process happening. | `https://payment-service`          |
-
-### Storage Strategies
-
-```csharp
-public enum StorageStrategy
-{
-    Local,
-    Supabase
-}
-```
-
-- `Local`: Stores uploaded files in the application's local storage (e.g. `wwwroot`).
-- `Supabase`: Stores uploaded files in a Supabase Storage bucket and serves them through public URLs.
+https://hub.docker.com/repositories/pourianof
 
 ---
 
-# Contributing
+## 🎯 Project Goals
 
-This project is primarily developed as a learning and portfolio project, but suggestions, ideas, and constructive feedback are always welcome.
+This project serves as a platform for exploring and applying modern backend development concepts, including:
 
-If you discover a bug or have an idea for improvement, feel free to open an Issue or submit a Pull Request.
+- Clean Architecture
+- Modular Monolith Architecture
+- Domain Separation
+- Secure Authentication
+- Payment Integration
+- Docker & CI/CD
+- Dynamic Scripting with Roslyn
+- Media Processing
+
+The architecture and implementation continue to evolve as new concepts and improvements are introduced.
 
 ---
 
-# Disclaimer
+## 🤝 Contributing
 
-This project is intended for educational and portfolio purposes and is **not intended for production use without further hardening, security review, and optimization**.
+Although this project is primarily a personal learning and portfolio project, feedback, suggestions, and pull requests are always welcome.
 
-# License
+If you discover a bug or have an idea for improvement, feel free to open an Issue.
 
-This project is released for educational and portfolio purposes.
+---
+
+## ⚠ Disclaimer
+
+This project is intended for educational and portfolio purposes.
+
+It should not be considered production-ready without additional security reviews, testing, monitoring, and performance optimization.
+
+---
+
+## 📄 License
+
+Released for educational and portfolio purposes.
