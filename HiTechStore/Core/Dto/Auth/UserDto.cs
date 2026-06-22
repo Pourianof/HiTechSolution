@@ -1,4 +1,4 @@
-namespace HiTechStore.Infrastructure.Data.DTOs.Authorization;
+namespace HiTechStore.Core.Dto.Auth;
 
 public class UserDto
 {

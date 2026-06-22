@@ -3,10 +3,52 @@ namespace HiTechStore.Core.Helpers.Result;
 public class Result<T>
 {
     public T? Value { get; set; }
-    public IEnumerable<ResultError>? Errors { get; set; }
-
+    public List<ResultError> Errors { get; init; } = new();
     public bool HasError => Errors?.Count() > 0;
     public bool IsValid => !HasError;
+
+    public Result<T> AddError(ResultError error)
+    {
+        Errors.Add(error);
+
+        return this;
+    }
+
+    public Result<T> AddAllErrors(IEnumerable<ResultError> erros)
+    {
+        Errors.AddRange(erros);
+
+        return this;
+    }
+
+    public Result<T> Failure(string title, string? description = default, string? code = default)
+    {
+        return new()
+        {
+            Errors = [
+                new ResultError() {
+                    Title=title,
+                    Description = description,
+                    Code = code
+                }
+            ]
+        };
+    }
+
+    public Result<TNewType> WithValue<TNewType>(TNewType value)
+    {
+        var result = new Result<TNewType>
+        {
+            Value = value
+        };
+
+        if (HasError)
+        {
+            result.AddAllErrors(Errors!);
+        }
+
+        return result;
+    }
 }
 
 public class ResultError

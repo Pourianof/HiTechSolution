@@ -71,7 +71,7 @@ public class CartService : ServiceBase, ICartService
             var result = new Result<CartWithProductsDto>() { Errors = [] };
             foreach (var product in notExistedProducts)
             {
-                result.Errors.Append(
+                result.AddError(
                     CartErrors.NotFoundProduct(product.Index)
                 );
             }
@@ -89,7 +89,7 @@ public class CartService : ServiceBase, ICartService
 
                 if (pv.Inventory > requestedAmount)
                 {
-                    result.Errors.Append(
+                    result.AddError(
                         CartErrors.OutOfAmount(index, requestedAmount, pv.Inventory)
                     );
                 }

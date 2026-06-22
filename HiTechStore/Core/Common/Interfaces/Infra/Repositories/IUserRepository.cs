@@ -19,4 +19,8 @@ public interface IUserRepository
     Task<Result<bool>> ChangePassword(User user, string oldPassowrd, string newPassword);
     Task<string> GenerateChangePasswordToken(User user);
     Task<Result<bool>> ResetPasswordByToken(User user, string token, string newPassword);
+    Task<Result<bool>> RegisterUser(User user, string password);
+    Task<Result<bool>> AddRoleToUser(User user, string role);
+    Task<Result<bool>> DeleteUser(User user);
+    Task<Result<bool>> CheckUsernameExists(string username);
 }

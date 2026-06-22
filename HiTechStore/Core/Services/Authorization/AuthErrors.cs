@@ -3,7 +3,7 @@ using HiTechStore.Core.Helpers.Result;
 
 namespace HiTechStore.Core.Services.Authorization;
 
-public static class AuthorizationErrors
+public static class AuthErrors
 {
     public static ValidationResultError OldPasswordRequired() =>
         new("Invalid data", "Current password must be provided.", "OldPasswordRequired", nameof(ChangePasswordDto.OldPassword));
@@ -37,4 +37,18 @@ public static class AuthorizationErrors
 
     public static ValidationResultError GenericPassword(string title, string? description, string? code, string? fieldName = null) =>
         new(title, description, code, fieldName);
+
+    public static class RegistrationErrors
+    {
+        public static ValidationResultError UsernameRequired() =>
+            new("Username required", "Username must defined", "UsernameRequired", nameof(RegisterDto.Username));
+        public static ValidationResultError PasswordRequired() =>
+            new("Password required", "A strong password must be at least 6 character include lowercase letter, uppercase letter, digits and punctuation marks", nameof(PasswordRequired), nameof(RegisterDto.Password));
+        public static ValidationResultError DuplicatedUsername() =>
+            new("Duplicated username", "Specified username already taken", nameof(DuplicatedUsername), nameof(RegisterDto.Username));
+        public static ValidationResultError EmailRequired() =>
+            new("Email required", "Email field must specified", nameof(EmailRequired), nameof(RegisterDto.Email));
+        public static ValidationResultError DuplicateEmail() =>
+            new("Email exist", "There are another account with this email", nameof(DuplicateEmail), nameof(RegisterDto.Email));
+    }
 }

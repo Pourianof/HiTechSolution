@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace HiTechStore.Infrastructure.Data.DTOs.Authorization
+namespace HiTechStore.Presentation.Auth
 {
-    public class LoginDto
+    public class LoginRequest
     {
         [MinLength(3)]
         [MaxLength(20)]

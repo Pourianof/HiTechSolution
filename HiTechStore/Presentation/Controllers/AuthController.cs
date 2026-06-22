@@ -2,7 +2,6 @@ using AutoMapper;
 
 using HiTechStore.ApiTokenHandler.Core;
 using HiTechStore.Core.Dto.Auth;
-using HiTechStore.Infrastructure.Data.DTOs.Authorization;
 using HiTechStore.Core.Models;
 using HiTechStore.Presentation.Requests.Auth;
 using HiTechStore.Presentation.Requests.User;
@@ -12,6 +11,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using HiTechStore.Core.Helpers.Result;
 using HiTechStore.Core.Common.Interfaces.Infra;
+using HiTechStore.Presentation.Auth;
+using HiTechStore.Presentation.Responses;
 
 namespace HiTechStore.Presentation.Controllers;
 
@@ -23,12 +24,12 @@ public class AuthController : AppControllerBase
     private readonly IMapper _mapper;
     private readonly ITokenHandler _tokenHelper;
     private readonly ILogger _logger;
-    private readonly HiTechStore.Core.Services.Authorization.IAuthorizationService _authorizationService;
+    private readonly Core.Services.Authorization.IAuthorizationService _authorizationService;
 
     public AuthController(UserManager<User> userManager,
                           IMapper mapper,
                           ITokenHandler tokenHelper,
-                          HiTechStore.Core.Services.Authorization.IAuthorizationService authorizationService,
+                          Core.Services.Authorization.IAuthorizationService authorizationService,
                           ILogger<AuthController> logger
                           )
     {
@@ -39,52 +40,21 @@ public class AuthController : AppControllerBase
         _logger = logger;
     }
 
-    private async Task<IActionResult> RegisterUser(RegisterDto dto)
+    private async Task<IActionResult> RegisterUser(RegisterRequest request)
     {
-        var user = _mapper.Map<User>(dto);
-        var result = await _userManager.CreateAsync(user, dto.Password!);
+        var user = _mapper.Map<RegisterDto>(request);
+        var result = await _authorizationService.RegisterUser(user);
 
-        if (!result.Succeeded)
-        {
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError(error.Code, error.Description);
-            }
-            var problemDetail = new ValidationProblemDetails(ModelState)
-            {
-                Title = "User registration failed",
-                Status = StatusCodes.Status400BadRequest,
-                Detail = "Please refer to the errors property for additional details."
-            };
-            return BadRequest(problemDetail);
-        }
-
-        if (!string.IsNullOrEmpty(dto.Role))
-        {
-            var roleResult = await _userManager.AddToRoleAsync(user, dto.Role);
-            if (!roleResult.Succeeded)
-            {
-                await _userManager.DeleteAsync(user);
-                foreach (var error in roleResult.Errors)
-                {
-                    ModelState.AddModelError(error.Code, error.Description);
-                }
-                return BadRequest(new ValidationProblemDetails(ModelState)
-                {
-                    Title = "User registration failed",
-                    Status = StatusCodes.Status400BadRequest,
-                    Detail = "Please refer to the errors property for additional details."
-                });
-            }
-        }
-
-        return Ok(new { Message = "Registering was successful", Status = StatusCodes.Status201Created });
+        return ResultCheck(
+            result.WithValue(new { Message = "Registering was successful", Status = StatusCodes.Status201Created }),
+            "Registration failed"
+        );
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterDto dto)
+    public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
-        if (!string.IsNullOrEmpty(dto.Role))
+        if (!string.IsNullOrEmpty(request.Role))
         {
             var problemDetail = new ProblemDetails
             {
@@ -94,14 +64,14 @@ public class AuthController : AppControllerBase
             };
             return Unauthorized(problemDetail);
         }
-        return await RegisterUser(dto);
+        return await RegisterUser(request);
     }
 
     [HttpPost("register-by-supervisor")]
     [Authorize(Roles = $"{IdentityRoles.Admin},{IdentityRoles.Manager}")]
-    public async Task<IActionResult> RegisterBySupervisor(RegisterDto dto)
+    public async Task<IActionResult> RegisterBySupervisor(RegisterRequest request)
     {
-        if (string.IsNullOrEmpty(dto.Role))
+        if (string.IsNullOrEmpty(request.Role))
         {
             return BadRequest(new ProblemDetails
             {
@@ -121,18 +91,18 @@ public class AuthController : AppControllerBase
             return Unauthorized(problemDetail);
         }
 
-        return await RegisterUser(dto);
+        return await RegisterUser(request);
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginDto loginDto, [FromServices] IPublicAssetRegisterer assetRegisterer)
+    public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest, [FromServices] IPublicAssetRegisterer assetRegisterer)
     {
-        if (loginDto == null || !ModelState.IsValid)
+        if (loginRequest == null || !ModelState.IsValid)
         {
             return new BadRequestObjectResult(ModelState);
         }
 
-        if (loginDto.Email == null && loginDto.Username == null)
+        if (loginRequest.Email == null && loginRequest.Username == null)
         {
             ModelState.AddModelError(
                 "Login",
@@ -147,7 +117,7 @@ public class AuthController : AppControllerBase
             });
         }
 
-        User? user = await _authorizationService.LoginAsync(loginDto);
+        User? user = await _authorizationService.LoginAsync(_mapper.Map<LoginDto>(loginRequest));
 
         if (user == null)
         {
@@ -167,7 +137,7 @@ public class AuthController : AppControllerBase
         var expiration = DateTime.UtcNow.AddMinutes(10); // 10 minute jwt lifetime
         var token = await _tokenHelper.IssueToken(user.Claims ?? [], user.Id, expiration);
 
-        var authData = new LoginResponseDto
+        var authData = new LoginResponse
         {
             Token = token.Token,
             RefreshToken = token.RefreshToken,
@@ -285,7 +255,7 @@ public class AuthController : AppControllerBase
         Console.WriteLine(expiration);
 
         return Ok(
-            new LoginResponseDto
+            new LoginResponse
             {
                 Token = token,
                 RefreshToken = refreshToken,

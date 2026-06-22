@@ -1,7 +1,6 @@
 using HiTechStore.Core.Services.Product;
 using HiTechStore.Core.Services.UserService;
 using HiTechStore.Infrastructure.Data.DTOs;
-using HiTechStore.Infrastructure.Data.DTOs.Authorization;
 using HiTechStore.Infrastructure.Data.DTOs.Product;
 using HiTechStore.Infrastructure.Data.DTOs.User;
 using HiTechStore.Infrastructure.Data.Queries;
@@ -12,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using HiTechStore.Core.Common.Interfaces.Infra;
+using HiTechStore.Core.Dto.Auth;
 
 namespace HiTechStore.Presentation.Controllers;
 

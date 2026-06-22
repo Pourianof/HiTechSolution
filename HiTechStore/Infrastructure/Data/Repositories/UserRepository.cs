@@ -78,22 +78,62 @@ public class UserRepository(UserManager<User> userManager) : IUserRepository
             Errors = result.Errors.MapToResultError()
         };
     }
+
+    public async Task<Result<bool>> RegisterUser(User user, string password)
+    {
+        var result = await userManager.CreateAsync(user, password);
+
+        return new Result<bool>
+        {
+            Value = result.Succeeded,
+            Errors = result.Errors.MapToResultError()
+        };
+    }
+
+    public async Task<Result<bool>> AddRoleToUser(User user, string role)
+    {
+        var res = await userManager.AddToRoleAsync(user, role);
+        return new()
+        {
+            Value = res.Succeeded,
+        };
+    }
+
+    public async Task<Result<bool>> DeleteUser(User user)
+    {
+        var res = await userManager.DeleteAsync(user);
+
+        return new()
+        {
+            Value = res.Succeeded,
+        };
+    }
+
+    public async Task<Result<bool>> CheckUsernameExists(string username)
+    {
+        var user = await userManager.FindByNameAsync(username);
+
+        return new()
+        {
+            Value = user is not null,
+        };
+    }
 }
 
 public static class IdentityErrorExtension
 {
-    public static IEnumerable<ResultError> MapToResultError(this IEnumerable<IdentityError> errors)
+    public static List<ResultError> MapToResultError(this IEnumerable<IdentityError> errors)
     {
         return errors.Select(ie => ie.Code switch
         {
-            "PasswordMismatch" => (ResultError)Core.Services.Authorization.AuthorizationErrors.PasswordMismatch(ie.Description),
-            "PasswordRequiresDigit" => Core.Services.Authorization.AuthorizationErrors.PasswordRequiresDigit(),
-            "PasswordRequiresLower" => Core.Services.Authorization.AuthorizationErrors.PasswordRequiresLower(),
-            "PasswordRequiresUpper" => Core.Services.Authorization.AuthorizationErrors.PasswordRequiresUpper(),
-            "PasswordRequiresNonAlphanumeric" => Core.Services.Authorization.AuthorizationErrors.PasswordRequiresNonAlphanumeric(),
-            "PasswordTooShort" => Core.Services.Authorization.AuthorizationErrors.PasswordTooShort(ie.Description),
-            _ => Core.Services.Authorization.AuthorizationErrors.GenericPassword(ie.Description ?? ie.Code, ie.Description, ie.Code, nameof(ChangePasswordDto.NewPassword))
-        });
+            "PasswordMismatch" => (ResultError)Core.Services.Authorization.AuthErrors.PasswordMismatch(ie.Description),
+            "PasswordRequiresDigit" => Core.Services.Authorization.AuthErrors.PasswordRequiresDigit(),
+            "PasswordRequiresLower" => Core.Services.Authorization.AuthErrors.PasswordRequiresLower(),
+            "PasswordRequiresUpper" => Core.Services.Authorization.AuthErrors.PasswordRequiresUpper(),
+            "PasswordRequiresNonAlphanumeric" => Core.Services.Authorization.AuthErrors.PasswordRequiresNonAlphanumeric(),
+            "PasswordTooShort" => Core.Services.Authorization.AuthErrors.PasswordTooShort(ie.Description),
+            _ => Core.Services.Authorization.AuthErrors.GenericPassword(ie.Description ?? ie.Code, ie.Description, ie.Code, nameof(ChangePasswordDto.NewPassword))
+        }).ToList();
 
     }
 }

@@ -1,6 +1,9 @@
-namespace HiTechStore.Infrastructure.Data.DTOs.Authorization;
 
-public class LoginResponseDto
+using HiTechStore.Core.Dto.Auth;
+
+namespace HiTechStore.Presentation.Responses;
+
+public class LoginResponse
 {
     public string? Token { get; set; }
     public string? RefreshToken { get; set; }

@@ -10,18 +10,18 @@ namespace HiTechStore.Presentation.Controllers;
 [ApiController]
 public class AppControllerBase : ControllerBase
 {
-    protected BadRequestObjectResult ValidationResult(IEnumerable<ValidationResultError> errors)
+    protected BadRequestObjectResult ValidationResult(IEnumerable<ValidationResultError> errors, string? title = default)
     {
-        var problem = ResultValidationMapper.ToValidationProblemDetails(errors, "Password change failed");
+        var problem = ResultValidationMapper.ToValidationProblemDetails(errors, title!);
         return BadRequest(problem);
     }
 
-    protected ObjectResult ResultCheck<T>(Result<T> result)
+    protected ObjectResult ResultCheck<T>(Result<T> result, string? title = default)
     {
         // If there are validation errors, convert them to ModelState and return a ValidationProblemDetails
         if (result.Errors != null && result.Errors.OfType<ValidationResultError>().Any())
         {
-            return ValidationResult(result.Errors.OfType<ValidationResultError>());
+            return ValidationResult(result.Errors.OfType<ValidationResultError>(), title);
         }
 
         if (result.HasError)

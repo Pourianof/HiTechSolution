@@ -2,7 +2,6 @@ using AutoMapper;
 
 using HiTechStore.Core.Models;
 using HiTechStore.DTOs.Product;
-using HiTechStore.Infrastructure.Data.DTOs.Authorization;
 using HiTechStore.Infrastructure.Data.DTOs.Category;
 using HiTechStore.Infrastructure.Data.DTOs;
 using HiTechStore.Infrastructure.Data.DTOs.Product;
@@ -12,6 +11,7 @@ using HiTechStore.Infrastructure.Data.DTOs.Brand;
 using HiTechStore.Infrastructure.Data.DTOs.Order;
 using HiTechStore.Infrastructure.Data.DTOs.DiscountEntity;
 using HiTechStore.Core.Dto.Product;
+using HiTechStore.Core.Dto.Auth;
 
 public class MappingProfile : Profile
 {

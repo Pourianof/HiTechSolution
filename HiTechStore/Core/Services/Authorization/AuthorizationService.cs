@@ -5,13 +5,21 @@ using HiTechStore.Core.Dto.Auth;
 using HiTechStore.Core.Common.Interfaces.Infra;
 using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Helpers.Result;
-using HiTechStore.Infrastructure.Data.DTOs.Authorization;
 using HiTechStore.Core.Models;
+
+using AutoMapper;
+using HiTechStore.Core.Domain.ValueObjects.Auth.Username;
+using HiTechStore.Core.Domain.ValueObjects.Auth.Email;
 
 namespace HiTechStore.Core.Services.Authorization;
 
 
-public class AuthorizationService(IUnitOfWork unitOfWork, ICurrentUserProvider currentUserProvider, IEmailNotificationService emailNotificationService) : IAuthorizationService
+public class AuthorizationService(
+    IUnitOfWork unitOfWork,
+    ICurrentUserProvider currentUserProvider,
+    IEmailNotificationService emailNotificationService,
+    IMapper mapper
+) : IAuthorizationService
 {
     private readonly IEmailNotificationService _emailNotificationService = emailNotificationService;
 
@@ -107,21 +115,21 @@ public class AuthorizationService(IUnitOfWork unitOfWork, ICurrentUserProvider c
 
         if (string.IsNullOrWhiteSpace(changePasswordDto.OldPassword))
         {
-            validationErrors.Add(AuthorizationErrors.OldPasswordRequired());
+            validationErrors.Add(AuthErrors.OldPasswordRequired());
         }
 
         if (string.IsNullOrWhiteSpace(changePasswordDto.NewPassword))
         {
-            validationErrors.Add(AuthorizationErrors.NewPasswordRequired());
+            validationErrors.Add(AuthErrors.NewPasswordRequired());
         }
 
         if (string.IsNullOrWhiteSpace(changePasswordDto.PasswordConfirmation))
         {
-            validationErrors.Add(AuthorizationErrors.PasswordConfirmationRequired());
+            validationErrors.Add(AuthErrors.PasswordConfirmationRequired());
         }
         else if (changePasswordDto.NewPassword != changePasswordDto.PasswordConfirmation)
         {
-            validationErrors.Add(AuthorizationErrors.PasswordConfirmationMismatch());
+            validationErrors.Add(AuthErrors.PasswordConfirmationMismatch());
         }
 
         if (validationErrors.Any())
@@ -186,7 +194,7 @@ public class AuthorizationService(IUnitOfWork unitOfWork, ICurrentUserProvider c
             return new Result<bool>
             {
                 Value = false,
-                Errors = [AuthorizationErrors.GenericPassword("Invalid data", "Email, token and new password must be provided.", "InvalidResetRequest")]
+                Errors = [AuthErrors.GenericPassword("Invalid data", "Email, token and new password must be provided.", "InvalidResetRequest")]
             };
         }
 
@@ -218,6 +226,104 @@ public class AuthorizationService(IUnitOfWork unitOfWork, ICurrentUserProvider c
 
         await _emailNotificationService.NotifyAsync(notification);
         return new Result<bool> { Value = true };
+    }
+
+    public Task<Result<bool>> CheckUsernameExists(string username)
+    {
+        return unitOfWork.UserRepository.CheckUsernameExists(username);
+    }
+
+    public async Task<Result<User>> RegisterUser(RegisterDto registerDto)
+    {
+        var result = new Result<User>() { Errors = [] };
+
+        var usernameDto = registerDto.Username;
+        if (string.IsNullOrEmpty(usernameDto))
+        {
+            return result.AddError(
+                AuthErrors.RegistrationErrors.UsernameRequired()
+            );
+        }
+
+        var usernameValueObject = UsernameValueObject.Create(usernameDto);
+
+        if (!usernameValueObject.IsValid)
+        {
+            return result.AddAllErrors(
+                usernameValueObject.WithFieldname(nameof(RegisterDto.Username)).Errors
+            );
+        }
+
+        if (string.IsNullOrEmpty(registerDto.Password))
+        {
+            result.AddError(
+                AuthErrors.RegistrationErrors.PasswordRequired()
+            );
+        }
+
+        var username = usernameValueObject.Value!.Username;
+
+        if (result.HasError)
+        {
+            return result;
+        }
+
+        if ((await CheckUsernameExists(username)).Value)
+        {
+            result.AddError(
+                AuthErrors.RegistrationErrors.DuplicatedUsername()
+            );
+
+            return result;
+        }
+
+        if (string.IsNullOrEmpty(registerDto.Email))
+        {
+            return result.AddError(
+                AuthErrors.RegistrationErrors.EmailRequired()
+            );
+        }
+
+        var emailObject = EmailValueObject.Create(registerDto.Email);
+
+        if (!emailObject.IsValid)
+        {
+            return emailObject.WithValue<User>(null!).WithFieldname(nameof(RegisterDto.Email));
+        }
+        var email = emailObject.Value!.Email;
+
+
+        var userWithEmail = await unitOfWork.UserRepository.GetUserByEmailAsync(email);
+
+        if (userWithEmail is not null)
+        {
+            return result.AddError(
+                AuthErrors.RegistrationErrors.DuplicateEmail()
+            );
+        }
+
+
+        var user = mapper.Map<User>(registerDto);
+        var res = await unitOfWork.UserRepository.RegisterUser(
+            user,
+            registerDto.Password!
+        );
+
+        if (res.HasError)
+        {
+            result.AddAllErrors(res.Errors!);
+            return result;
+        }
+
+        if (!string.IsNullOrEmpty(registerDto.Role))
+        {
+            var roleResult = await unitOfWork.UserRepository.AddRoleToUser(user, registerDto.Role);
+
+            result.AddAllErrors(roleResult.Errors!);
+            await unitOfWork.UserRepository.DeleteUser(user);
+        }
+
+        return result;
     }
 }
 

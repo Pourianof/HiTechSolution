@@ -2,7 +2,6 @@ using System.Security.Claims;
 
 using HiTechStore.Core.Dto.Auth;
 using HiTechStore.Core.Helpers.Result;
-using HiTechStore.Infrastructure.Data.DTOs.Authorization;
 using HiTechStore.Core.Models;
 
 namespace HiTechStore.Core.Services.Authorization;
@@ -15,4 +14,6 @@ public interface IAuthorizationService
     Task<Result<bool>> ChangePassword(ChangePasswordDto changePasswordDto);
     Task RequestPasswordResetAsync(string email, Func<string, string> accessPointProvider);
     Task<Result<bool>> ResetPasswordAsync(string email, string token, string newPassword);
+    Task<Result<User>> RegisterUser(RegisterDto registerDto);
+    Task<Result<bool>> CheckUsernameExists(string username);
 }
