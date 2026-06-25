@@ -1,10 +1,15 @@
 namespace HiTechStore.Core.Helpers.Result;
 
-public class Result<T>
+public class Result
 {
-    public T? Value { get; set; }
     public List<ResultError> Errors { get; init; } = new();
     public bool HasError => Errors?.Count() > 0;
+
+}
+
+public class Result<T> : Result
+{
+    public T? Value { get; set; }
     public bool IsValid => !HasError;
 
     public Result<T> AddError(ResultError error)
