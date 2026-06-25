@@ -1,7 +1,10 @@
 using System.Security.Claims;
 
+using HiTechStore.Core.Dto.Auth;
 using HiTechStore.Core.Helpers.Result;
 using HiTechStore.Core.Models;
+using HiTechStore.Infrastructure.Data.DTOs;
+using HiTechStore.Infrastructure.Data.Queries;
 
 namespace HiTechStore.Core.Common.Interfaces.Infra.Repositories;
 
@@ -23,4 +26,5 @@ public interface IUserRepository
     Task<Result<bool>> AddRoleToUser(User user, string role);
     Task<Result<bool>> DeleteUser(User user);
     Task<Result<bool>> CheckUsernameExists(string username);
+    Task<Result<PagedResultDto<UserDto>>> GetUsers(UserQuery userQuery);
 }

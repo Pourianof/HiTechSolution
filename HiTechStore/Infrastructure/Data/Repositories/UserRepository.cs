@@ -7,10 +7,21 @@ using HiTechStore.Core.Common.Interfaces.Infra.Repositories;
 using HiTechStore.Core.Models;
 
 using Microsoft.AspNetCore.Identity;
+using HiTechStore.Infrastructure.Data.DTOs;
+using HiTechStore.Infrastructure.Data.Queries;
+using HiTechStore.Infrastructure.Data.Repositories.Helpers;
+using Microsoft.EntityFrameworkCore;
+using AutoMapper.QueryableExtensions;
+using AutoMapper;
+using HiTechStore.Helpers.URLFilterQuery;
 
 namespace HiTechStore.Infrastructure.Data.Repositories;
 
-public class UserRepository(UserManager<User> userManager) : IUserRepository
+public class UserRepository(
+    UserManager<User> userManager,
+    HiTechStoreDbContext dbContext,
+    IMapper mapper
+    ) : IUserRepository
 {
     public Task<User?> GetUserByIdAsync(string id)
     {
@@ -116,6 +127,37 @@ public class UserRepository(UserManager<User> userManager) : IUserRepository
         return new()
         {
             Value = user is not null,
+        };
+    }
+
+    public async Task<Result<PagedResultDto<UserDto>>> GetUsers(UserQuery userQuery)
+    {
+        IQueryable<User> query = dbContext.Users.AsQueryable();
+
+        var username = userQuery.Username?.GetValue<string>(QueryOperator.Equal)?.Trim();
+        if (!string.IsNullOrEmpty(username))
+        {
+            query = query.Where(
+                user => EF.Functions.ILike(
+                    user.UserName!, $"%{username}%"
+                )
+            );
+        }
+
+        var finalResult = RepositoryHelper.BuildQueryBuilderBasedOnQueryParams(
+            query,
+            userQuery
+        );
+
+        return new()
+        {
+            Value = new PagedResultDto<UserDto>()
+            {
+                Items = finalResult.AppliedQuery.ProjectTo<UserDto>(mapper.ConfigurationProvider),// await Project<TOut>(query.AppliedQuery!, queryParams).ToListAsync(),
+                PageNumber = finalResult.Page,
+                PageSize = finalResult.PageSize,
+                TotalCount = await finalResult.BaseQuery!.CountAsync()
+            }
         };
     }
 }

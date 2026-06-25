@@ -17,7 +17,10 @@ namespace HiTechStore.Presentation.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class UsersController(UserManager<User> userManager, IProductService productService, IUserService userService) : ControllerBase
+public class UsersController(
+    UserManager<User> userManager,
+    IProductService productService,
+    IUserService userService) : AppControllerBase
 {
     private UserManager<User> _userManager = userManager;
 
@@ -80,5 +83,13 @@ public class UsersController(UserManager<User> userManager, IProductService prod
                 AvatarUrl = newAvatarUrl
             }
         );
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<PagedResultDto<UserDto>>> GetUsers([ToQuery] UserQuery query)
+    {
+        var result = await userService.GetUsers(query);
+
+        return ResultCheck(result);
     }
 }

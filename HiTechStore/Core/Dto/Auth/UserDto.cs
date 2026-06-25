@@ -1,5 +1,9 @@
+using HiTechStore.Core.Models;
+using HiTechStore.Helpers.AutoMapper;
+
 namespace HiTechStore.Core.Dto.Auth;
 
+[MapFrom<User>]
 public class UserDto
 {
     public string? FirstName { get; set; }

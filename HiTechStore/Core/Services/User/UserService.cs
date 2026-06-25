@@ -5,6 +5,10 @@ using HiTechStore.Core.Common.Interfaces.Infra;
 using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Services.Authorization;
 using HiTechStore.Core.Models;
+using HiTechStore.Infrastructure.Data.DTOs;
+using HiTechStore.Core.Dto.Auth;
+using HiTechStore.Infrastructure.Data.Queries;
+using HiTechStore.Core.Helpers.Result;
 
 namespace HiTechStore.Core.Services.UserService;
 
@@ -67,5 +71,10 @@ public class UserService : ServiceBase, IUserService
 
             throw;
         }
+    }
+
+    public Task<Result<PagedResultDto<UserDto>>> GetUsers(UserQuery query)
+    {
+        return _unitOfWork.UserRepository.GetUsers(query);
     }
 }
