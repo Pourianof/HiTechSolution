@@ -37,4 +37,26 @@ public class AppControllerBase : ControllerBase
 
         return Ok(result.Value);
     }
+
+    protected ObjectResult ResultCheck(Result result, object response, string? title = default)
+    {
+        // If there are validation errors, convert them to ModelState and return a ValidationProblemDetails
+        if (result.Errors != null && result.Errors.OfType<ValidationResultError>().Any())
+        {
+            return ValidationResult(result.Errors.OfType<ValidationResultError>(), title);
+        }
+
+        if (result.HasError)
+        {
+            return new BadRequestObjectResult(
+                new
+                {
+                    Title = "Bad request",
+                    result.Errors
+                }
+            );
+        }
+
+        return Ok(response);
+    }
 }
