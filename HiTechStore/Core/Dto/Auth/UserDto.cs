@@ -13,4 +13,5 @@ public class UserDto
     public string? UserName { get; set; }
     public string? AvatarUrl { get; set; }
     public IEnumerable<string>? Roles { get; set; }
+    public IEnumerable<string>? Permissions { get; set; }
 }

@@ -149,7 +149,8 @@ public class AuthController : AppControllerBase
                 LastName = user.LastName,
                 Email = user.Email,
                 Roles = user.Roles,
-                AvatarUrl = user.AvatarUrl is null ? default : assetRegisterer.GetPublicUrl(user.AvatarUrl)
+                AvatarUrl = user.AvatarUrl is null ? default : assetRegisterer.GetPublicUrl(user.AvatarUrl),
+                Permissions = user.Permissions?.Select(up => up.Permission!.Code) ?? []
             }
         };
         return Ok(authData);
