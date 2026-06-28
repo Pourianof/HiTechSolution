@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using HiTechStore.Presentation.Controllers.Requirements;
 
 namespace HiTechStore.Core.Common.Interfaces.Presentation;
 
@@ -111,8 +112,17 @@ public static class AuthRegistration
             });
 
 
-        builder.Services.AddAuthorization();
-        builder.Services.AddProblemDetails();
+        builder.Services.AddAuthorization(options =>
+        {
+            options.AddPolicy(Permissions.Product.Create, policy =>
+                policy.Requirements.Add(new PermissionRequirement(Permissions.Product.Create)));
+
+            options.AddPolicy(Permissions.Product.Edit, policy =>
+                policy.Requirements.Add(new PermissionRequirement(Permissions.Product.Edit)));
+
+            options.AddPolicy(Permissions.Product.Delete, policy =>
+                policy.Requirements.Add(new PermissionRequirement(Permissions.Product.Delete)));
+        }); builder.Services.AddProblemDetails();
 
         return builder;
     }

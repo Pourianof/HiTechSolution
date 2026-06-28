@@ -4,7 +4,6 @@ using System.Security.Claims;
 using AutoMapper;
 
 using HiTechStore.Presentation.Controllers.ExceptionFilters;
-using HiTechStore.Core;
 using HiTechStore.Core.Dto.Product;
 using HiTechStore.Core.Services.Product;
 using HiTechStore.Infrastructure.Data.DTOs;
@@ -25,13 +24,11 @@ namespace HiTechStore.Presentation.Controllers
     [Route("api/[controller]")]
     public class ProductsController : ControllerBase
     {
-        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IProductService _productService;
 
-        public ProductsController(IUnitOfWork unitOfWork, IMapper mapper, IProductService productService)
+        public ProductsController(IMapper mapper, IProductService productService)
         {
-            _unitOfWork = unitOfWork;
             _mapper = mapper;
             _productService = productService;
         }
@@ -81,7 +78,7 @@ namespace HiTechStore.Presentation.Controllers
 
 
         [HttpPost]
-        [Authorize(Roles = $"{IdentityRoles.Admin},{IdentityRoles.Manager}")]
+        [Authorize(Policy = Permissions.Product.Create)]
         [ViolateForeignKeyExceptionFilter]
         public async Task<IActionResult> CreateProduct([FromForm] ProductCreationRequest product)
         {
@@ -129,6 +126,7 @@ namespace HiTechStore.Presentation.Controllers
         }
 
         [HttpPatch("{id}")]
+        [Authorize(Policy = Permissions.Product.Edit)]
         public async Task<IActionResult> UpdateProduct(int id, [FromBody] ProductUpdateRequest updateRequest)
         {
             var result = await _productService.UpdateProduct(id, _mapper.Map<UpdateProductDto>(updateRequest));
@@ -137,6 +135,7 @@ namespace HiTechStore.Presentation.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = Permissions.Product.Delete)]
         public async Task<IActionResult> DeleteProduct(int id)
         {
             var product = await _productService.DeleteProduct(id);
