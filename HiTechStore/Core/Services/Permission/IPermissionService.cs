@@ -6,4 +6,5 @@ namespace HiTechStore.Core.Services.Permission;
 public interface IPermissionService
 {
     Task<Result<IEnumerable<Models.Permission>>> ModifyPermissions(ModifyPermissionDto modifyPermissionDto);
+    Task<bool> HasPermissions(string userId, IEnumerable<string> permissionCodes);
 }

@@ -2,6 +2,7 @@
 using HiTechStore.Core.Common.Interfaces.Presentation;
 using HiTechStore.Core.Dto.Auth;
 using HiTechStore.Core.Dto.Permission;
+using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Helpers.Models;
 using HiTechStore.Core.Helpers.Result;
 using HiTechStore.Core.Models;
@@ -19,6 +20,17 @@ public class PermissionService : ServiceBase, IPermissionService
     ) : base(authorizationService, currentUserProvider)
     {
         _unitOfWork = unitOfWork;
+    }
+
+    public async Task<bool> HasPermissions(string userId, IEnumerable<string> permissionCodes)
+    {
+        var permissions = await _unitOfWork.PermissionRepository.GetUserPermissions(userId);
+
+        return permissions.All(
+            perm => permissionCodes.Any(
+                p => p == perm.Code
+            )
+        );
     }
 
     public async Task<Result<IEnumerable<Models.Permission>>> ModifyPermissions(ModifyPermissionDto modifyPermissionDto)
