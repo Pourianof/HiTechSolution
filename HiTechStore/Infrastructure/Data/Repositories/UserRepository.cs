@@ -14,28 +14,45 @@ using Microsoft.EntityFrameworkCore;
 using AutoMapper.QueryableExtensions;
 using AutoMapper;
 using HiTechStore.Helpers.URLFilterQuery;
+using System.Linq.Expressions;
 
 namespace HiTechStore.Infrastructure.Data.Repositories;
 
 public class UserRepository(
     UserManager<User> userManager,
-    HiTechStoreDbContext dbContext,
     IMapper mapper
     ) : IUserRepository
 {
+    private IQueryable<User> GetBaseUserQuery()
+    {
+        return userManager.Users.Include(u => u.Permissions)!
+                .ThenInclude(up => up.Permission);
+    }
+
+    private Task<User?> GetSingleUser(Expression<Func<User, bool>> selector)
+    {
+        return GetBaseUserQuery().FirstOrDefaultAsync(selector);
+    }
+
     public Task<User?> GetUserByIdAsync(string id)
     {
-        return userManager.FindByIdAsync(id);
+        return GetSingleUser(u => u.Id == id);
+    }
+    private string Normalize(string text)
+    {
+        return text.Trim().ToUpper();
     }
 
     public Task<User?> GetUserByUsernameAsync(string username)
     {
-        return userManager.FindByNameAsync(username);
+        var normalizedUserName = Normalize(username);
+        return GetSingleUser(u => u.NormalizedUserName == normalizedUserName);
     }
 
     public Task<User?> GetUserByEmailAsync(string email)
     {
-        return userManager.FindByEmailAsync(email);
+        var normalizedEmail = email.Trim().ToUpper();
+        return GetSingleUser(u => u.NormalizedEmail == normalizedEmail);
     }
 
     public Task<bool> CheckUserPasswordAsync(User user, string password)
@@ -132,14 +149,15 @@ public class UserRepository(
 
     public async Task<Result<PagedResultDto<UserDto>>> GetUsers(UserQuery userQuery)
     {
-        IQueryable<User> query = dbContext.Users.AsQueryable();
+        IQueryable<User> query = GetBaseUserQuery();
 
         var username = userQuery.Username?.GetValue<string>(QueryOperator.Equal)?.Trim();
         if (!string.IsNullOrEmpty(username))
         {
+            var normalizedUserName = Normalize(username);
             query = query.Where(
-                user => EF.Functions.ILike(
-                    user.UserName!, $"%{username}%"
+                user => EF.Functions.Like(
+                    user.NormalizedEmail!, $"%{normalizedUserName}%"
                 )
             );
         }
