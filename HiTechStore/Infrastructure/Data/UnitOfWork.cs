@@ -1,6 +1,7 @@
 using AutoMapper;
 
 using HiTechStore.Core;
+using HiTechStore.Core.Common.Interfaces.Infra;
 using HiTechStore.Core.Common.Interfaces.Infra.Repositories;
 using HiTechStore.Infrastructure.Data.Repositories;
 
@@ -29,6 +30,8 @@ namespace HiTechStore.Infrastructure.Data
         public IDiscountedProductsRepository DiscountedProductsRepository { get; }
         public ICommentRepository CommentRepository { get; }
         public IProductVariationRepository ProductVariationRepository { get; }
+        public IPermissionRepository PermissionRepository { get; }
+        public IPermissionAuditRepository PermissionAuditRepository { get; }
 
         public UnitOfWork(
             HiTechStoreDbContext context,
@@ -49,7 +52,9 @@ namespace HiTechStore.Infrastructure.Data
             IUserRepository userRepository,
             IDiscountedProductsRepository discountedProductsRepository,
             ICommentRepository commentRepository,
-            IProductVariationRepository productVariationRepository
+            IProductVariationRepository productVariationRepository,
+            IPermissionRepository permissionRepository,
+            IPermissionAuditRepository permissionAuditRepository
         )
         {
             _context = context;
@@ -71,6 +76,8 @@ namespace HiTechStore.Infrastructure.Data
             DiscountedProductsRepository = discountedProductsRepository;
             CommentRepository = commentRepository;
             ProductVariationRepository = productVariationRepository;
+            PermissionRepository = permissionRepository;
+            PermissionAuditRepository = permissionAuditRepository;
         }
 
         public HiTechStoreDbContext Context()

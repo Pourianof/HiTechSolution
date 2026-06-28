@@ -1,3 +1,4 @@
+using HiTechStore.Core.Common.Interfaces.Infra;
 using HiTechStore.Core.Common.Interfaces.Infra.Repositories;
 
 namespace HiTechStore.Core
@@ -21,6 +22,8 @@ namespace HiTechStore.Core
         IUserRepository UserRepository { get; }
         IDiscountedProductsRepository DiscountedProductsRepository { get; }
         ICommentRepository CommentRepository { get; }
+        IPermissionRepository PermissionRepository { get; }
+        IPermissionAuditRepository PermissionAuditRepository { get; }
         IRepositoryModelBase<TModel> RespositoryOf<TModel>() where TModel : class, IModel;
         Task<int> Complete();
         Task<ITransaction> StartTransaction();

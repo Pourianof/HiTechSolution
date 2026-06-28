@@ -1,3 +1,4 @@
+using HiTechStore.Core.Common.Interfaces.Infra;
 using HiTechStore.Core.Common.Interfaces.Infra.Repositories;
 
 namespace HiTechStore.Infrastructure.Data.Repositories;
@@ -23,6 +24,8 @@ public static class RepositoryDependenciesRegistration
         services.AddTransient<IDiscountedProductsRepository, DiscountedProductsRepository>();
         services.AddTransient<ICommentRepository, CommentRepository>();
         services.AddTransient<IProductVariationRepository, ProductVariationRepository>();
+        services.AddTransient<IPermissionRepository, PermissionRepository>();
+        services.AddTransient<IPermissionAuditRepository, PermissionAuditRepository>();
 
         return services;
     }
