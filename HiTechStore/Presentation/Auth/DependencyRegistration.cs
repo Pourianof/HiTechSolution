@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using HiTechStore.Presentation.Controllers.Requirements;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HiTechStore.Core.Common.Interfaces.Presentation;
 
@@ -111,6 +112,7 @@ public static class AuthRegistration
                 };
             });
 
+        builder.Services.AddScoped<IAuthorizationHandler, PermissionRequirementHandler>();
 
         builder.Services.AddAuthorization(options =>
         {
