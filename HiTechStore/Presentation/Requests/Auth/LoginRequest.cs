@@ -1,7 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 
+using HiTechStore.Core.Dto.Auth;
+using HiTechStore.Helpers.AutoMapper;
+
 namespace HiTechStore.Presentation.Auth
 {
+    [MapTo<LoginDto>]
     public class LoginRequest
     {
         [MinLength(3)]
