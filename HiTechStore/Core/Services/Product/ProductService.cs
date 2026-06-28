@@ -12,8 +12,6 @@ using HiTechStore.Infrastructure.Data.DTOs;
 using HiTechStore.Infrastructure.Data.DTOs.Product;
 using HiTechStore.Infrastructure.Data.Mapping;
 using HiTechStore.Infrastructure.Data.Queries;
-using HiTechStore.Infrastructure.Data.Storage;
-using HiTechStore.DTOs.Product;
 using HiTechStore.Helpers.Types;
 using HiTechStore.Core.Models;
 
@@ -27,7 +25,8 @@ public class ProductService(
     IConditionComponentTreeToLambdaExpression conditionTreeToLambdaExprMapper,
     ProductServiceHelper productServiceHelper,
     IAuthorizationService authorizationService,
-    IPublicAssetRegisterer assetRegisterer
+    IPublicAssetRegisterer assetRegisterer,
+    ProductPermissionHelper productPermissionHelper
 ) : ServiceBase(authorizationService, currentUserProvider), IProductService
 {
     private void ApplyRulesToProducts(IEnumerable<ProductDto> products, IEnumerable<DiscountRule> rules)
@@ -129,8 +128,13 @@ public class ProductService(
         return products;
     }
 
-    public async Task<Core.Models.Product?> DeleteProduct(int id)
+    public async Task<Models.Product?> DeleteProduct(int id)
     {
+        if (!await productPermissionHelper.HasProductDeletePermission(UserIdOrThrow))
+        {
+            throw new NotAllowedException("Not authorized", "You have not access to delete product");
+        }
+
         var product = await unitOfWork.Products.GetModelByIdAsync(id);
         if (product == null)
         {
@@ -145,6 +149,10 @@ public class ProductService(
 
     public async Task<ProductDto> CreateProduct(ProductCreationDto product, string userId)
     {
+        if (!await productPermissionHelper.HasProductCreatePermission(userId))
+        {
+            throw new NotAllowedException("Not authorized", "You are not authorized to create a product");
+        }
 
         int? createdProductId = default;
         using (var trx = await unitOfWork.StartTransaction())
@@ -428,6 +436,11 @@ public class ProductService(
 
     public async Task<ProductBasicInfoDto> UpdateProduct(int productId, UpdateProductDto? updateDto)
     {
+        if (!await productPermissionHelper.HasProductEditPermission(UserIdOrThrow))
+        {
+            throw new NotAllowedException("Not authorized", "You have not access to edit a product");
+        }
+
         var product = await GetAuthorizedProduct(productId);
 
         if (updateDto is not null)
@@ -468,6 +481,11 @@ public class ProductService(
 
     public async Task<ProductDto> UpdateProductsCategory(int productId, ProductCategoryValuesDto replaceDto)
     {
+        if (!await productPermissionHelper.HasProductEditPermission(UserIdOrThrow))
+        {
+            throw new NotAllowedException("Not authorized", "You are not authorized to edit product");
+        }
+
         var product = await GetAuthorizedProduct(productId);
 
         if (replaceDto is not null)
