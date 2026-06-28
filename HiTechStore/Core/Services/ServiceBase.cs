@@ -10,6 +10,7 @@ public class ServiceBase(
     ICurrentUserProvider currentUserProvider
 )
 {
+    protected IAuthorizationService AuthorizationService = authorizationService;
     protected string? UserId => currentUserProvider.UserId;
     protected string UserIdOrThrow => currentUserProvider.UserId ?? Unauthorized();
 
@@ -30,7 +31,7 @@ public class ServiceBase(
             return Unauthorized();
         }
 
-        var user = await authorizationService.GetUserByIdAsync(currentUserProvider.UserId);
+        var user = await AuthorizationService.GetUserByIdAsync(currentUserProvider.UserId);
 
         if (user is null)
         {
@@ -47,6 +48,6 @@ public class ServiceBase(
             return default;
         }
 
-        return await authorizationService.GetUserByIdAsync(currentUserProvider.UserId);
+        return await AuthorizationService.GetUserByIdAsync(currentUserProvider.UserId);
     }
 }
