@@ -13,4 +13,10 @@ public static class EnumerableExtensions
     {
         return vals.Where((val) => val.HasValue).Select(val => val!.Value);
     }
+
+    public static string StringJoin<TSource>(this IEnumerable<TSource?> vals, char separator)
+        where TSource : class
+    {
+        return string.Join(separator, vals);
+    }
 }
