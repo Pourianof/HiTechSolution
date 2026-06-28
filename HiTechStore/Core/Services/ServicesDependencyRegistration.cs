@@ -18,6 +18,7 @@ public static class ServicesDependencyRegistration
     {
         services.AddScoped<IDiscountCodeGenerator, DiscountCodeGenerator>();
         services.AddScoped<IDiscountService, DiscountService>();
+        services.AddScoped<ProductPermissionHelper>();
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IAuthorizationService, AuthorizationService>();
         services.AddScoped<ICommentService, CommentService>();
