@@ -26,27 +26,31 @@ namespace HiTechStore.Infrastructure.Data.Seeders
 
             var adminUser = await userManager!.FindByEmailAsync(adminEmail!);
 
-            if (adminUser == null)
+            if (adminUser is not null)
             {
-                adminUser = new User
-                {
-                    UserName = "admin",
-                    Email = adminEmail,
-                    EmailConfirmed = true
-                };
+                await userManager.RemovePasswordAsync(adminUser);
+                await userManager.AddPasswordAsync(adminUser, "Test123!");
+                return;
+            }
 
-                var adminCreateResult = await userManager.CreateAsync(adminUser, adminPassword!);
-                if (!adminCreateResult.Succeeded)
-                {
-                    throw new Exception("Failed to create admin user." + string.Join(", ", adminCreateResult.Errors.Select(e => e.Description)));
-                }
+            adminUser = new User
+            {
+                UserName = "admin",
+                Email = adminEmail,
+                EmailConfirmed = true
+            };
 
-                var addToRoleResult = await userManager.AddToRoleAsync(adminUser, IdentityRoles.Admin);
-                if (!addToRoleResult.Succeeded)
-                {
-                    await userManager.DeleteAsync(adminUser);
-                    throw new Exception("Failed to add admin user to role." + string.Join(", ", addToRoleResult.Errors.Select(e => e.Description)));
-                }
+            var adminCreateResult = await userManager.CreateAsync(adminUser, adminPassword!);
+            if (!adminCreateResult.Succeeded)
+            {
+                throw new Exception("Failed to create admin user." + string.Join(", ", adminCreateResult.Errors.Select(e => e.Description)));
+            }
+
+            var addToRoleResult = await userManager.AddToRoleAsync(adminUser, IdentityRoles.Admin);
+            if (!addToRoleResult.Succeeded)
+            {
+                await userManager.DeleteAsync(adminUser);
+                throw new Exception("Failed to add admin user to role." + string.Join(", ", addToRoleResult.Errors.Select(e => e.Description)));
             }
         }
     }
