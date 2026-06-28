@@ -40,6 +40,8 @@ namespace HiTechStore.Infrastructure.Data
             modelBuilder.BuildConditionComponentModels();
             modelBuilder.BuildUsertModels();
             modelBuilder.BuildCommentEntity();
+            modelBuilder.BuildUserPermissionEntity();
+            modelBuilder.BuildPermissionAuditBuilderEntity();
         }
 
         public DbSet<Product> Products { get; set; }
@@ -56,6 +58,8 @@ namespace HiTechStore.Infrastructure.Data
         public DbSet<ConditionComponent> ConditionComponents { get; set; }
         public DbSet<ConditionMethod> ConditionMethods { get; set; }
         public DbSet<Comment> Comments { get; set; }
+        public DbSet<PermissionAudit> PermissionAudits { get; set; }
+
     }
 
 }

@@ -18,5 +18,6 @@ namespace HiTechStore.Core.Models
         public IEnumerable<Claim>? Claims { get; set; }
         [NotMapped]
         public IEnumerable<string> Roles { get; set; } = [];
+        virtual public List<UserPermission> Permissions { get; set; } = [];
     }
 }
