@@ -26,9 +26,9 @@ public class PermissionService : ServiceBase, IPermissionService
     {
         var permissions = await _unitOfWork.PermissionRepository.GetUserPermissions(userId);
 
-        return permissions.All(
-            perm => permissionCodes.Any(
-                p => p == perm.Code
+        return permissionCodes.All(
+            perm => permissions.Any(
+                p => perm == p.Code
             )
         );
     }
