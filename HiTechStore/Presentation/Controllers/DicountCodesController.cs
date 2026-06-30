@@ -1,11 +1,8 @@
 using AutoMapper;
 
 using HiTechStore.Core;
-using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Services.Discount;
 using HiTechStore.Infrastructure.Data.DTOs.Discount;
-using HiTechStore.Infrastructure.Data.Queries;
-using HiTechStore.Helpers.URLFilterQuery;
 using HiTechStore.Core.Models;
 
 using Microsoft.AspNetCore.Authorization;
