@@ -39,6 +39,8 @@ public static class DependencyRegistration
 
         builder.UsePresentation();
 
+        builder.Services.AddProblemDetails();
+
         builder.Services.AddExceptionHandler<ApplicationExceptionHandler>();
         builder.Services.AddExceptionHandler<PgDbExceptionHandler>();
         builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

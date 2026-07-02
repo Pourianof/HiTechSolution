@@ -109,8 +109,6 @@ public static class AuthRegistration
                 };
             });
 
-        builder.Services.AddProblemDetails();
-
         return builder;
     }
 }

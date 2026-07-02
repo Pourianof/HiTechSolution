@@ -8,6 +8,8 @@ public static class AppConfiguration
 {
     public static async Task ConfigueApp(this WebApplication app)
     {
+        app.UseExceptionHandler();
+
         await app.ConfigueAuth();
 
         app.UseStaticFiles(
@@ -29,7 +31,6 @@ public static class AppConfiguration
         );
         app.UseRateLimiter();
         app.MapControllers();
-        app.UseExceptionHandler();
 
         app.UseHealthChecks("/_health");
 
