@@ -14,6 +14,7 @@ using HiTechStore.Core.Models;
 
 using Microsoft.Extensions.Primitives;
 using HiTechStore.Core.Dto.Discount;
+using HiTechStore.Core.Services.Authorization;
 
 namespace HiTechStore.Core.Services.Discount;
 
@@ -23,12 +24,23 @@ public class DiscountService(
     IServiceProvider serviceProvider,
     IDiscountConditionScriptParser scriptParser,
     IMapper mapper,
-    ICurrentUserProvider userProvider
+    ICurrentUserProvider userProvider,
+    DiscountPermissionHelper discountPermissionHelper,
+    IAuthorizationService authorizationService,
+    ICurrentUserProvider currentUserProvider
     )
-    : IDiscountService
+    : ServiceBase(authorizationService, currentUserProvider), IDiscountService
 {
     public async Task<bool> DeleteDiscountCode(int id)
     {
+        if (!await discountPermissionHelper.HasDiscountDeletePermission(UserIdOrThrow, id))
+        {
+            throw new NotAllowedException(
+                "Not allowed",
+                $"You are not allowed to delete discount with id {id}"
+            );
+        }
+
         var discountCode = await unitOfWork.DiscountRepository.GetModelByIdAsync(id);
 
         if (discountCode is null)
@@ -58,7 +70,7 @@ public class DiscountService(
         return code!;
     }
 
-    public Task<PagedResultDto<DiscountDto>> GetDiscounts(DiscountQuery? discountQuery)
+    public async Task<PagedResultDto<DiscountDto>> GetDiscounts(DiscountQuery? discountQuery)
     {
         var query = discountQuery ?? new();
 
@@ -71,7 +83,32 @@ public class DiscountService(
 
         query.DiscountType ??= DiscountType.All;
 
-        return unitOfWork.DiscountRepository.GetAllProjectedAsync(query);
+        if (await discountPermissionHelper.HasPermissionToListAllDiscounts(UserIdOrThrow))
+        {
+            // free
+            // do nothing
+        }
+        else if (await discountPermissionHelper.HasPermissionToListSelfDiscounts(UserIdOrThrow))
+        {
+            if (query.CreatorIds is not null && (query.CreatorIds.Count() > 1 || query.CreatorIds.Any(c => c != UserId)))
+            {
+                throw new NotAllowedException(
+                    "Not Allowed",
+                    "Your are not allowed to list another creator's discounts"
+                );
+            }
+
+            query.CreatorIds = [UserId!];
+        }
+        else
+        {
+            throw new NotAllowedException(
+                "Not allowed",
+                "You are not allowed to list discounts"
+            );
+        }
+
+        return await unitOfWork.DiscountRepository.GetAllProjectedAsync(query);
     }
 
     private async Task ValidateDiscount(DiscountCreationDto discount)
@@ -127,6 +164,13 @@ public class DiscountService(
 
     public async Task<DiscountDto> RegisterDiscountCode(DiscountCodeCreationDto discountCodeCreationDto)
     {
+        if (await discountPermissionHelper.HasDiscountCreatePermission(UserIdOrThrow))
+        {
+            throw new NotAllowedException(
+                "Not allowed",
+                $"You are not allowed to register new discount"
+            );
+        }
 
         await ValidateDiscount(discountCodeCreationDto);
         var discount = mapper.Map<Core.Models.Discount>(discountCodeCreationDto);
@@ -164,6 +208,14 @@ public class DiscountService(
 
     public async Task<DiscountDto> RegisterDiscount(DiscountCreationDto discountCreationDto)
     {
+        if (!await discountPermissionHelper.HasDiscountCreatePermission(UserIdOrThrow))
+        {
+            throw new NotAllowedException(
+                "Not allowed",
+                $"You are not allowed to register new discount"
+            );
+        }
+
         await ValidateDiscount(discountCreationDto);
 
         // IMapper also convert script string to ConditionComponent by parser
@@ -184,6 +236,14 @@ public class DiscountService(
 
     async public Task<DiscountDto?> UpdateDiscountCode(int id, DiscountCodeUpdateDto discountCodeUpdateDto, ClaimsPrincipal claims)
     {
+        if (!await discountPermissionHelper.HasDiscountEditPermission(UserIdOrThrow, id))
+        {
+            throw new NotAllowedException(
+                "Not allowed",
+                $"You are not allowed to update discount with id {id}"
+            );
+        }
+
         var discountCode = await unitOfWork.DiscountRepository.GetModelByIdAsync(id);
 
         if (discountCode is null)
@@ -290,6 +350,14 @@ public class DiscountService(
 
     public async Task<Core.Models.Discount?> GetActiveDiscountCodeOf(string discountCode)
     {
+        if (!await discountPermissionHelper.HasPermissionToWorkWithDiscount(UserIdOrThrow))
+        {
+            // Only users whose have discount creation or edition access can call this method
+            throw new NotAllowedException(
+                "Not allowed",
+                "You are not allowed to get discount code"
+            );
+        }
         var now = DateTime.UtcNow;
 
         var discounts = await unitOfWork.DiscountRepository.GetDiscountCodeByNameAsync(discountCode);
@@ -302,6 +370,14 @@ public class DiscountService(
 
     public async Task<ConditionParseResult> GetConditionScriptProducts(string conditionScript)
     {
+        if (!await discountPermissionHelper.HasPermissionToWorkWithDiscount(UserIdOrThrow))
+        {
+            // Only users whose have discount creation or edition access can call this method
+            throw new NotAllowedException(
+                "Not allowed",
+                "You are not allowed to run discount script"
+            );
+        }
         var conditionTree = scriptParser.Parse(conditionScript);
 
         if (conditionTree is null)
@@ -318,8 +394,7 @@ public class DiscountService(
         {
             ResultedProducts = discountedProducts,
             Succeed = true
-        }
-        ;
+        };
     }
 }
 

@@ -20,4 +20,6 @@ public class PermissionChangeRequest
     public string? PermissionCode { get; set; }
     [Required]
     public string? Action { get; set; }
+    [Required]
+    public string? Scope { get; set; }
 }

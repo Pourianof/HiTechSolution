@@ -130,7 +130,7 @@ public class ProductService(
 
     public async Task<Models.Product?> DeleteProduct(int id)
     {
-        if (!await productPermissionHelper.HasProductDeletePermission(UserIdOrThrow))
+        if (!await productPermissionHelper.HasProductDeletePermission(UserIdOrThrow, id))
         {
             throw new NotAllowedException("Not authorized", "You have not access to delete product");
         }
@@ -436,7 +436,7 @@ public class ProductService(
 
     public async Task<ProductBasicInfoDto> UpdateProduct(int productId, UpdateProductDto? updateDto)
     {
-        if (!await productPermissionHelper.HasProductEditPermission(UserIdOrThrow))
+        if (!await productPermissionHelper.HasProductEditPermission(UserIdOrThrow, productId))
         {
             throw new NotAllowedException("Not authorized", "You have not access to edit a product");
         }
@@ -481,7 +481,7 @@ public class ProductService(
 
     public async Task<ProductDto> UpdateProductsCategory(int productId, ProductCategoryValuesDto replaceDto)
     {
-        if (!await productPermissionHelper.HasProductEditPermission(UserIdOrThrow))
+        if (!await productPermissionHelper.HasProductEditPermission(UserIdOrThrow, productId))
         {
             throw new NotAllowedException("Not authorized", "You are not authorized to edit product");
         }

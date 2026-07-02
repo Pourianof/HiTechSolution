@@ -1,3 +1,5 @@
+using HiTechStore.Core.Models;
+
 namespace HiTechStore.Core.Dto.Permission;
 
 public class ModifyPermissionDto
@@ -10,6 +12,7 @@ public class TargetPermissionDto
 {
     public PermissionModificationAction Action { get; set; }
     required public string PermissionCode { get; set; }
+    required public PermissionScope Scope { get; set; }
 }
 
 public enum PermissionModificationAction

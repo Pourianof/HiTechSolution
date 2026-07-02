@@ -15,6 +15,7 @@ public static class AdminPermissionSeeder
         }
 
         var allPermissions = await unitOfWork.PermissionRepository.GetAllAsync();
+        admin.Permissions ??= [];
 
         foreach (var permission in allPermissions)
         {

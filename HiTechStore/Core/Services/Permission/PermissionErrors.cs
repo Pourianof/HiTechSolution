@@ -35,6 +35,13 @@ public static class PermissionErrors
         Code = nameof(CannotGrantPermissionYouDoNotHave),
     };
 
+    public static ResultError CannotGrantPermissionScopeWhichHigherThanYou(string code, string scope) => new()
+    {
+        Title = "Grant failed",
+        Description = $"You cannot grant or revoke a permission({code}) which its scope is higher than your's({scope})",
+        Code = nameof(CannotGrantPermissionScopeWhichHigherThanYou),
+    };
+
     public static ResultError NotAuthorizedToModifyTargetUsersPermissions() => new()
     {
         Title = "Un-authorized",
@@ -52,5 +59,12 @@ public static class PermissionErrors
         Title = "Forbidden action",
         Description = "You are not authorized to grant/revoke access permissions",
         Code = nameof(ForbiddenAccessGranting)
+    };
+
+    public static ResultError LockingPermissionListForAccessGrantedTargetUser() => new()
+    {
+        Title = "Forbidden action",
+        Description = "Cannot grant/revoke permission to user which has access permission itself",
+        Code = nameof(LockingPermissionListForAccessGrantedTargetUser)
     };
 }

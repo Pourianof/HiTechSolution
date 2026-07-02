@@ -2,6 +2,7 @@
 using AutoMapper;
 
 using HiTechStore.Core.Common.Interfaces.Infra;
+using HiTechStore.Core.Dto.Permission;
 using HiTechStore.Core.Models;
 
 using Microsoft.EntityFrameworkCore;
@@ -22,14 +23,18 @@ public class PermissionRepository : Repository<Permission>, IPermissionRepositor
         ).ToListAsync();
     }
 
-    public async Task<IEnumerable<Permission>> GetUserPermissions(string userId)
+    public async Task<IEnumerable<UserPermissionDto>> GetUserPermissions(string userId)
     {
         return await _context.Users.Where(
             (u) => u.Id == userId
         ).SelectMany(
-            (u) => u.Permissions
+            (u) => u.Permissions!
         ).Select(
-            up => up.Permission!
+            up => new UserPermissionDto()
+            {
+                Code = up.Permission!.Code,
+                Scope = up.Scope
+            }
         ).ToListAsync();
     }
 

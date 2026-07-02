@@ -10,7 +10,7 @@ public class PermissionAudit : IModel
     virtual public User? TargetUser { get; set; }
 
     virtual public Permission? Permission { get; set; }
-
+    public PermissionScope Scope { get; set; }
     public PermissionAction Action { get; set; }
 
     public DateTime OccurredAt { get; set; }

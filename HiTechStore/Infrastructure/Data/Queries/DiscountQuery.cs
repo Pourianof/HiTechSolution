@@ -3,6 +3,7 @@ namespace HiTechStore.Infrastructure.Data.Queries;
 public class DiscountQuery : BaseQuery
 {
     public DiscountType? DiscountType { get; set; }
+    public IEnumerable<string>? CreatorIds { get; set; }
 }
 
 public enum DiscountType

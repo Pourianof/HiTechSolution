@@ -78,7 +78,6 @@ namespace HiTechStore.Presentation.Controllers
 
 
         [HttpPost]
-        [Authorize(Policy = Permissions.Product.Create)]
         [ViolateForeignKeyExceptionFilter]
         public async Task<IActionResult> CreateProduct([FromForm] ProductCreationRequest product)
         {
@@ -126,7 +125,6 @@ namespace HiTechStore.Presentation.Controllers
         }
 
         [HttpPatch("{id}")]
-        [Authorize(Policy = Permissions.Product.Edit)]
         public async Task<IActionResult> UpdateProduct(int id, [FromBody] ProductUpdateRequest updateRequest)
         {
             var result = await _productService.UpdateProduct(id, _mapper.Map<UpdateProductDto>(updateRequest));
@@ -135,7 +133,6 @@ namespace HiTechStore.Presentation.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Policy = Permissions.Product.Delete)]
         public async Task<IActionResult> DeleteProduct(int id)
         {
             var product = await _productService.DeleteProduct(id);

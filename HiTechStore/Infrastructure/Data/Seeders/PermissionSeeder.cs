@@ -29,6 +29,24 @@ public static class PermissionSeeder
                     Name = "Comment moderation",
                 },
 
+                // Discount
+                new Permission{
+                    Code = Permissions.Discount.Create,
+                    Name = "Register discount",
+                },
+                new Permission{
+                    Code = Permissions.Discount.View,
+                    Name = "View discounts",
+                },
+                new Permission{
+                    Code = Permissions.Discount.Edit,
+                    Name = "Edit discount",
+                },
+                new Permission{
+                    Code = Permissions.Discount.Delete,
+                    Name = "Delete discount",
+                },
+
                 new Permission{
                     Code = Permissions.Access.Grant,
                     Name = "Granting access",

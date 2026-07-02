@@ -1,8 +1,6 @@
 
 using HiTechStore.Core.Common.Interfaces.Presentation;
-using HiTechStore.Core.Dto.Auth;
 using HiTechStore.Core.Dto.Permission;
-using HiTechStore.Core.Exceptions;
 using HiTechStore.Core.Helpers.Models;
 using HiTechStore.Core.Helpers.Result;
 using HiTechStore.Core.Models;
@@ -22,21 +20,57 @@ public class PermissionService : ServiceBase, IPermissionService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<bool> HasPermissions(string userId, IEnumerable<string> permissionCodes)
+    private Task<IEnumerable<UserPermissionDto>> GetUsersPermissions(string userId)
     {
-        var permissions = await _unitOfWork.PermissionRepository.GetUserPermissions(userId);
+        return _unitOfWork.PermissionRepository.GetUserPermissions(userId);
+    }
+
+    public async Task<bool> HasAllPermissions(string userId, IEnumerable<UserPermissionDto> permissionCodes)
+    {
+        var userPermissions = await GetUsersPermissions(userId);
 
         return permissionCodes.All(
-            perm => permissions.Any(
-                p => perm == p.Code
+            perm => userPermissions.Any(
+                p => perm.Code == p.Code && (
+                    p.Scope is null || // if is null then its free(no-scope)
+                    p.Scope == PermissionScope.All ||
+                    perm.Scope == p.Scope)
             )
         );
     }
 
-    public async Task<Result<IEnumerable<Models.Permission>>> ModifyPermissions(ModifyPermissionDto modifyPermissionDto)
+    public async Task<bool> HasAnyPermissions(string userId, IEnumerable<UserPermissionDto> permissionCodes)
+    {
+        var userPermissions = await GetUsersPermissions(userId);
+
+        return permissionCodes.Any(
+            perm => userPermissions.Any(
+                p => perm.Code == p.Code && (
+                    p.Scope is null || // if is null then its free(no-scope)
+                    p.Scope == PermissionScope.All ||
+                    perm.Scope == p.Scope)
+            )
+        );
+    }
+
+    public async Task<bool> HasResourceAccess(string userId, IEnumerable<ResourceAccessCheck> permissionCodes)
+    {
+        var userPermissions = await GetUsersPermissions(userId);
+
+        return permissionCodes.All(
+            perm => userPermissions.Any(
+                up => perm.Code == up.Code && (
+                    up.Scope == PermissionScope.All ||
+                    (up.Scope == PermissionScope.Self && perm.IsOwner)
+                )
+            )
+        );
+    }
+
+    public async Task<Result<IEnumerable<UserPermissionDto>>> ModifyPermissions(ModifyPermissionDto modifyPermissionDto)
     {
         var requestedPermissions = modifyPermissionDto.Permissions.ToList();
-        var result = new Result<IEnumerable<Models.Permission>>();
+        var result = new Result<IEnumerable<UserPermissionDto>>();
 
         var actorUser = await GetUser();
         var targetUser = await AuthorizationService.GetUserByIdAsync(modifyPermissionDto.TargetUserId);
@@ -48,8 +82,16 @@ public class PermissionService : ServiceBase, IPermissionService
             );
         }
 
-        var actorPermissions = await _unitOfWork.PermissionRepository.GetUserPermissions(actorUser.Id);
+        var actorPermissions = actorUser.Permissions ?? [];
         var isActorAdmin = actorUser.IsAdmin();
+        var targetUserHasAccessPermission = targetUser.Permissions?.Any(p => p.Permission!.Code == Permissions.Access.Grant) == true;
+
+        if (!isActorAdmin && !actorUser.IsManager() && targetUserHasAccessPermission)
+        {
+            return result.AddError(
+                PermissionErrors.LockingPermissionListForAccessGrantedTargetUser()
+            );
+        }
 
         if (!isActorAdmin && (targetUser.IsManager() || targetUser.IsAdmin()))
         {
@@ -64,7 +106,7 @@ public class PermissionService : ServiceBase, IPermissionService
             );
         }
 
-        if (!isActorAdmin && !actorPermissions.Any(perm => perm.Code == Permissions.Access.Grant))
+        if (!isActorAdmin && !actorPermissions.Any(perm => perm.Permission!.Code == Permissions.Access.Grant))
         {
             return result.AddError(PermissionErrors.GrantPermissionRequiredGrantAccess());
         }
@@ -94,13 +136,12 @@ public class PermissionService : ServiceBase, IPermissionService
                 return result;
             }
         }
+        targetUser.Permissions ??= [];
 
-        var targetUserPermissions = await _unitOfWork.PermissionRepository.GetUserPermissions(targetUser.Id);
-
-        var requestedActions =
+        var requestedPermMap =
             requestedPermissions.ToDictionary(
                 x => x.PermissionCode,
-                x => x.Action);
+                x => new { x.Action, x.Scope });
 
         foreach (var permission in modifyingPermissions)
         {
@@ -110,30 +151,48 @@ public class PermissionService : ServiceBase, IPermissionService
                     PermissionErrors.ForbiddenAccessGranting()
                 );
             }
+            var reqPerm = requestedPermMap[permission.Code!];
 
-            if (!actorPermissions.Any((p) => p.Code == permission.Code))
+            bool permCodeMatch = true, scopeMatch = true;
+            if (!actorPermissions.Any((p) => (permCodeMatch = p.Permission!.Code == permission.Code) && (scopeMatch = p.Scope == reqPerm.Scope)))
             {
-                return result.AddError(
-                    PermissionErrors.CannotGrantPermissionYouDoNotHave(permission.Code)
-                );
+                if (!permCodeMatch)
+                {
+                    return result.AddError(
+                        PermissionErrors.CannotGrantPermissionYouDoNotHave(permission.Code)
+                    );
+                }
+                else
+                {
+                    // scope mismatch
+                    return result.AddError(
+                        PermissionErrors.CannotGrantPermissionScopeWhichHigherThanYou(permission.Code, Enum.GetName(reqPerm.Scope) ?? "")
+                    );
+                }
             }
 
-            var action = requestedActions[permission.Code!];
-            var didUserHavePermission = targetUserPermissions
-                .Any(perm => perm.Code == permission.Code);
+            var existingPermission = targetUser.Permissions?
+               .FirstOrDefault(perm => perm.Permission!.Code == permission.Code);
+            var didUserHavePermission = existingPermission is not null;
 
-            if (action == PermissionModificationAction.Grant)
+            if (reqPerm.Action == PermissionModificationAction.Grant)
             {
+                var isScopeChange = didUserHavePermission && existingPermission!.Scope != reqPerm.Scope;
+
+                if (isScopeChange)
+                {
+                    targetUser.Permissions!.Remove(existingPermission!);
+                }
+
                 // if permission not assigned to user before (duplicate pervent)
-                if (!didUserHavePermission)
+                if (!didUserHavePermission || isScopeChange)
                 {
                     var perm = new UserPermission()
                     {
                         Permission = permission,
                         GrantedByUserId = actorUser.Id
                     };
-
-                    targetUser.Permissions.Add(perm);
+                    targetUser.Permissions!.Add(perm);
 
                     await _unitOfWork.PermissionAuditRepository.AddAsync(
                         new()
@@ -141,22 +200,25 @@ public class PermissionService : ServiceBase, IPermissionService
                             Action = PermissionAction.Granted,
                             ActorUser = actorUser,
                             Permission = permission,
-                            TargetUser = targetUser
-
+                            TargetUser = targetUser,
+                            Scope = reqPerm.Scope
                         }
                     );
                 }
             }
             else if (didUserHavePermission)
             {
-                var existingPermission =
-                    targetUser.Permissions
-                        .FirstOrDefault(
-                            p => p.PermissionId == permission.Id);
-
                 if (existingPermission != null)
                 {
-                    targetUser.Permissions.Remove(existingPermission);
+                    // not allowed to revoke higher scope permission
+                    if (existingPermission.Scope == PermissionScope.Self && reqPerm.Scope == PermissionScope.All)
+                    {
+                        return result.AddError(
+                            PermissionErrors.CannotGrantPermissionScopeWhichHigherThanYou(permission.Code, Enum.GetName(reqPerm.Scope) ?? "")
+                        );
+                    }
+
+                    targetUser.Permissions!.Remove(existingPermission);
                     await _unitOfWork.PermissionAuditRepository.AddAsync(
                         new()
                         {
@@ -164,7 +226,6 @@ public class PermissionService : ServiceBase, IPermissionService
                             ActorUser = actorUser,
                             Permission = permission,
                             TargetUser = targetUser
-
                         }
                     );
                 }
