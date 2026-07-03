@@ -13,6 +13,7 @@ using HiTechStore.Core.Helpers.Result;
 using HiTechStore.Core.Common.Interfaces.Infra;
 using HiTechStore.Presentation.Auth;
 using HiTechStore.Presentation.Responses;
+using HiTechStore.Core.Dto.Permission;
 
 namespace HiTechStore.Presentation.Controllers;
 
@@ -150,7 +151,11 @@ public class AuthController : AppControllerBase
                 Email = user.Email,
                 Roles = user.Roles,
                 AvatarUrl = user.AvatarUrl is null ? default : assetRegisterer.GetPublicUrl(user.AvatarUrl),
-                Permissions = user.Permissions?.Select(up => up.Permission!.Code) ?? []
+                Permissions = user.Permissions?.Select(up => new UserPermissionDto()
+                {
+                    Code = up.Permission!.Code,
+                    Scope = up.Scope
+                }) ?? []
             }
         };
         return Ok(authData);
