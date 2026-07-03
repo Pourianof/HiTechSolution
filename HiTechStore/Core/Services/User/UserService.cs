@@ -16,15 +16,18 @@ public class UserService : ServiceBase, IUserService
 {
     private IPublicAssetRegisterer _assetRegisterer;
     private IUnitOfWork _unitOfWork;
+    private UsersServicePermissionHelper _usersServicePermissionHelper;
     public UserService(
         IAuthorizationService authorizationService,
         ICurrentUserProvider currentUserProvider,
         IPublicAssetRegisterer assetRegisterer,
-        IUnitOfWork unitOfWork
+        IUnitOfWork unitOfWork,
+        UsersServicePermissionHelper usersServicePermissionHelper
     ) : base(authorizationService, currentUserProvider)
     {
         _assetRegisterer = assetRegisterer;
         _unitOfWork = unitOfWork;
+        _usersServicePermissionHelper = usersServicePermissionHelper;
     }
 
     public async Task<string> UpdateProfileAvatar(AppFile avatar)
@@ -73,8 +76,17 @@ public class UserService : ServiceBase, IUserService
         }
     }
 
-    public Task<Result<PagedResultDto<UserDto>>> GetUsers(UserQuery query)
+    public async Task<Result<PagedResultDto<UserDto>>> GetUsers(UserQuery query)
     {
-        return _unitOfWork.UserRepository.GetUsers(query);
+        if (await _usersServicePermissionHelper.HasPermissionToGetUsersList(UserIdOrThrow))
+        {
+            return await _unitOfWork.UserRepository.GetUsers(query);
+        }
+
+        throw new NotAllowedException(
+            "Not allowed",
+            "You have not permission to access this service"
+        );
+
     }
 }

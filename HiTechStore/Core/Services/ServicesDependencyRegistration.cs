@@ -30,6 +30,7 @@ public static class ServicesDependencyRegistration
 
         services.AddScoped<ProductPermissionHelper>();
         services.AddScoped<DiscountPermissionHelper>();
+        services.AddScoped<UsersServicePermissionHelper>();
 
         services.AddTransient<ProductServiceHelper>();
 
