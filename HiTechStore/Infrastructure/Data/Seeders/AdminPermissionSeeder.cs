@@ -17,10 +17,12 @@ public static class AdminPermissionSeeder
         var allPermissions = await unitOfWork.PermissionRepository.GetAllAsync();
         admin.Permissions ??= [];
 
+        await unitOfWork.Complete();
+
         foreach (var permission in allPermissions)
         {
             var exists = admin.Permissions.Any(
-                perm => perm.Id == permission.Id
+                perm => perm.PermissionId == permission.Id
             );
 
             if (!exists)
@@ -31,6 +33,7 @@ public static class AdminPermissionSeeder
                     PermissionId = permission.Id,
                     GrantedAt = DateTime.UtcNow,
                     GrantedByUserId = admin.Id,
+                    Scope = PermissionScope.All
                 };
 
                 admin.Permissions.Add(newPermission);
