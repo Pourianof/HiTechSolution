@@ -1,22 +1,17 @@
 using HiTechStore.Core.Models;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace HiTechStore.Infrastructure.Data.EntityBuilder
+namespace HiTechStore.Infrastructure.Data.EntityBuilder;
+
+public class CategoryEntityBuilder : IEntityTypeConfiguration<Category>
 {
-    public class CategoryEntityBuilder
-    {
-        public static void Build(ModelBuilder modelBuilder)
-        {
 
-            modelBuilder.Entity<Category>(
-                (entity) =>
-                {
-                    entity.HasMany(c => c.Properties)
-                        .WithOne()
-                        .OnDelete(DeleteBehavior.Cascade);
-                }
-            );
-        }
+    public void Configure(EntityTypeBuilder<Category> builder)
+    {
+        builder.HasMany(c => c.Properties)
+            .WithOne()
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

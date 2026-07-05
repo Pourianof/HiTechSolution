@@ -2,20 +2,16 @@
 using HiTechStore.Core.Models;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace HiTechStore.Infrastructure.Data.EntityBuilder;
 
-public class DiscountRuleEntityBuilder
+public class DiscountRuleEntityBuilder : IEntityTypeConfiguration<DiscountRule>
 {
-    public static void Build(ModelBuilder modelBuilder)
+    public void Configure(EntityTypeBuilder<DiscountRule> builder)
     {
-        modelBuilder.Entity<DiscountRule>(
-             (entity) =>
-             {
-                 entity.ToTable("DiscountRules");
-                 entity.OwnsOne(rule => rule.DiscountAction)
-                    .WithOwner();
-             }
-         );
+        builder.ToTable("DiscountRules");
+        builder.OwnsOne(rule => rule.DiscountAction)
+           .WithOwner();
     }
 }

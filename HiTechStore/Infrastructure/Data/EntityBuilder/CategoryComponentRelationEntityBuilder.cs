@@ -1,19 +1,15 @@
 using HiTechStore.Core.Models;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace HiTechStore.Infrastructure.Data.EntityBuilder
 {
-    public class CategoryComponentRelationEntityBuilder
+    public class CategoryComponentRelationEntityBuilder : IEntityTypeConfiguration<CategoryComponent>
     {
-        public static void Build(ModelBuilder modelBuilder)
+        public void Configure(EntityTypeBuilder<CategoryComponent> builder)
         {
-            modelBuilder.Entity<CategoryComponent>(
-                entity =>
-                {
-                    entity.HasKey(categoryComponent => new { categoryComponent.ComponentTypeId, categoryComponent.CategoryId });
-                }
-            );
+            builder.HasKey(categoryComponent => new { categoryComponent.ComponentTypeId, categoryComponent.CategoryId });
         }
     }
 }

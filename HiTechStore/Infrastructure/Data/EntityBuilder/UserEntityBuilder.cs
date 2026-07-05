@@ -1,16 +1,14 @@
 using HiTechStore.Core.Models;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace HiTechStore.Infrastructure.Data.EntityBuilder;
 
-public static class UserEntityBuilder
+public class UserEntityBuilder : IEntityTypeConfiguration<User>
 {
-    public static void BuildUsertModels(this ModelBuilder modelBuilder)
+    public void Configure(EntityTypeBuilder<User> builder)
     {
-        modelBuilder.Entity<User>(entity =>
-        {
-            entity.Property(u => u.RegisteredAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
-        });
+        builder.Property(u => u.RegisteredAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
     }
 }

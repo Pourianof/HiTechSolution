@@ -1,42 +1,24 @@
 using HiTechStore.Core.Models;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace HiTechStore.Infrastructure.Data.EntityBuilder;
 
-public static class ConditionComponentModelsEntityBuilder
+public class ConditionComponentModelsEntityBuilder : IEntityTypeConfiguration<ConditionComponent>
 {
-    public static void BuildConditionComponentModels(this ModelBuilder modelBuilder)
+    public void Configure(EntityTypeBuilder<ConditionComponent> builder)
     {
-        modelBuilder.Entity<ConditionComponent>(entity =>
-        {
-            entity.HasKey(cc => cc.ConditionComponentId);
+        builder.HasKey(cc => cc.ConditionComponentId);
 
-            entity.HasMany(cc => cc.SubConditions)
-                .WithOne(cc => cc.Parent)
-                .HasForeignKey(cc => cc.ParentId)
-                .OnDelete(DeleteBehavior.Restrict);
+        builder.HasMany(cc => cc.SubConditions)
+            .WithOne(cc => cc.Parent)
+            .HasForeignKey(cc => cc.ParentId)
+            .OnDelete(DeleteBehavior.Restrict);
 
-            entity.HasOne(cc => cc.Lambda)
-                .WithOne(l => l.OwnerCondition)
-                .HasForeignKey<ConditionLambda>(l => l.OwnerConditionId)
-                .OnDelete(DeleteBehavior.Restrict);
-        });
-
-        modelBuilder.Entity<ConditionLambda>(entity =>
-        {
-            entity.HasKey(l => l.ConditionLambdaId);
-
-            // 🔥 این قسمت مهمه
-            entity.HasOne(l => l.Body)
-                .WithMany() // هیچ navigation برعکس نداره
-                .HasForeignKey(l => l.BodyId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // 🔥 اینم صریح تعریف کن (حتی اگر بالا هست)
-            entity.HasOne(l => l.OwnerCondition)
-                .WithOne(c => c.Lambda)
-                .HasForeignKey<ConditionLambda>(l => l.OwnerConditionId);
-        });
+        builder.HasOne(cc => cc.Lambda)
+            .WithOne(l => l.OwnerCondition)
+            .HasForeignKey<ConditionLambda>(l => l.OwnerConditionId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

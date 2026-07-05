@@ -1,38 +1,34 @@
 using HiTechStore.Core.Models;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace HiTechStore.Infrastructure.Data.EntityBuilder;
 
-public static class CommentEntityBuilder
+public class CommentEntityBuilder : IEntityTypeConfiguration<Comment>
 {
-    public static void BuildCommentEntity(this ModelBuilder modelBuilder)
+    public void Configure(EntityTypeBuilder<Comment> builder)
     {
-        modelBuilder.Entity<Comment>(
-            entity =>
-            {
-                entity
-                    .HasOne(c => c.Product)
-                    .WithMany(p => p.Comments)
-                    .HasForeignKey(c => c.ProductId);
+        builder
+            .HasOne(c => c.Product)
+            .WithMany(p => p.Comments)
+            .HasForeignKey(c => c.ProductId);
 
 
-                entity
-                    .HasOne(c => c.User)
-                    .WithMany()
-                    .HasForeignKey(c => c.UserId)
-                    .IsRequired();
+        builder
+            .HasOne(c => c.User)
+            .WithMany()
+            .HasForeignKey(c => c.UserId)
+            .IsRequired();
 
-                entity.HasIndex(p => p.RateId).IsUnique(false);
+        builder.HasIndex(p => p.RateId).IsUnique(false);
 
-                entity
-                    .HasOne(c => c.Rate)
-                    .WithOne()
-                    .IsRequired(false)
-                    .HasForeignKey<Comment>(c => c.RateId);
+        builder
+            .HasOne(c => c.Rate)
+            .WithOne()
+            .IsRequired(false)
+            .HasForeignKey<Comment>(c => c.RateId);
 
-                entity.Property(c => c.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
-            }
-        );
+        builder.Property(c => c.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
     }
 }

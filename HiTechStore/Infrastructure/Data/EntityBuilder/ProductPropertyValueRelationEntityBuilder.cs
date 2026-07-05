@@ -1,22 +1,17 @@
 using HiTechStore.Core.Models;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace HiTechStore.Infrastructure.Data.EntityBuilder
+namespace HiTechStore.Infrastructure.Data.EntityBuilder;
+
+public class ProductPropertyValueRelationEntityBuilder : IEntityTypeConfiguration<ProductPropertyValue>
 {
-    public class ProductPropertyValueRelationEntityBuilder
+    public void Configure(EntityTypeBuilder<ProductPropertyValue> builder)
     {
-        public static void Build(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<ProductPropertyValue>(
-                entity =>
-                {
-                    entity.HasKey(p => new { p.ProductId, p.PropertyId });
-                    entity.HasOne(ppv => ppv.Product)
-                        .WithMany(p => p.Properties);
-                    entity.HasOne(ppv => ppv.Property);
-                }
-            );
-        }
+        builder.HasKey(p => new { p.ProductId, p.PropertyId });
+        builder.HasOne(ppv => ppv.Product)
+            .WithMany(p => p.Properties);
+        builder.HasOne(ppv => ppv.Property);
     }
 }

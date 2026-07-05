@@ -1,17 +1,14 @@
 using HiTechStore.Core.Models;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace HiTechStore.Infrastructure.Data.EntityBuilder;
 
-public static class PermissionAuditEntityBuilder
+public class PermissionAuditEntityBuilder : IEntityTypeConfiguration<PermissionAudit>
 {
-    public static void BuildPermissionAuditBuilderEntity(this ModelBuilder modelBuilder)
+    public void Configure(EntityTypeBuilder<PermissionAudit> builder)
     {
-
-        modelBuilder.Entity<PermissionAudit>(entity =>
-        {
-            entity.Property(u => u.OccurredAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
-        });
+        builder.Property(u => u.OccurredAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
     }
 }

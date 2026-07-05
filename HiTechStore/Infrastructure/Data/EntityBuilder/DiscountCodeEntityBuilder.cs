@@ -1,21 +1,17 @@
 using HiTechStore.Core.Models;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace HiTechStore.Infrastructure.Data.EntityBuilder;
 
-public class DiscountCodeEntityBuilder
+public class DiscountCodeEntityBuilder : IEntityTypeConfiguration<Discount>
 {
-    public static void Build(ModelBuilder modelBuilder)
+    public void Configure(EntityTypeBuilder<Discount> builder)
     {
-        modelBuilder.Entity<Discount>(
-             (entity) =>
-             {
-                 entity.ToTable("Discounts");
-                 entity.Property(dc => dc.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
-                 entity.Property(dc => dc.IsDeactivated).HasDefaultValue(false);
-                 entity.HasOne(dc => dc.Creator).WithMany().HasForeignKey(dc => dc.CreatorId);
-             }
-         );
+        builder.ToTable("Discounts");
+        builder.Property(dc => dc.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+        builder.Property(dc => dc.IsDeactivated).HasDefaultValue(false);
+        builder.HasOne(dc => dc.Creator).WithMany().HasForeignKey(dc => dc.CreatorId);
     }
 }

@@ -1,9 +1,10 @@
 
-using HiTechStore.Infrastructure.Data.EntityBuilder;
 using HiTechStore.Core.Models;
 
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+
+using System.Reflection;
 
 namespace HiTechStore.Infrastructure.Data
 {
@@ -23,25 +24,7 @@ namespace HiTechStore.Infrastructure.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            ProductEntityBuilder.Build(modelBuilder);
-            ProductScoreEntityBuilder.Build(modelBuilder);
-            CategoryEntityBuilder.Build(modelBuilder);
-            ComponentTypeEntityBuilder.Build(modelBuilder);
-            ComponentModelEntityBuilder.Build(modelBuilder);
-            ProductPropertyValueRelationEntityBuilder.Build(modelBuilder);
-            BrandEntityBuilder.Build(modelBuilder);
-            BrandModelEntityBuilder.Build(modelBuilder);
-            CategoryComponentRelationEntityBuilder.Build(modelBuilder);
-            CartEntityBuilder.Build(modelBuilder);
-            OrderEntityBuilder.Build(modelBuilder);
-            DiscountCodeEntityBuilder.Build(modelBuilder);
-            DiscountEntityEntityBuilder.Build(modelBuilder);
-            DiscountRuleEntityBuilder.Build(modelBuilder);
-            modelBuilder.BuildConditionComponentModels();
-            modelBuilder.BuildUsertModels();
-            modelBuilder.BuildCommentEntity();
-            modelBuilder.BuildUserPermissionEntity();
-            modelBuilder.BuildPermissionAuditBuilderEntity();
+            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }
 
         public DbSet<Product> Products { get; set; }

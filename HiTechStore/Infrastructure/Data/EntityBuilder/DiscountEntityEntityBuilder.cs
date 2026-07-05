@@ -1,36 +1,18 @@
-using System;
-
 using HiTechStore.Core.Models;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace HiTechStore.Infrastructure.Data.EntityBuilder;
 
-public class DiscountEntityEntityBuilder
+public class DiscountEntityEntityBuilder : IEntityTypeConfiguration<DiscountEntity>
 {
-    public static void Build(ModelBuilder modelBuilder)
+    public void Configure(EntityTypeBuilder<DiscountEntity> builder)
     {
-        modelBuilder.Entity<DiscountEntity>(
-             (entity) =>
-             {
-                 entity.ToTable("DiscountEntities");
-                 entity.HasIndex(p => p.Name).IsUnique();
-                 entity.HasMany(de => de.Properties)
-                    .WithOne(dep => dep.Entity)
-                    .HasForeignKey(dep => dep.EntityId);
-             }
-         );
-
-        modelBuilder.Entity<DiscountEntityProperty>(
-            (entity) =>
-            {
-                entity.ToTable("DiscountEntityProperties");
-                entity.HasIndex(p => new { p.EntityId, p.Name }).IsUnique();
-                entity.HasOne(dep => dep.SubEntity)
-                    .WithMany()
-                    .HasForeignKey(dep => dep.SubEntityId)
-                    .IsRequired(false);
-            }
-        );
+        builder.ToTable("DiscountEntities");
+        builder.HasIndex(p => p.Name).IsUnique();
+        builder.HasMany(de => de.Properties)
+           .WithOne(dep => dep.Entity)
+           .HasForeignKey(dep => dep.EntityId);
     }
 }

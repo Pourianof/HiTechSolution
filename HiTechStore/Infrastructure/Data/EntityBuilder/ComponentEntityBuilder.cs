@@ -1,18 +1,13 @@
 using HiTechStore.Core.Models;
 
 using Microsoft.EntityFrameworkCore;
-public class ComponentTypeEntityBuilder
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+public class ComponentTypeEntityBuilder : IEntityTypeConfiguration<ComponentType>
 {
-    public static void Build(ModelBuilder modelBuilder)
+    public void Configure(EntityTypeBuilder<ComponentType> builder)
     {
-        modelBuilder.Entity<ComponentType>(
-            entity =>
-            {
-                entity.HasMany(c => c.Properties)
-                    .WithOne()
-                    .OnDelete(DeleteBehavior.Cascade);
-
-            }
-        );
+        builder.HasMany(c => c.Properties)
+            .WithOne()
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

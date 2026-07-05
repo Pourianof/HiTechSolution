@@ -1,22 +1,18 @@
 using HiTechStore.Core.Models;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace HiTechStore.Infrastructure.Data.EntityBuilder
+namespace HiTechStore.Infrastructure.Data.EntityBuilder;
+
+public class BrandEntityBuilder : IEntityTypeConfiguration<Brand>
 {
-    public class BrandEntityBuilder
+    public void Configure(EntityTypeBuilder<Brand> builder)
     {
-        public static void Build(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Brand>(
-                (entity) =>
-                {
-                    entity
-                        .HasMany((b) => b.Models)
-                        .WithOne(bm => bm.Brand)
-                        .OnDelete(DeleteBehavior.Cascade);
-                }
-            );
-        }
+        builder
+            .HasMany((b) => b.Models)
+            .WithOne(bm => bm.Brand)
+            .OnDelete(DeleteBehavior.Cascade);
+
     }
 }

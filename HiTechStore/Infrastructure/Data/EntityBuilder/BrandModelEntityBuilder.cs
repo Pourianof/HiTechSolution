@@ -1,21 +1,16 @@
 using HiTechStore.Core.Models;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace HiTechStore.Infrastructure.Data.EntityBuilder
+namespace HiTechStore.Infrastructure.Data.EntityBuilder;
+
+public class BrandModelEntityBuilder : IEntityTypeConfiguration<BrandModel>
 {
-    public class BrandModelEntityBuilder
+    public void Configure(EntityTypeBuilder<BrandModel> builder)
     {
-        public static void Build(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<BrandModel>(
-                 (entity) =>
-                 {
-                     entity
-                         .HasIndex(bm => new { bm.NormalizedName, bm.BrandId })
-                         .IsUnique();
-                 }
-             );
-        }
+        builder
+            .HasIndex(bm => new { bm.NormalizedName, bm.BrandId })
+            .IsUnique();
     }
 }

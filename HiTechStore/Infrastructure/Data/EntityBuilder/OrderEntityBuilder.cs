@@ -2,21 +2,16 @@
 using HiTechStore.Core.Models;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace HiTechStore.Infrastructure.Data.EntityBuilder
+namespace HiTechStore.Infrastructure.Data.EntityBuilder;
+
+public class OrderEntityBuilder : IEntityTypeConfiguration<Order>
 {
-    public class OrderEntityBuilder
+    public void Configure(EntityTypeBuilder<Order> builder)
     {
-        public static void Build(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Order>(
-                 (entity) =>
-                 {
-                     entity.HasMany(o => o.Items)
-                        .WithOne(o => o.Order)
-                        .OnDelete(DeleteBehavior.Cascade);
-                 }
-             );
-        }
+        builder.HasMany(o => o.Items)
+           .WithOne(o => o.Order)
+           .OnDelete(DeleteBehavior.Cascade);
     }
 }

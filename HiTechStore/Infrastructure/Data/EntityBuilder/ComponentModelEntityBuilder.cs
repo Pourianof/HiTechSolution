@@ -1,21 +1,17 @@
 using HiTechStore.Core.Models;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace HiTechStore.Infrastructure.Data.EntityBuilder
 {
-    public class ComponentModelEntityBuilder
+    public class ComponentModelEntityBuilder : IEntityTypeConfiguration<ComponentModel>
     {
-        public static void Build(ModelBuilder modelBuilder)
+        public void Configure(EntityTypeBuilder<ComponentModel> builder)
         {
-            modelBuilder.Entity<ComponentModel>(
-                (entity) =>
-                {
-                    entity
-                        .HasIndex(m => new { m.ComponentTypeId, m.BrandModelId })
-                        .IsUnique();
-                }
-            );
+            builder
+                .HasIndex(m => new { m.ComponentTypeId, m.BrandModelId })
+                .IsUnique();
         }
     }
 }
