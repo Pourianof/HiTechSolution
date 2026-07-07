@@ -95,9 +95,9 @@ namespace HiTechStore.Infrastructure.Data
             _context.Dispose();
         }
 
-        IRepositoryModelBase<TModel> IUnitOfWork.RespositoryOf<TModel>()
+        IRepositoryModelBase<TModel, TId> IUnitOfWork.RespositoryOf<TModel, TId>()
         {
-            return new RepositoryCore<TModel>(_context);
+            return new RepositoryCore<TModel, TId>(_context);
         }
 
         public async Task<ITransaction> StartTransaction()

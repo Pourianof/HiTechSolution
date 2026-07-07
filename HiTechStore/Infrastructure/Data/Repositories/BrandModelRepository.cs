@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HiTechStore.Infrastructure.Data.Repositories;
 
-public class BrandModelRepository : Repository<BrandModel, BrandModelDto>, IBrandModelRepository
+public class BrandModelRepository : RepositoryWithIntegerId<BrandModel, BrandModelDto>, IBrandModelRepository
 {
     public BrandModelRepository(HiTechStoreDbContext context, IMapper mapper) : base(context, mapper) { }
 

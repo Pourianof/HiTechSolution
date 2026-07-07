@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HiTechStore.Infrastructure.Data.Repositories
 {
-    public class ProductRepository : Repository<Product, ProductDto, ProductQuery>, IProductRepository
+    public class ProductRepository : RepositoryWithIntegerId<Product, ProductDto, ProductQuery>, IProductRepository
     {
         public ProductRepository(HiTechStoreDbContext context, IMapper mapper, IConditionComponentTreeToLambdaExpression conditionToExpressionMapper) : base(context, mapper)
         {

@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HiTechStore.Infrastructure.Data.Repositories;
 
-public class ComponentRepository : Repository<ComponentType, ComponentTypeDto>, IComponentRepository
+public class ComponentRepository : RepositoryWithIntegerId<ComponentType, ComponentTypeDto>, IComponentRepository
 {
     public ComponentRepository(HiTechStoreDbContext context, IMapper mapper) : base(context, mapper)
     {

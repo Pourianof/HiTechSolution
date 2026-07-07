@@ -5,7 +5,7 @@ using HiTechStore.Core.Models;
 
 namespace HiTechStore.Core.Common.Interfaces.Infra.Repositories
 {
-    public interface IProductRepository : IRepository<Product, ProductDto, ProductQuery>
+    public interface IProductRepository : IRepositoryWithIntegerId<Product, ProductDto, ProductQuery>
     {
         Task<ProductDto?> GetByIdAsync(int id, string? userId, ProductQuery? productQuery = default);
         Task<IEnumerable<ProductVariation>> GetAllVariations(IEnumerable<int> variationIds);

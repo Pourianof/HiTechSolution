@@ -6,14 +6,15 @@ namespace HiTechStore.Helpers.Types
 {
     public static class ModelExtensions
     {
-        public static int? GetId(this IModel model)
+        public static TId? GetId<TId>(this IModel model)
+            where TId : struct
         {
             var modelType = model.GetType();
 
             var prop = ModelHelper.GetModelIdPropertyInfo(modelType)?.GetValue(model);
 
 
-            return int.TryParse(prop?.ToString(), out var id) ? id : null;
+            return prop as TId?;
         }
     }
 

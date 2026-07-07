@@ -5,7 +5,7 @@ using HiTechStore.Core.Models;
 
 namespace HiTechStore.Core.Common.Interfaces.Infra.Repositories;
 
-public interface ICommentRepository : IRepository<Comment, CommentDto>
+public interface ICommentRepository : IRepositoryWithIntegerId<Comment, CommentDto>
 {
     Task<PagedResultDto<CommentDto>> GetCommentsOfProduct(int productId, BaseQuery? query, string? userId = default);
     Task<CommentDto?> GetCommentOfUserForProduct(int productId, string userId);

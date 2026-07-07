@@ -6,13 +6,14 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace HiTechStore.Presentation.Controllers.ActionFilters
 {
-    public abstract class ModelAccessorBaseActionFilterAttribute<TModel> : ActionFilterAttribute
+    public abstract class ModelAccessorBaseActionFilterAttribute<TModel, TId> : ActionFilterAttribute
     where TModel : class, IModel
+    where TId : struct
     {
 
         protected readonly IUnitOfWork UnitOfWork;
-        protected IRepositoryModelBase<TModel> Repo { get; set; }
-        private readonly System.Type _entityType;
+        protected IRepositoryModelBase<TModel, TId> Repo { get; set; }
+        private readonly Type _entityType;
 
 
         public ModelAccessorBaseActionFilterAttribute(IUnitOfWork unitOfWork)
@@ -20,7 +21,7 @@ namespace HiTechStore.Presentation.Controllers.ActionFilters
             UnitOfWork = unitOfWork;
             _entityType = typeof(TModel);
 
-            var repo = unitOfWork.GetRepositoryOfModelType<TModel>();
+            var repo = unitOfWork.GetRepositoryOfModelType<TModel, TId>();
 
             if (repo is null)
             {

@@ -6,7 +6,7 @@ using HiTechStore.Core.Models;
 
 namespace HiTechStore.Infrastructure.Data.Repositories;
 
-public class ProductVariationRepository : Repository<ProductVariation, ProductVariationDto>, IProductVariationRepository
+public class ProductVariationRepository : RepositoryWithIntegerId<ProductVariation, ProductVariationDto>, IProductVariationRepository
 {
     public ProductVariationRepository(HiTechStoreDbContext context, IMapper mapper) : base(context, mapper)
     {

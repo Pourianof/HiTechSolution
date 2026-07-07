@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HiTechStore.Infrastructure.Data.Repositories;
 
-public class DiscountEntityRepository : Repository<DiscountEntity, DiscountEntityDto>, IDiscountEntityRepository
+public class DiscountEntityRepository : RepositoryWithIntegerId<DiscountEntity, DiscountEntityDto>, IDiscountEntityRepository
 {
     public DiscountEntityRepository(HiTechStoreDbContext context, IMapper mapper) : base(context, mapper)
     {

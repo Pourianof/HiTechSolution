@@ -1,10 +1,7 @@
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 
 using HiTechStore.Core.Common.Interfaces.Infra.Repositories;
 using HiTechStore.Infrastructure.Data.DTOs;
-using HiTechStore.Infrastructure.Data.DTOs.Brand;
-using HiTechStore.Infrastructure.Data.DTOs.Component;
 using HiTechStore.Infrastructure.Data.Queries;
 using HiTechStore.Core.Models;
 
@@ -12,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HiTechStore.Infrastructure.Data.Repositories
 {
-    public class CategoryRepository : Repository<Category, CategoryDTO>, ICategoryRepository
+    public class CategoryRepository : RepositoryWithIntegerId<Category, CategoryDTO>, ICategoryRepository
     {
         public CategoryRepository(HiTechStoreDbContext context, IMapper mapper) : base(context, mapper)
         {

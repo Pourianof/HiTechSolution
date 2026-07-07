@@ -4,7 +4,7 @@ using HiTechStore.Core.Models;
 
 namespace HiTechStore.Core.Common.Interfaces.Infra.Repositories;
 
-public interface IDiscountCodeRepository : IRepository<Discount, DiscountDto, DiscountQuery>
+public interface IDiscountCodeRepository : IRepositoryWithIntegerId<Discount, DiscountDto, DiscountQuery>
 {
     public Task<IEnumerable<Discount?>> GetDiscountCodeByNameAsync(string name);
     public Task<IEnumerable<DiscountDto?>> GetDiscountCodeByNameProjectedAsync(string name);

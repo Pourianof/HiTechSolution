@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HiTechStore.Infrastructure.Data.Repositories;
 
-public class CommentRepository : Repository<Comment, CommentDto>, ICommentRepository
+public class CommentRepository : RepositoryWithIntegerId<Comment, CommentDto>, ICommentRepository
 {
     public CommentRepository(HiTechStoreDbContext context, IMapper mapper) : base(context, mapper)
     {

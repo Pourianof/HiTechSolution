@@ -3,7 +3,7 @@ using HiTechStore.Core.Models;
 
 namespace HiTechStore.Core.Common.Interfaces.Infra.Repositories;
 
-public interface IDiscountEntityRepository : IRepository<DiscountEntity, DiscountEntityDto>
+public interface IDiscountEntityRepository : IRepositoryWithIntegerId<DiscountEntity, DiscountEntityDto>
 {
     Task<DiscountEntityProperty?> GetPropertyById(int propertyId);
     Task<DiscountEntityProperty?> GetPropertyByEntityAsync(string entityName, string propertyName);

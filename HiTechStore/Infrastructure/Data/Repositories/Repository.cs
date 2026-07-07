@@ -12,12 +12,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HiTechStore.Infrastructure.Data.Repositories
 {
-    public class RepositoryCore<TModel>(HiTechStoreDbContext context) : IRepositoryModelBase<TModel>
+    public class RepositoryCore<TModel, TId>(HiTechStoreDbContext context) : IRepositoryModelBase<TModel, TId>
         where TModel : class, IModel
+        where TId : struct
     {
         protected readonly HiTechStoreDbContext _context = context;
         protected readonly DbSet<TModel> _dbSet = context.Set<TModel>();
-        public virtual async Task<TModel?> GetModelByIdAsync(int id)
+        public virtual async Task<TModel?> GetModelByIdAsync(TId id)
         {
             var query = GetByIdAsyncQueryBuilder(_dbSet);
             return await query.FindById(id).FirstOrDefaultAsync();
@@ -39,7 +40,7 @@ namespace HiTechStore.Infrastructure.Data.Repositories
             return Task.CompletedTask;
         }
 
-        public virtual Task Delete(int id)
+        public virtual Task Delete(TId id)
         {
             var entity = _dbSet.Find(id);
             if (entity != null)
@@ -49,12 +50,12 @@ namespace HiTechStore.Infrastructure.Data.Repositories
             return Task.CompletedTask;
         }
 
-        public virtual Task<int> DeleteImmediately(int id)
+        public virtual Task<int> DeleteImmediately(TId id)
         {
             return _dbSet.FindById(id).ExecuteDeleteAsync();
         }
 
-        public virtual Task<bool> IsExistsAsync(int id)
+        public virtual Task<bool> IsExistsAsync(TId id)
         {
             var modelType = typeof(TModel);
             var modelIdName = modelType.GetProperties().FirstOrDefault(p => p.Name.Contains("Id"))?.Name;
@@ -62,19 +63,19 @@ namespace HiTechStore.Infrastructure.Data.Repositories
             {
                 throw new InvalidOperationException("Entity does not have an Id property.");
             }
-            return _dbSet.AnyAsync(e => EF.Property<int>(e, modelIdName) == id);
+            return _dbSet.AnyAsync(e => EqualityComparer<TId>.Default.Equals(EF.Property<TId>(e, modelIdName), id));
         }
 
-        public async Task<IEnumerable<ResourceExistenceResult>> CheckExistence(IEnumerable<int> ids)
+        public async Task<IEnumerable<ResourceExistenceResult<TId>>> CheckExistence(IEnumerable<TId> ids)
         {
             var existingResources = await _context.Set<TModel>()
                .WhereIdExists(ids)
                .ToListAsync();
 
-            var existingIds = existingResources.Select((res) => res.GetId());
+            var existingIds = existingResources.Select((res) => res.GetId<TId>());
 
             return ids
-                 .Select(id => new ResourceExistenceResult
+                 .Select(id => new ResourceExistenceResult<TId>
                  {
                      Id = id,
                      DoesExist = existingIds.Contains(id)
@@ -82,7 +83,7 @@ namespace HiTechStore.Infrastructure.Data.Repositories
                  .ToList();
         }
 
-        public async Task<IEnumerable<TModel>> GetAll(IEnumerable<int> ids)
+        public async Task<IEnumerable<TModel>> GetAll(IEnumerable<TId> ids)
         {
             return await _dbSet.WhereIdExists(ids).ToListAsync();
         }
@@ -92,20 +93,24 @@ namespace HiTechStore.Infrastructure.Data.Repositories
             return await _dbSet.ToListAsync();
         }
 
-        public async Task<IEnumerable<ResourceExistenceResultWithModel<TModel>>> CheckExistence(IEnumerable<int> ids, bool includeModel = false)
+        public async Task<IEnumerable<ResourceExistenceResultWithModel<TModel, TId>>> CheckExistence(IEnumerable<TId> ids, bool includeModel = false)
         {
             var existingResources = await _context.Set<TModel>()
                .WhereIdExists(ids)
                .ToListAsync();
 
-            var existingIds = existingResources.Select((res) => res.GetId());
+            var existingIds = existingResources
+                .Select((res) => res.GetId<TId>())
+                .Where((resId) => resId.HasValue)
+                .Select((resId) => resId!.Value);
 
             return ids
-                 .Select(id => new ResourceExistenceResultWithModel<TModel>
+                 .Select(id => new ResourceExistenceResultWithModel<TModel, TId>
                  {
                      Id = id,
                      DoesExist = existingIds.Contains(id),
-                     Model = existingResources.Where((res) => res.GetId() == id).FirstOrDefault()
+                     Model = existingResources.FirstOrDefault(res =>
+                         res.GetId<TId>() is TId resId && EqualityComparer<TId>.Default.Equals(resId, id))
                  })
                  .ToList();
         }
@@ -120,22 +125,23 @@ namespace HiTechStore.Infrastructure.Data.Repositories
             return _dbSet.AnyAsync();
         }
     }
-    public class Repository<T, O, Q>(HiTechStoreDbContext context, IMapper mapper) :
-        RepositoryCore<T>(context), IRepository<T, O, Q>
-            where T : class, IModel
-            where Q : BaseQuery
-            where O : class
+    public class Repository<TModel, TProject, TQuery, TId>(HiTechStoreDbContext context, IMapper mapper) :
+        RepositoryCore<TModel, TId>(context), IRepository<TModel, TProject, TQuery, TId>
+            where TModel : class, IModel
+            where TQuery : BaseQuery
+            where TProject : class
+            where TId : struct
     {
         protected readonly IMapper _mapper = mapper;
 
-        protected virtual IQueryable<T> GetAllQueryBuilder(IQueryable<T> queryBuilder, Q? queyParams = null)
+        protected virtual IQueryable<TModel> GetAllQueryBuilder(IQueryable<TModel> queryBuilder, TQuery? queyParams = null)
         {
             return queryBuilder;
         }
 
 
 
-        private RepositoryHelper.QueryParamAppliedQuery<T> BuildQueryBuilderBasedOnQueryParams(IQueryable<T> baseQuery, Q? queryParams)
+        private RepositoryHelper.QueryParamAppliedQuery<TModel> BuildQueryBuilderBasedOnQueryParams(IQueryable<TModel> baseQuery, TQuery? queryParams)
         {
             return RepositoryHelper.BuildQueryBuilderBasedOnQueryParams(
                 GetAllQueryBuilder(baseQuery, queryParams),
@@ -143,7 +149,7 @@ namespace HiTechStore.Infrastructure.Data.Repositories
             );
         }
 
-        protected async Task<PagedResultDto<TOut>> GetPagedResult<TOut>(IQueryable<T> baseQuery, Q? queryParams)
+        protected async Task<PagedResultDto<TOut>> GetPagedResult<TOut>(IQueryable<TModel> baseQuery, TQuery? queryParams)
         {
             var query = BuildQueryBuilderBasedOnQueryParams(baseQuery, queryParams);
             return new PagedResultDto<TOut>()
@@ -155,43 +161,43 @@ namespace HiTechStore.Infrastructure.Data.Repositories
             };
         }
 
-        protected Task<PagedResultDto<TOut>> GetPagedResult<TOut>(Q? queryParams)
+        protected Task<PagedResultDto<TOut>> GetPagedResult<TOut>(TQuery? queryParams)
         {
             return GetPagedResult<TOut>(_dbSet.AsQueryable(), queryParams);
         }
 
-        private Task<PagedResultDto<TOut>> BaseGetAll<TOut>(Q? queryParams)
+        private Task<PagedResultDto<TOut>> BaseGetAll<TOut>(TQuery? queryParams)
         {
             return GetPagedResult<TOut>(queryParams);
         }
 
-        public Task<PagedResultDto<TProject>> GetAllProjectToAsync<TProject>(Q? queryParams)
+        public Task<PagedResultDto<TProjection>> GetAllProjectToAsync<TProjection>(TQuery? queryParams)
+        {
+            return GetPagedResult<TProjection>(queryParams);
+        }
+        public virtual Task<PagedResultDto<TProject>> GetAllProjectedAsync(TQuery queryParams)
         {
             return GetPagedResult<TProject>(queryParams);
         }
-        public virtual Task<PagedResultDto<O>> GetAllProjectedAsync(Q queryParams)
+
+        protected virtual IQueryable<TProject> HandleProject(IQueryable<TModel> queryable, TQuery? queryParams = default)
         {
-            return GetPagedResult<O>(queryParams);
+            return HandleProject<TProject>(queryable, queryParams);
         }
 
-        protected virtual IQueryable<O> HandleProject(IQueryable<T> queryable, Q? queryParams = default)
-        {
-            return HandleProject<O>(queryable, queryParams);
-        }
-
-        protected virtual IQueryable<TOut> HandleProject<TOut>(IQueryable<T> queryable, Q? queryParams = default)
+        protected virtual IQueryable<TOut> HandleProject<TOut>(IQueryable<TModel> queryable, TQuery? queryParams = default)
         {
             return queryable.ProjectTo<TOut>(_mapper.ConfigurationProvider);
         }
 
-        protected IQueryable<TOut> Project<TOut>(IQueryable<T> queryable, Q? queryParams = default)
+        protected IQueryable<TOut> Project<TOut>(IQueryable<TModel> queryable, TQuery? queryParams = default)
         {
             var outType = typeof(TOut);
-            if (outType == typeof(T))
+            if (outType == typeof(TModel))
             {
                 return (IQueryable<TOut>)queryable;
             }
-            if (outType == typeof(O))
+            if (outType == typeof(TProject))
             {
                 return (IQueryable<TOut>)HandleProject(queryable, queryParams);
             }
@@ -199,18 +205,18 @@ namespace HiTechStore.Infrastructure.Data.Repositories
             return queryable.ProjectTo<TOut>(_mapper.ConfigurationProvider, queryParams);
         }
 
-        protected IQueryable<O> Project(IQueryable<T> queryable, Q? queryParams = default)
+        protected IQueryable<TProject> Project(IQueryable<TModel> queryable, TQuery? queryParams = default)
         {
-            return Project<O>(queryable, queryParams);
+            return Project<TProject>(queryable, queryParams);
         }
 
-        public async Task<IEnumerable<O>> GetAllProjectedAsync()
+        public async Task<IEnumerable<TProject>> GetAllProjectedAsync()
         {
             return await Project(GetAllQueryBuilder(_dbSet.AsQueryable())).ToListAsync();
 
         }
 
-        public virtual async Task<PagedResultDto<O>> GetPagedProjectedAsync(int limit = 10)
+        public virtual async Task<PagedResultDto<TProject>> GetPagedProjectedAsync(int limit = 10)
         {
             var query = GetAllQueryBuilder(_dbSet.AsQueryable());
             var counts = await query.CountAsync();
@@ -221,7 +227,7 @@ namespace HiTechStore.Infrastructure.Data.Repositories
                 query.Take(limit)
             ).ToListAsync();
 
-            return new PagedResultDto<O>()
+            return new PagedResultDto<TProject>()
             {
                 Items = projectedQuery,
                 PageNumber = 1,
@@ -231,28 +237,29 @@ namespace HiTechStore.Infrastructure.Data.Repositories
         }
 
 
-        public virtual async Task<O?> GetByIdProjectedAsync(int id)
+        public virtual async Task<TProject?> GetByIdProjectedAsync(TId id)
         {
             var query = GetByIdAsyncQueryBuilder(_dbSet);
             return await Project(query.FindById(id)).FirstOrDefaultAsync();
         }
 
-        public Task<TProject?> GetByIdProjectTo<TProject>(int id)
+        public Task<TProjection?> GetByIdProjectTo<TProjection>(TId id)
         {
             var query = GetByIdAsyncQueryBuilder(_dbSet);
-            return Project<TProject>(query.FindById(id)).FirstOrDefaultAsync();
+            return Project<TProjection>(query.FindById(id)).FirstOrDefaultAsync();
         }
 
-        public Task<TProject?> GetByIdProjectTo<TProject>(int id, Q queryParams)
+        public Task<TProjection?> GetByIdProjectTo<TProjection>(TId id, TQuery queryParams)
         {
             var query = GetByIdAsyncQueryBuilder(_dbSet);
-            return Project<TProject>(query.FindById(id), queryParams).FirstOrDefaultAsync();
+            return Project<TProjection>(query.FindById(id), queryParams).FirstOrDefaultAsync();
         }
     }
 
-    public class Repository<T, O> : Repository<T, O, BaseQuery>
-          where T : class, IModel
-          where O : class
+    public class Repository<TModel, TProject, TId> : Repository<TModel, TProject, BaseQuery, TId>
+          where TModel : class, IModel
+          where TProject : class
+          where TId : struct
     {
         public Repository(HiTechStoreDbContext context, IMapper mapper)
             : base(context, mapper)
@@ -260,8 +267,18 @@ namespace HiTechStore.Infrastructure.Data.Repositories
         }
     }
 
-    public class Repository<T> : Repository<T, T, BaseQuery>
-            where T : class, IModel
+    public class Repository<TModel, TId> : Repository<TModel, TModel, BaseQuery, TId>
+            where TModel : class, IModel
+            where TId : struct
+    {
+        public Repository(HiTechStoreDbContext context, IMapper mapper)
+            : base(context, mapper)
+        {
+        }
+    }
+
+    public class Repository<TModel> : Repository<TModel, int>
+            where TModel : class, IModel
     {
         public Repository(HiTechStoreDbContext context, IMapper mapper)
             : base(context, mapper)

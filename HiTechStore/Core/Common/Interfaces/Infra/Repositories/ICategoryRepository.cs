@@ -3,7 +3,7 @@ using HiTechStore.Core.Models;
 
 namespace HiTechStore.Core.Common.Interfaces.Infra.Repositories
 {
-    public interface ICategoryRepository : IRepository<Category, CategoryDTO>
+    public interface ICategoryRepository : IRepositoryWithIntegerId<Category, CategoryDTO>
     {
         IEnumerable<Category> GetCategoriesByName(string name);
         Task<IEnumerable<Property>> GetCategoryPropertiesAsync(int categoryId);

@@ -9,7 +9,7 @@ public class ProductVariationEntityBuilder : IEntityTypeConfiguration<ProductVar
 {
     public void Configure(EntityTypeBuilder<ProductVariation> builder)
     {
-        builder.ToTable("ProductVariations");
+        builder.ToTable("ProductVariation");
         builder.Property(e => e.Price).IsRequired().HasColumnType("decimal(18,2)");
         builder.HasOne(pv => pv.Product)
             .WithMany(p => p.Variations)

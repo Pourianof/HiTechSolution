@@ -15,7 +15,7 @@ namespace HiTechStore.Infrastructure.Data.Repositories;
 
 using DiscountSorter = Expression<Func<Discount, dynamic>>;
 
-public class DiscountCodeRepository : Repository<Discount, DiscountDto, DiscountQuery>, IDiscountCodeRepository
+public class DiscountCodeRepository : RepositoryWithIntegerId<Discount, DiscountDto, DiscountQuery>, IDiscountCodeRepository
 {
     public DiscountCodeRepository(HiTechStoreDbContext context, IMapper mapper) : base(context, mapper)
     {

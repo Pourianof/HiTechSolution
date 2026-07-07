@@ -4,7 +4,7 @@ namespace HiTechStore.Helpers.Types;
 
 public static class QueryableExtentions
 {
-    static public IQueryable<T> FindById<T>(this IQueryable<T> queryable, int id)
+    static public IQueryable<T> FindById<T, TId>(this IQueryable<T> queryable, TId id)
     {
         var type = typeof(T);
         var idProperty = ModelHelper.GetModelIdPropertyInfo(type);
@@ -25,7 +25,7 @@ public static class QueryableExtentions
         return queryable.Where(lambda);
     }
 
-    static public IQueryable<T> WhereIdExists<T>(this IQueryable<T> queryable, IEnumerable<int> ids)
+    static public IQueryable<T> WhereIdExists<T, TId>(this IQueryable<T> queryable, IEnumerable<TId> ids)
     {
         var type = typeof(T);
         var idProperty = ModelHelper.GetModelIdPropertyInfo(type);
