@@ -14,6 +14,13 @@ public static class RateLimiterConfiguration
                 context =>
                 {
                     IPAddress? remoteIpAddress = context.Connection.RemoteIpAddress;
+
+                    if (remoteIpAddress is null)
+                    {
+                        // Test Env
+                        return RateLimitPartition.GetNoLimiter("Test");
+                    }
+
                     if (!IPAddress.IsLoopback(remoteIpAddress!))
                     {
                         var isAuthenticated = context.User.Identity?.IsAuthenticated == true;
