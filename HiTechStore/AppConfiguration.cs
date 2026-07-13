@@ -1,6 +1,7 @@
 using HiTechStore.ApiTokenHandler;
 using HiTechStore.Infrastructure.Data;
 using HiTechStore.Presentation.Auth;
+using HiTechStore.Presentation.RealTime;
 
 namespace HiTechStore;
 
@@ -33,6 +34,8 @@ public static class AppConfiguration
         app.MapControllers();
 
         app.UseHealthChecks("/_health");
+
+        app.MapHub<NotificationHub>(NotificationHub.Route);
 
         await app.DbInitialize();
 

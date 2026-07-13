@@ -1,8 +1,12 @@
 using HiTechStore.Core.Common.Interfaces.Infra;
 using HiTechStore.Infrastructure.AssetStorage;
+using HiTechStore.Infrastructure.Dispatcher;
 using HiTechStore.Infrastructure.Email;
+using HiTechStore.Infrastructure.Event;
+using HiTechStore.Infrastructure.Helpers;
 using HiTechStore.Infrastructure.ThumbnailGenerator;
 using HiTechStore.Infrastructure.Utils;
+using HiTechStore.Infrastructure.Workers;
 
 namespace HiTechStore.Infrastructure;
 
@@ -19,6 +23,13 @@ public static class IngrastructureDependencyRegistration
         services.AddScoped<IEmailSender, MailKitEmailSender>();
         services.AddSingleton<IEmailTemplateRenderer, FileEmailTemplateRenderer>();
         services.AddScoped<IEmailNotificationService, EmailNotificationService>();
+
+        services.UseDispatcher();
+        services.AddScoped<IEventPublisher, EventPublisher>();
+
+        services.AddSingleton<OutboxSignal>();
+
+        services.AddWorkers();
 
         services.UseStorage(configuration);
 

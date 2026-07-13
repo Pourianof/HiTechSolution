@@ -3,6 +3,7 @@ using HiTechStore.Core.Services.Authorization;
 using HiTechStore.Core.Services.Cart;
 using HiTechStore.Core.Services.Comment;
 using HiTechStore.Core.Services.Discount;
+using HiTechStore.Core.Services.Notification;
 using HiTechStore.Core.Services.Permission;
 using HiTechStore.Core.Services.Product;
 using HiTechStore.Core.Services.ProductComment;
@@ -27,6 +28,7 @@ public static class ServicesDependencyRegistration
         services.AddScoped<IUserService, UserService.UserService>();
         services.AddScoped<ICartService, CartService>();
         services.AddScoped<IPermissionService, PermissionService>();
+        services.AddScoped<INotificationService, NotificationService>();
 
         services.AddScoped<ProductPermissionHelper>();
         services.AddScoped<DiscountPermissionHelper>();

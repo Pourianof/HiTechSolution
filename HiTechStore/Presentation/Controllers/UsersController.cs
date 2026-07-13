@@ -92,4 +92,12 @@ public class UsersController(
 
         return ResultCheck(result);
     }
+
+    [HttpGet("{userId:guid}")]
+    public async Task<ActionResult<UserDto>> GetUsers(string userId)
+    {
+        var result = await userService.GetUserById(userId);
+
+        return Ok(result);
+    }
 }

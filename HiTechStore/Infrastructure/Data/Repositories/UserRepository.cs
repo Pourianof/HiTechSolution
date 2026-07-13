@@ -178,6 +178,13 @@ public class UserRepository(
             }
         };
     }
+
+    public Task<UserDto?> GetUserDtoByIdAsync(string id)
+    {
+        return GetBaseUserQuery().Where(
+            user => user.Id == id
+        ).ProjectTo<UserDto>(mapper.ConfigurationProvider).FirstOrDefaultAsync();
+    }
 }
 
 public static class IdentityErrorExtension

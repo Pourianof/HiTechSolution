@@ -3,6 +3,7 @@ using System;
 using HiTechStore.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HiTechStore.Migrations
 {
     [DbContext(typeof(HiTechStoreDbContext))]
-    partial class HiTechStoreDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260707142128_AddOutboxMessageTable")]
+    partial class AddOutboxMessageTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -44,7 +47,7 @@ namespace HiTechStore.Migrations
                     b.HasIndex("NormalizedName")
                         .IsUnique();
 
-                    b.ToTable("Brand", (string)null);
+                    b.ToTable("Brand");
                 });
 
             modelBuilder.Entity("HiTechStore.Core.Models.BrandModel", b =>
@@ -74,7 +77,7 @@ namespace HiTechStore.Migrations
                     b.HasIndex("NormalizedName", "BrandId")
                         .IsUnique();
 
-                    b.ToTable("BrandModel", (string)null);
+                    b.ToTable("BrandModel");
                 });
 
             modelBuilder.Entity("HiTechStore.Core.Models.Cart", b =>
@@ -96,7 +99,7 @@ namespace HiTechStore.Migrations
                     b.HasIndex("ClientId")
                         .IsUnique();
 
-                    b.ToTable("Carts", (string)null);
+                    b.ToTable("Carts");
                 });
 
             modelBuilder.Entity("HiTechStore.Core.Models.CartItem", b =>
@@ -122,7 +125,7 @@ namespace HiTechStore.Migrations
 
                     b.HasIndex("ProductVariationId");
 
-                    b.ToTable("CartItem", (string)null);
+                    b.ToTable("CartItem");
                 });
 
             modelBuilder.Entity("HiTechStore.Core.Models.Category", b =>
@@ -144,7 +147,7 @@ namespace HiTechStore.Migrations
 
                     b.HasKey("CategoryId");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("HiTechStore.Core.Models.CategoryComponent", b =>
@@ -159,7 +162,7 @@ namespace HiTechStore.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("CategoryComponent", (string)null);
+                    b.ToTable("CategoryComponent");
                 });
 
             modelBuilder.Entity("HiTechStore.Core.Models.Color", b =>
@@ -178,7 +181,7 @@ namespace HiTechStore.Migrations
 
                     b.HasKey("ColorId");
 
-                    b.ToTable("Color", (string)null);
+                    b.ToTable("Color");
                 });
 
             modelBuilder.Entity("HiTechStore.Core.Models.Comment", b =>
@@ -220,7 +223,7 @@ namespace HiTechStore.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Comments", (string)null);
+                    b.ToTable("Comments");
                 });
 
             modelBuilder.Entity("HiTechStore.Core.Models.ComponentModel", b =>
@@ -247,7 +250,7 @@ namespace HiTechStore.Migrations
                     b.HasIndex("ComponentTypeId", "BrandModelId")
                         .IsUnique();
 
-                    b.ToTable("ComponentModel", (string)null);
+                    b.ToTable("ComponentModel");
                 });
 
             modelBuilder.Entity("HiTechStore.Core.Models.ComponentPropertyValue", b =>
@@ -270,7 +273,7 @@ namespace HiTechStore.Migrations
 
                     b.HasIndex("PropertyId");
 
-                    b.ToTable("ComponentPropertyValue", (string)null);
+                    b.ToTable("ComponentPropertyValue");
                 });
 
             modelBuilder.Entity("HiTechStore.Core.Models.ComponentType", b =>
@@ -289,7 +292,7 @@ namespace HiTechStore.Migrations
 
                     b.HasKey("ComponentTypeId");
 
-                    b.ToTable("ComponentType", (string)null);
+                    b.ToTable("ComponentType");
                 });
 
             modelBuilder.Entity("HiTechStore.Core.Models.ConditionComponent", b =>
@@ -318,7 +321,7 @@ namespace HiTechStore.Migrations
 
                     b.HasIndex("PropertyDiscountEntityPropertyId");
 
-                    b.ToTable("ConditionComponents", (string)null);
+                    b.ToTable("ConditionComponents");
                 });
 
             modelBuilder.Entity("HiTechStore.Core.Models.ConditionLambda", b =>
@@ -347,7 +350,7 @@ namespace HiTechStore.Migrations
                     b.HasIndex("OwnerConditionId")
                         .IsUnique();
 
-                    b.ToTable("ConditionLambda", (string)null);
+                    b.ToTable("ConditionLambda");
                 });
 
             modelBuilder.Entity("HiTechStore.Core.Models.ConditionMethod", b =>
@@ -366,7 +369,7 @@ namespace HiTechStore.Migrations
 
                     b.HasKey("ConditionMethodId");
 
-                    b.ToTable("ConditionMethods", (string)null);
+                    b.ToTable("ConditionMethods");
                 });
 
             modelBuilder.Entity("HiTechStore.Core.Models.Discount", b =>
@@ -533,7 +536,7 @@ namespace HiTechStore.Migrations
 
                     b.HasIndex("DiscountCodeDiscountId");
 
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("HiTechStore.Core.Models.OrderItem", b =>
@@ -565,7 +568,7 @@ namespace HiTechStore.Migrations
 
                     b.HasIndex("ProductVariationId");
 
-                    b.ToTable("OrderItem", (string)null);
+                    b.ToTable("OrderItem");
                 });
 
             modelBuilder.Entity("HiTechStore.Core.Models.OutboxMessage", b =>
@@ -600,7 +603,7 @@ namespace HiTechStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("OutboxMessage", (string)null);
+                    b.ToTable("OutboxMessage");
                 });
 
             modelBuilder.Entity("HiTechStore.Core.Models.Permission", b =>
@@ -621,7 +624,7 @@ namespace HiTechStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Permission", (string)null);
+                    b.ToTable("Permission");
                 });
 
             modelBuilder.Entity("HiTechStore.Core.Models.PermissionAudit", b =>
@@ -660,7 +663,7 @@ namespace HiTechStore.Migrations
 
                     b.HasIndex("TargetUserId");
 
-                    b.ToTable("PermissionAudits", (string)null);
+                    b.ToTable("PermissionAudits");
                 });
 
             modelBuilder.Entity("HiTechStore.Core.Models.Product", b =>
@@ -745,7 +748,7 @@ namespace HiTechStore.Migrations
 
                     b.HasIndex("ProductVariationId");
 
-                    b.ToTable("ProductMedia", (string)null);
+                    b.ToTable("ProductMedia");
                 });
 
             modelBuilder.Entity("HiTechStore.Core.Models.ProductPropertyValue", b =>
@@ -765,7 +768,7 @@ namespace HiTechStore.Migrations
 
                     b.HasIndex("PropertyId");
 
-                    b.ToTable("ProductPropertyValue", (string)null);
+                    b.ToTable("ProductPropertyValue");
                 });
 
             modelBuilder.Entity("HiTechStore.Core.Models.ProductScore", b =>
@@ -792,7 +795,7 @@ namespace HiTechStore.Migrations
                     b.HasIndex("ProductId", "UserId")
                         .IsUnique();
 
-                    b.ToTable("ProductScores", (string)null);
+                    b.ToTable("ProductScores");
                 });
 
             modelBuilder.Entity("HiTechStore.Core.Models.ProductVariation", b =>
@@ -856,7 +859,7 @@ namespace HiTechStore.Migrations
 
                     b.HasIndex("ComponentTypeId");
 
-                    b.ToTable("Property", (string)null);
+                    b.ToTable("Property");
                 });
 
             modelBuilder.Entity("HiTechStore.Core.Models.PropertyValue", b =>
@@ -890,7 +893,7 @@ namespace HiTechStore.Migrations
                     b.HasIndex("ComponentPropertyValueId")
                         .IsUnique();
 
-                    b.ToTable("PropertyValue", (string)null);
+                    b.ToTable("PropertyValue");
                 });
 
             modelBuilder.Entity("HiTechStore.Core.Models.User", b =>
@@ -1002,7 +1005,7 @@ namespace HiTechStore.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserPermission", (string)null);
+                    b.ToTable("UserPermission");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -1152,7 +1155,7 @@ namespace HiTechStore.Migrations
                     b.HasIndex("ProductId", "ComponentModelId")
                         .IsUnique();
 
-                    b.ToTable("ProductComponents", (string)null);
+                    b.ToTable("ProductComponents");
                 });
 
             modelBuilder.Entity("HiTechStore.Core.Models.BrandModel", b =>
@@ -1366,7 +1369,7 @@ namespace HiTechStore.Migrations
 
                             b1.HasKey("DiscountRuleId");
 
-                            b1.ToTable("DiscountRules", (string)null);
+                            b1.ToTable("DiscountRules");
 
                             b1.WithOwner()
                                 .HasForeignKey("DiscountRuleId");

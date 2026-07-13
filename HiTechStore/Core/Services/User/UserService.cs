@@ -89,4 +89,14 @@ public class UserService : ServiceBase, IUserService
         );
 
     }
+
+    public async Task<UserDto?> GetUserById(string userId)
+    {
+        if (await _usersServicePermissionHelper.HasPermissionToGetUsersList(UserIdOrThrow))
+        {
+            return await _unitOfWork.UserRepository.GetUserDtoByIdAsync(userId);
+        }
+
+        throw new NotAllowedException("Un-Authorized", "You are not allowed to list users");
+    }
 }

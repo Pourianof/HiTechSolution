@@ -2,6 +2,7 @@ using HiTechStore.ApiTokenHandler;
 using HiTechStore.Core.Common.Interfaces.Presentation;
 using HiTechStore.Helpers.Types;
 using HiTechStore.Presentation.Auth;
+using HiTechStore.Presentation.RealTime;
 
 namespace HiTechStore.Presentation;
 
@@ -30,6 +31,8 @@ public static class DependencyRegistration
         builder.Services.AddTokenHandler(builder.Configuration.ProvideConnectionString());
         builder.Services.AddSingleton<IApplicationContext, ApplicationContext>();
         builder.Services.WithRateLimiter();
+
+        builder.Services.AddScoped<NotificationHub>();
 
         return builder;
     }

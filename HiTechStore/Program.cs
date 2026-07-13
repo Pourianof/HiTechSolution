@@ -8,3 +8,5 @@ var app = builder.Build();
 await app.ConfigueApp();
 
 app.Run();
+
+public partial class Program;

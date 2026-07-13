@@ -30,7 +30,7 @@ public class ServiceBase(
         {
             return Unauthorized();
         }
-
+        Console.WriteLine($"USERID: {currentUserProvider.UserId}");
         var user = await AuthorizationService.GetUserByIdAsync(currentUserProvider.UserId);
 
         if (user is null)

@@ -1,4 +1,6 @@
 
+using HiTechStore.Core.Common.Events;
+using HiTechStore.Core.Common.Interfaces.Infra;
 using HiTechStore.Core.Common.Interfaces.Presentation;
 using HiTechStore.Core.Dto.Permission;
 using HiTechStore.Core.Helpers.Models;
@@ -11,13 +13,16 @@ namespace HiTechStore.Core.Services.Permission;
 public class PermissionService : ServiceBase, IPermissionService
 {
     private IUnitOfWork _unitOfWork;
+    private IEventPublisher _eventPublisher;
     public PermissionService(
         IUnitOfWork unitOfWork,
         IAuthorizationService authorizationService,
-        ICurrentUserProvider currentUserProvider
+        ICurrentUserProvider currentUserProvider,
+        IEventPublisher eventPublisher
     ) : base(authorizationService, currentUserProvider)
     {
         _unitOfWork = unitOfWork;
+        _eventPublisher = eventPublisher;
     }
 
     private Task<IEnumerable<UserPermissionDto>> GetUsersPermissions(string userId)
@@ -175,6 +180,8 @@ public class PermissionService : ServiceBase, IPermissionService
                .FirstOrDefault(perm => perm.Permission!.Code == permission.Code);
             var didUserHavePermission = existingPermission is not null;
 
+            var hasChanged = false;
+
             if (reqPerm.Action == PermissionModificationAction.Grant)
             {
                 var isScopeChange = didUserHavePermission && existingPermission!.Scope != reqPerm.Scope;
@@ -204,6 +211,8 @@ public class PermissionService : ServiceBase, IPermissionService
                             Scope = reqPerm.Scope
                         }
                     );
+
+                    hasChanged = true;
                 }
             }
             else if (didUserHavePermission)
@@ -228,7 +237,19 @@ public class PermissionService : ServiceBase, IPermissionService
                             TargetUser = targetUser
                         }
                     );
+
+                    hasChanged = true;
                 }
+            }
+
+            if (hasChanged)
+            {
+                await _eventPublisher.PublishAsync(
+                    new PermissionChangedEvent()
+                    {
+                        TargetUserId = targetUser.Id
+                    }
+                );
             }
         }
 

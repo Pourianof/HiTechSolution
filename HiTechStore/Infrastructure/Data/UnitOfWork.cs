@@ -12,7 +12,6 @@ namespace HiTechStore.Infrastructure.Data
     public class UnitOfWork : IUnitOfWork
     {
         private readonly HiTechStoreDbContext _context;
-        private readonly IMapper _mapper;
         public IProductRepository Products { get; }
         public ICategoryRepository Categories { get; }
         public IProductScoresRepository ProductScores { get; }
@@ -35,7 +34,6 @@ namespace HiTechStore.Infrastructure.Data
 
         public UnitOfWork(
             HiTechStoreDbContext context,
-            IMapper mapper,
             IProductRepository productRepository,
             ICategoryRepository categoryRepository,
             IProductScoresRepository productScoresRepository,
@@ -58,7 +56,7 @@ namespace HiTechStore.Infrastructure.Data
         )
         {
             _context = context;
-            _mapper = mapper;
+
             Products = productRepository;
             Categories = categoryRepository;
             ProductScores = productScoresRepository;

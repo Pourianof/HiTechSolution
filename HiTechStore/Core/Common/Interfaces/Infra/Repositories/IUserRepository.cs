@@ -12,6 +12,7 @@ namespace HiTechStore.Core.Common.Interfaces.Infra.Repositories;
 public interface IUserRepository
 {
     Task<User?> GetUserByIdAsync(string id);
+    Task<UserDto?> GetUserDtoByIdAsync(string id);
     Task<User?> GetUserByUsernameAsync(string username);
     Task<User?> GetUserByEmailAsync(string email);
     Task<bool> CheckUserPasswordAsync(User user, string password);
