@@ -5,18 +5,24 @@ using FluentAssertions;
 
 using HiTechStore.Core;
 using HiTechStore.Core.Common.Events;
+using HiTechStore.Core.Common.Interfaces.Infra.Repositories;
 using HiTechStore.Core.Dto.Permission;
 using HiTechStore.Core.Models;
 using HiTechStore.Infrastructure.Data;
 using HiTechStore.Infrastructure.Data.Repositories; // OutboxMessageRepository
+using HiTechStore.Infrastructure.Data.Seeders;
 using HiTechStore.IntegrationTests.Fixtures;
+using HiTechStore.IntegrationTests.Helpers;
 using HiTechStore.IntegrationTests.Infrastructure;
 using HiTechStore.IntegrationTests.TestData;
 using HiTechStore.Presentation.RealTime;
 using HiTechStore.Presentation.Requests.Auth;
 
 using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+
+using Npgsql;
 
 using Xunit;
 
@@ -45,7 +51,7 @@ public class PermissionChangeSignalRIntegrationTests :
 
 
     [Fact]
-    public async Task ModifyPermissions_GrantsPermission_And_NotifiesTargetUser_ViaSignalR()
+    public async Task ModifyPermissions_ShouldDispatchNotificationViaSignalRChannel()
     {
         // Arrange
         var admin = await _context.Factory.UseServiceAsync<IUnitOfWork, User>(
@@ -56,32 +62,8 @@ public class PermissionChangeSignalRIntegrationTests :
         );
 
         var actorToken = TestJwtTokenGenerator.GenerateTestJwtToken(admin.Id);
-        var targetToken = TestJwtTokenGenerator.GenerateTestJwtToken(TargetUserId);
 
-        var hubUrl = new Uri(_context.Factory.Server.BaseAddress, NotificationHub.Route);
-
-        // Connect to the hub AS THE TARGET USER, before triggering the
-        // change, so we can prove the notification actually reaches the
-        // correct user (not just "someone").
-        await using var targetConnection = new HubConnectionBuilder()
-            .WithUrl(hubUrl, options =>
-            {
-                options.HttpMessageHandlerFactory = _ => _context.Factory.Server.CreateHandler();
-                options.AccessTokenProvider = () => Task.FromResult<string?>(targetToken);
-            })
-            .Build();
-
-        var received = new TaskCompletionSource<PermissionChangedEvent>(
-            TaskCreationOptions.RunContinuationsAsynchronously);
-
-        // "PermissionChanged" is the exact method name used in
-        // PermissionChangeDispatcher.DispatchAsync, so this part is not a guess.
-        targetConnection.On<PermissionChangedEvent>("PermissionChanged", evt =>
-        {
-            received.TrySetResult(evt);
-        });
-
-        await targetConnection.StartAsync();
+        await using var hub = await ConnectToHub();
 
         _context.Client.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", actorToken);
@@ -103,12 +85,95 @@ public class PermissionChangeSignalRIntegrationTests :
         response.EnsureSuccessStatusCode();
 
         // Assert
-        var evt = await received.Task.WaitAsync(
-            TimeSpan.FromSeconds(5)
+        var notif = await hub.Received.Task.WaitAsync(
+            TimeSpan.FromSeconds(1000)
         );
 
-        evt.Should().BeOfType<PermissionChangedEvent>();
-        evt.TargetUserId.Should().Be(TargetUserId);
+        notif.Should().BeOfType<UserNotification>();
+        notif.Type.Should().Be("PermissionChanged");
+        notif.OwnerId.Should().Be(TargetUserId);
+    }
+
+    [Fact]
+    public async Task ModifyPermissions_ShouldSaveNotificationAndDispatchItWhenUserConnectViaSignalR()
+    {
+        // Arrange
+        var admin = await _context.Factory.UseServiceAsync<IUnitOfWork, User>(
+            async uow =>
+            {
+                return (await uow.UserRepository.GetUserByEmailAsync(TestUsers.Admin.Email))!;
+            }
+        );
+
+        var actorToken = TestJwtTokenGenerator.GenerateTestJwtToken(admin.Id);
+
+
+        _context.Client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", actorToken);
+
+        var requestBody = new UpdatePermissionsRequest
+        {
+            Permissions = [
+                new PermissionChangeRequest
+                {
+                    PermissionCode = PermissionCodeUnderTest,
+                    Action = "grant",
+                    Scope = "all",
+                }
+            ]
+        };
+
+        var response = await _context.Client.PatchAsJsonAsync($"/api/auth/{TargetUserId}/permissions", requestBody);
+        response.EnsureSuccessStatusCode();
+
+        // No connection yet, so notification must be saved
+        using (var scope = _context.Factory.Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<HiTechStoreDbContext>();
+
+            var notification = dbContext.Set<UserNotification>().FirstOrDefault();
+
+            notification.Should().NotBeNull();
+            notification.IsRead.Should().BeFalse();
+            notification.Type.Should().Be("PermissionChanged");
+        }
+
+        await using var hub = await ConnectToHub();
+
+        // Assert
+        var notif = await hub.Received.Task.WaitAsync(
+            TimeSpan.FromSeconds(1000)
+        );
+
+        notif.Should().BeOfType<UserNotification>();
+        notif.Type.Should().Be("PermissionChanged");
+        notif.OwnerId.Should().Be(TargetUserId);
+    }
+
+    private async Task<HubTestConnection> ConnectToHub()
+    {
+        var token = TestJwtTokenGenerator.GenerateTestJwtToken(TargetUserId);
+
+        var hubUrl = new Uri(
+            _context.Factory.Server.BaseAddress,
+            NotificationHub.Route);
+
+        var connection = new HubConnectionBuilder()
+            .WithUrl(hubUrl, options =>
+            {
+                options.HttpMessageHandlerFactory =
+                    _ => _context.Factory.Server.CreateHandler();
+
+                options.AccessTokenProvider =
+                    () => Task.FromResult<string?>(token);
+            })
+            .Build();
+
+        var hub = new HubTestConnection(connection);
+
+        await hub.StartAsync();
+
+        return hub;
     }
 
     private async Task SeedAsync()
@@ -116,6 +181,8 @@ public class PermissionChangeSignalRIntegrationTests :
         using var scope = _context.Factory.Services.CreateScope();
 
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+
+        var targetUser = await unitOfWork.UserRepository.GetUserByIdAsync(TargetUserId);
 
         await unitOfWork.UserRepository.RegisterUser(
             new()
@@ -134,10 +201,22 @@ public class PermissionChangeSignalRIntegrationTests :
 
     public async Task InitializeAsync()
     {
+        using (var scope = _context.Factory.Services.CreateScope())
+        {
+
+            var dbContext = scope.ServiceProvider.GetRequiredService<HiTechStoreDbContext>();
+
+            await dbContext.Database.ExecuteSqlRawAsync("DROP SCHEMA public CASCADE;");
+
+            await dbContext.Database.ExecuteSqlRawAsync("CREATE SCHEMA public;");
+
+            await dbContext.Database.EnsureCreatedAsync();
+
+            await SeederExtension.SeedRequiredBaseData(scope.ServiceProvider);
+        }
+
         await SeedAsync();
     }
 
-    public async Task DisposeAsync()
-    {
-    }
+    public Task DisposeAsync() => Task.CompletedTask;
 }

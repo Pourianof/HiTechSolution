@@ -4,8 +4,9 @@ public static class DispatcherDependencyRegistration
 {
     public static void UseDispatcher(this IServiceCollection services)
     {
-        services.AddScoped<IOutboxDispatcherRegistry, OutboxDispatcherRegistry>();
-        services.AddScoped<IOutboxDispatcher, PermissionChangeDispatcher>();
+        services.AddScoped<IOutboxDispatcher, UserNotificationCreatedDispatcher>();
+        services.AddScoped<IOutboxDispatcher, PermissionChangeUserNotificationHandler>();
+
         services.AddSingleton<EventTypeResolver>();
 
     }

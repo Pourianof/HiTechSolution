@@ -26,6 +26,7 @@ public static class RepositoryDependenciesRegistration
         services.AddTransient<IProductVariationRepository, ProductVariationRepository>();
         services.AddTransient<IPermissionRepository, PermissionRepository>();
         services.AddTransient<IPermissionAuditRepository, PermissionAuditRepository>();
+        services.AddTransient<IUserNotificationRepository, UserNotificationRepository>();
         services.AddTransient<OutboxMessageRepository>();
 
         return services;

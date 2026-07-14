@@ -24,6 +24,7 @@ namespace HiTechStore.Core
         ICommentRepository CommentRepository { get; }
         IPermissionRepository PermissionRepository { get; }
         IPermissionAuditRepository PermissionAuditRepository { get; }
+        IUserNotificationRepository UserNotificationRepository { get; }
         IRepositoryModelBase<TModel, TId> RespositoryOf<TModel, TId>()
             where TModel : class, IModel
             where TId : struct;

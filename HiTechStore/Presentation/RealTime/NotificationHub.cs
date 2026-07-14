@@ -2,6 +2,7 @@
 
 using System.Security.Claims;
 
+using HiTechStore.Core.Models;
 using HiTechStore.Core.Services.Notification;
 
 using Microsoft.AspNetCore.SignalR;
@@ -23,5 +24,20 @@ public class NotificationHub(INotificationService notificationService) : Hub
         }
 
         await notificationService.SyncNotifications();
+    }
+
+    public override async Task OnConnectedAsync()
+    {
+        var notifications =
+            await notificationService.GetUnreadNotifications();
+
+        foreach (var notification in notifications)
+        {
+            await Clients.Caller.SendAsync(
+                nameof(UserNotification),
+                notification);
+        }
+
+        await base.OnConnectedAsync();
     }
 }

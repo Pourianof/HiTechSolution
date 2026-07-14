@@ -31,6 +31,7 @@ namespace HiTechStore.Infrastructure.Data
         public IProductVariationRepository ProductVariationRepository { get; }
         public IPermissionRepository PermissionRepository { get; }
         public IPermissionAuditRepository PermissionAuditRepository { get; }
+        public IUserNotificationRepository UserNotificationRepository { get; }
 
         public UnitOfWork(
             HiTechStoreDbContext context,
@@ -52,7 +53,8 @@ namespace HiTechStore.Infrastructure.Data
             ICommentRepository commentRepository,
             IProductVariationRepository productVariationRepository,
             IPermissionRepository permissionRepository,
-            IPermissionAuditRepository permissionAuditRepository
+            IPermissionAuditRepository permissionAuditRepository,
+            IUserNotificationRepository userNotificationRepository
         )
         {
             _context = context;
@@ -76,6 +78,7 @@ namespace HiTechStore.Infrastructure.Data
             ProductVariationRepository = productVariationRepository;
             PermissionRepository = permissionRepository;
             PermissionAuditRepository = permissionAuditRepository;
+            UserNotificationRepository = userNotificationRepository;
         }
 
         public HiTechStoreDbContext Context()

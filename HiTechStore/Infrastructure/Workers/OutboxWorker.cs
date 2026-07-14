@@ -66,7 +66,7 @@ public sealed class OutboxWorker(
         using var scope = _serviceProvider.CreateScope();
 
         var repo = scope.ServiceProvider.GetRequiredService<OutboxMessageRepository>();
-        var dispatcherRegistry = scope.ServiceProvider.GetRequiredService<IOutboxDispatcherRegistry>();
+        var dispatchers = scope.ServiceProvider.GetServices<IOutboxDispatcher>();
 
         var message = await repo.GetModelByIdAsync(messageId);
 
@@ -81,9 +81,10 @@ public sealed class OutboxWorker(
             );
         }
 
-        var handlers = dispatcherRegistry.GetDispatchers(eventType);
+        var handlers = dispatchers
+                    .Where(x => x.EventType == eventType);
 
-        if (handlers.Count == 0)
+        if (handlers.Count() == 0)
         {
             _logger.LogWarning(
                 "No dispatcher found for event '{EventType}'",

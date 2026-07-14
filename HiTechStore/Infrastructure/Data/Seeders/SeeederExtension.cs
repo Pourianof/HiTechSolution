@@ -9,18 +9,12 @@ public static class SeederExtension
 {
     public static async Task SeedDatabase(this WebApplication app)
     {
-        using var service = app.Services.CreateScope();
-        var uow = service.ServiceProvider.GetRequiredService<IUnitOfWork>();
-        var userManager = service.ServiceProvider.GetRequiredService<UserManager<User>>();
-        var configs = service.ServiceProvider.GetRequiredService<IConfiguration>();
 
-        await uow.SeedPermissions();
-        await RoleSeeder.SeedAsync(service.ServiceProvider);
-        await AdminSeeder.SeedAsync(userManager, configs);
-        await uow.SeedAminPermissions();
-        await ColorSeeder.SeedAsync(uow);
-        await uow.SeedDiscountEntitiesAsync();
-        await uow.SeedConditionMethodssAsync();
+        using var scope = app.Services.CreateScope();
+        var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+
+        await SeedRequiredBaseData(scope.ServiceProvider);
 
         if (app.Environment.IsDevelopment())
         {
@@ -30,5 +24,20 @@ public static class SeederExtension
             await CategorySeeder.SeedAsync(uow);
             await ProductsSeeder.SeedAsync(uow, userManager);
         }
+    }
+
+    public static async Task SeedRequiredBaseData(IServiceProvider serviceProvider)
+    {
+        var uow = serviceProvider.GetRequiredService<IUnitOfWork>();
+        var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
+        var configs = serviceProvider.GetRequiredService<IConfiguration>();
+
+        await uow.SeedPermissions();
+        await RoleSeeder.SeedAsync(serviceProvider);
+        await AdminSeeder.SeedAsync(userManager, configs);
+        await uow.SeedAminPermissions();
+        await ColorSeeder.SeedAsync(uow);
+        await uow.SeedDiscountEntitiesAsync();
+        await uow.SeedConditionMethodssAsync();
     }
 }

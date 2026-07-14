@@ -37,7 +37,7 @@ public class HiTechStoreWebApplicationFactory : WebApplicationFactory<Program>
             using var scope = services.BuildServiceProvider().CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<HiTechStoreDbContext>();
 
-            db.Database.Migrate();
+            db.Database.EnsureCreated();
 
             services.AddAuthentication(options =>
             {
