@@ -4,6 +4,7 @@ using AutoMapper;
 using HiTechStore.Core.Dto.Permission;
 using HiTechStore.Core.Services.Permission;
 using HiTechStore.Presentation.Requests.Auth;
+using HiTechStore.Presentation.Requests.Permission;
 using HiTechStore.Presentation.Responses.Permission;
 
 using Microsoft.AspNetCore.Authorization;

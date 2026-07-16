@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using HiTechStore.Core.Dto.Permission;
 using HiTechStore.Helpers.AutoMapper;
 
-namespace HiTechStore.Presentation.Requests.Auth;
+namespace HiTechStore.Presentation.Requests.Permission;
 
 [MapTo<ModifyPermissionDto>]
 public class UpdatePermissionsRequest
