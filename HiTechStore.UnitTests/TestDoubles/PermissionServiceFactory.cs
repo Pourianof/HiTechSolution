@@ -14,6 +14,7 @@ public class PermissionServiceTestFactory
 {
     public Mock<IPermissionRepository> PermissionRepository = new();
     public Mock<IPermissionAuditRepository> AuditRepository = new();
+    public Mock<IEventPublisher> EventPublisher = new();
     public Mock<IAuthorizationService> AuthService = new();
     public Mock<ICurrentUserProvider> CurrentUser = new();
 
@@ -53,7 +54,8 @@ public class PermissionServiceTestFactory
         return new PermissionService(
             uow.Object,
             AuthService.Object,
-            CurrentUser.Object
+            CurrentUser.Object,
+            EventPublisher.Object
         );
     }
 }
