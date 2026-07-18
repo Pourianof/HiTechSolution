@@ -159,7 +159,7 @@ public class PermissionService : ServiceBase, IPermissionService
             var reqPerm = requestedPermMap[permission.Code!];
 
             bool permCodeMatch = true, scopeMatch = true;
-            if (!actorPermissions.Any((p) => (permCodeMatch = p.Permission!.Code == permission.Code) && (scopeMatch = p.Scope == reqPerm.Scope)))
+            if (!actorPermissions.Any((p) => (permCodeMatch = p.Permission!.Code == permission.Code) && (scopeMatch = p.Scope == PermissionScope.All || p.Scope == reqPerm.Scope)))
             {
                 if (!permCodeMatch)
                 {
