@@ -19,7 +19,7 @@ public class UserNotificationRepository : Repository<UserNotification, UserNotif
     public async Task<IEnumerable<UserNotificationDto>> GetUnreadNotifications(string userId)
     {
         return await _dbSet.Where(
-            un => un.ReadAt == null
+            un => un.ReadAt == null && un.OwnerId == userId
         )
         .ProjectTo<UserNotificationDto>(_mapper.ConfigurationProvider)
         .ToListAsync();
