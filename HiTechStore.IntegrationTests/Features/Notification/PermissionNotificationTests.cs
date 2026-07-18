@@ -4,27 +4,21 @@ using System.Net.Http.Json;
 using FluentAssertions;
 
 using HiTechStore.Core;
-using HiTechStore.Core.Common.Events;
-using HiTechStore.Core.Common.Interfaces.Infra.Repositories;
-using HiTechStore.Core.Dto.Permission;
 using HiTechStore.Core.Models;
 using HiTechStore.Infrastructure.Data;
-using HiTechStore.Infrastructure.Data.Repositories; // OutboxMessageRepository
 using HiTechStore.Infrastructure.Data.Seeders;
 using HiTechStore.IntegrationTests.Fixtures;
 using HiTechStore.IntegrationTests.Helpers;
 using HiTechStore.IntegrationTests.Infrastructure;
 using HiTechStore.IntegrationTests.TestData;
 using HiTechStore.Presentation.RealTime;
-using HiTechStore.Presentation.Requests.Auth;
+using HiTechStore.Presentation.Requests.Permission;
 
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-using Npgsql;
 
-using Xunit;
 
 namespace HiTechStore.IntegrationTests;
 
