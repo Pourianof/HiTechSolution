@@ -35,6 +35,7 @@ public static class AppConfiguration
 
         app.UseHealthChecks("/_health");
 
+        app.UseCors();
         app.MapHub<NotificationHub>(NotificationHub.Route);
 
         await app.DbInitialize();
