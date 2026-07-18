@@ -105,7 +105,7 @@ public class ConditionComponentTreeToExpression : ConditionComponentTreeVisitor<
         }
 
 
-        Expression ToDoubleExp(Expression expr) => Expression.Convert(expr, typeof(double));
+        Expression ToDoubleExp(Expression expr) => expr.Type == typeof(DateTime) ? expr : Expression.Convert(expr, typeof(double));
 
         return condition.Type switch
         {
