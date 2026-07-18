@@ -373,4 +373,42 @@ public class PermissionServiceTests
         Assert.Single(result.Errors);
         Assert.Contains(result.Errors, err => err.Code == nameof(PermissionErrors.LockingPermissionListForAccessGrantedTargetUser));
     }
+
+    [Fact]
+    public async Task ModifyPermissions_WhenActorHasAllScope_ShouldAbleToGrantSelfScope()
+    {
+        // Arrange
+        var factory = new PermissionServiceTestFactory();
+        factory.ActorUser.Permissions = [
+            PermissionBuilder.Access,
+            PermissionBuilder.ProductCreateAll
+        ];
+
+        factory.TargetUser.Permissions = [];
+
+        var service = factory.Create();
+
+        // Action
+        var result = await service.ModifyPermissions(new ModifyPermissionDto
+        {
+            TargetUserId = factory.TargetUser.Id,
+            Permissions = [
+                new (){
+                    PermissionCode = Permissions.Product.Create,
+                    Scope= PermissionScope.Self,
+                }
+            ],
+        });
+
+
+        // Assert
+        Assert.True(result.IsValid);
+        factory.AuditRepository.Verify(repo => repo.AddAsync(
+            It.Is<PermissionAudit>(
+                (up) => up.Scope == PermissionScope.Self &&
+                        up.Permission!.Id == PermissionBuilder.ProductCreateAll.Permission!.Id
+            )
+        ), Times.Once);
+        Assert.Contains(factory.TargetUser.Permissions, p => p.Permission!.Code == Permissions.Product.Create && p.Scope == PermissionScope.Self);
+    }
 }
