@@ -143,10 +143,12 @@ public class PermissionService : ServiceBase, IPermissionService
         }
         targetUser.Permissions ??= [];
 
-        var requestedPermMap =
-            requestedPermissions.ToDictionary(
-                x => x.PermissionCode,
-                x => new { x.Action, x.Scope });
+        var requestedPermMap = requestedPermissions
+            .GroupBy(x => x.PermissionCode)
+            .ToDictionary(
+                g => g.Key,
+                g => g.LastOrDefault(x => x.Action == PermissionModificationAction.Grant) ?? g.Last()
+            );
 
         foreach (var permission in modifyingPermissions)
         {
