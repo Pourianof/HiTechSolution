@@ -199,7 +199,8 @@ public class PermissionService : ServiceBase, IPermissionService
                     var perm = new UserPermission()
                     {
                         Permission = permission,
-                        GrantedByUserId = actorUser.Id
+                        GrantedByUserId = actorUser.Id,
+                        Scope = reqPerm.Scope
                     };
                     targetUser.Permissions!.Add(perm);
 
