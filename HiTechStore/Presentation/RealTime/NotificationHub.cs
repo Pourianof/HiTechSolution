@@ -28,6 +28,13 @@ public class NotificationHub(INotificationService notificationService) : Hub
 
     public override async Task OnConnectedAsync()
     {
+        if (Context.User?.Identity?.IsAuthenticated != true)
+        {
+            await base.OnConnectedAsync();
+            Context.Abort();
+            return;
+        }
+
         var notifications =
             await notificationService.GetUnreadNotifications();
 

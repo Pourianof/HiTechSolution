@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using HiTechStore.Presentation.RealTime;
 
 namespace HiTechStore.Core.Common.Interfaces.Presentation;
 
@@ -33,6 +34,19 @@ public static class AuthRegistration
             {
                 options.Events = new JwtBearerEvents()
                 {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+
+                        if (!string.IsNullOrEmpty(accessToken)
+                            && path.StartsWithSegments(NotificationHub.Route))
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    },
                     OnChallenge = async (context) =>
                     {
                         context.HandleResponse();
