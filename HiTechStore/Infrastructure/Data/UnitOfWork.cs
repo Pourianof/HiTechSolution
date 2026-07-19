@@ -4,6 +4,7 @@ using HiTechStore.Core;
 using HiTechStore.Core.Common.Interfaces.Infra;
 using HiTechStore.Core.Common.Interfaces.Infra.Repositories;
 using HiTechStore.Infrastructure.Data.Repositories;
+using HiTechStore.Infrastructure.Helpers;
 
 using Microsoft.EntityFrameworkCore.Storage;
 
@@ -32,6 +33,8 @@ namespace HiTechStore.Infrastructure.Data
         public IPermissionRepository PermissionRepository { get; }
         public IPermissionAuditRepository PermissionAuditRepository { get; }
         public IUserNotificationRepository UserNotificationRepository { get; }
+        private OutboxMessageRepository _outboxMessageRepository;
+        private OutboxSignal _outboxSignal;
 
         public UnitOfWork(
             HiTechStoreDbContext context,
@@ -54,7 +57,9 @@ namespace HiTechStore.Infrastructure.Data
             IProductVariationRepository productVariationRepository,
             IPermissionRepository permissionRepository,
             IPermissionAuditRepository permissionAuditRepository,
-            IUserNotificationRepository userNotificationRepository
+            IUserNotificationRepository userNotificationRepository,
+            OutboxMessageRepository outboxMessageRepository,
+            OutboxSignal outboxSignal
         )
         {
             _context = context;
@@ -79,6 +84,9 @@ namespace HiTechStore.Infrastructure.Data
             PermissionRepository = permissionRepository;
             PermissionAuditRepository = permissionAuditRepository;
             UserNotificationRepository = userNotificationRepository;
+
+            _outboxMessageRepository = outboxMessageRepository;
+            _outboxSignal = outboxSignal;
         }
 
         public HiTechStoreDbContext Context()
@@ -88,7 +96,17 @@ namespace HiTechStore.Infrastructure.Data
 
         public async Task<int> Complete()
         {
-            return await _context.SaveChangesAsync();
+            var result = await _context.SaveChangesAsync();
+
+            Console.WriteLine($"HAS PENDING: {_outboxMessageRepository.HasPendingMessages}");
+
+            if (result > 0 && _outboxMessageRepository.HasPendingMessages)
+            {
+                _outboxSignal.Notify();
+                _outboxMessageRepository.Reset();
+            }
+
+            return result;
         }
 
         public void Dispose()

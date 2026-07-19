@@ -7,27 +7,27 @@ public static class RepositoryDependenciesRegistration
 {
     public static IServiceCollection AddRepositories(this IServiceCollection services)
     {
-        services.AddTransient<IProductRepository, ProductRepository>();
-        services.AddTransient<IBrandRepository, BrandRepository>();
-        services.AddTransient<IBrandModelRepository, BrandModelRepository>();
-        services.AddTransient<ICartRepository, CartRepository>();
-        services.AddTransient<ICategoryRepository, CategoryRepository>();
-        services.AddTransient<IColorRepository, ColorRepository>();
-        services.AddTransient<IComponentRepository, ComponentRepository>();
-        services.AddTransient<IConditionMethodRepository, ConditionMethodRepository>();
-        services.AddTransient<IDiscountCodeRepository, DiscountCodeRepository>();
-        services.AddTransient<IDiscountEntityRepository, DiscountEntityRepository>();
-        services.AddTransient<IFilterRepository, FilterRepository>();
-        services.AddTransient<IOrderRepository, OrderRepository>();
-        services.AddTransient<IProductScoresRepository, ProductScoresRepository>();
-        services.AddTransient<IUserRepository, UserRepository>();
-        services.AddTransient<IDiscountedProductsRepository, DiscountedProductsRepository>();
-        services.AddTransient<ICommentRepository, CommentRepository>();
-        services.AddTransient<IProductVariationRepository, ProductVariationRepository>();
-        services.AddTransient<IPermissionRepository, PermissionRepository>();
-        services.AddTransient<IPermissionAuditRepository, PermissionAuditRepository>();
+        services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<IBrandRepository, BrandRepository>();
+        services.AddScoped<IBrandModelRepository, BrandModelRepository>();
+        services.AddScoped<ICartRepository, CartRepository>();
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
+        services.AddScoped<IColorRepository, ColorRepository>();
+        services.AddScoped<IComponentRepository, ComponentRepository>();
+        services.AddScoped<IConditionMethodRepository, ConditionMethodRepository>();
+        services.AddScoped<IDiscountCodeRepository, DiscountCodeRepository>();
+        services.AddScoped<IDiscountEntityRepository, DiscountEntityRepository>();
+        services.AddScoped<IFilterRepository, FilterRepository>();
+        services.AddScoped<IOrderRepository, OrderRepository>();
+        services.AddScoped<IProductScoresRepository, ProductScoresRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IDiscountedProductsRepository, DiscountedProductsRepository>();
+        services.AddScoped<ICommentRepository, CommentRepository>();
+        services.AddScoped<IProductVariationRepository, ProductVariationRepository>();
+        services.AddScoped<IPermissionRepository, PermissionRepository>();
+        services.AddScoped<IPermissionAuditRepository, PermissionAuditRepository>();
         services.AddTransient<IUserNotificationRepository, UserNotificationRepository>();
-        services.AddTransient<OutboxMessageRepository>();
+        services.AddScoped<OutboxMessageRepository>();
 
         return services;
     }

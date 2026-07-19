@@ -34,14 +34,14 @@ public class NotificationService : ServiceBase, INotificationService
         var notification = _mapper.Map<UserNotification>(notificationDto);
         await _unitOfWork.UserNotificationRepository.AddAsync(notification);
 
-        await _unitOfWork.Complete();
-
         await _eventPublisher.PublishAsync(
-             new UserNotificationCreatedEvent()
-             {
-                 NotificationId = notification.Id
-             }
-         );
+           new UserNotificationCreatedEvent()
+           {
+               NotificationId = notification.Id
+           }
+       );
+
+        await _unitOfWork.Complete();
 
         return notification;
     }
