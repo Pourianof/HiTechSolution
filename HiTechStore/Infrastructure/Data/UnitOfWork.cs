@@ -98,8 +98,6 @@ namespace HiTechStore.Infrastructure.Data
         {
             var result = await _context.SaveChangesAsync();
 
-            Console.WriteLine($"HAS PENDING: {_outboxMessageRepository.HasPendingMessages}");
-
             if (result > 0 && _outboxMessageRepository.HasPendingMessages)
             {
                 _outboxSignal.Notify();
