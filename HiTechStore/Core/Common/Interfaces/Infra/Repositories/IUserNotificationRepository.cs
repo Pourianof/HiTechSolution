@@ -1,9 +1,10 @@
 using HiTechStore.Core.Dto.UserNotification;
 using HiTechStore.Core.Models;
+using HiTechStore.Infrastructure.Data.DTOs;
 
 namespace HiTechStore.Core.Common.Interfaces.Infra.Repositories;
 
-public interface IUserNotificationRepository : IRepository<UserNotification, UserNotificationDto, Guid>
+public interface IUserNotificationRepository : IRepository<UserNotification, UserNotificationDto, NotificationQuery, Guid>
 {
-    Task<IEnumerable<UserNotificationDto>> GetUnreadNotifications(string userId);
+    Task<PagedResultDto<UserNotificationDto>> GetUsersNotifications(string userId, NotificationQuery query);
 }

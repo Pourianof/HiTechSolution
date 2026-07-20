@@ -35,16 +35,6 @@ public class NotificationHub(INotificationService notificationService) : Hub
             return;
         }
 
-        var notifications =
-            await notificationService.GetUnreadNotifications();
-
-        foreach (var notification in notifications)
-        {
-            await Clients.Caller.SendAsync(
-                nameof(UserNotification),
-                notification);
-        }
-
         await base.OnConnectedAsync();
     }
 }

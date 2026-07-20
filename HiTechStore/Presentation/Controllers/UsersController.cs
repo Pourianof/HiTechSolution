@@ -12,6 +12,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using HiTechStore.Core.Common.Interfaces.Infra;
 using HiTechStore.Core.Dto.Auth;
+using HiTechStore.Core.Dto.UserNotification;
+using HiTechStore.Core.Services.Notification;
+using System.Security.Claims;
 
 namespace HiTechStore.Presentation.Controllers;
 
@@ -20,7 +23,8 @@ namespace HiTechStore.Presentation.Controllers;
 public class UsersController(
     UserManager<User> userManager,
     IProductService productService,
-    IUserService userService) : AppControllerBase
+    IUserService userService,
+    INotificationService notificationService) : AppControllerBase
 {
     private UserManager<User> _userManager = userManager;
 
@@ -83,6 +87,18 @@ public class UsersController(
                 AvatarUrl = newAvatarUrl
             }
         );
+    }
+
+    [HttpGet("me/notifications")]
+    [Authorize]
+    public async Task<ActionResult<PagedResultDto<UserNotificationDto>>> GetUserNotifications([ToQuery] NotificationQuery query)
+    {
+        var usersNotifications = await notificationService.GetNotifications(
+            User.FindFirst(ClaimTypes.NameIdentifier)!.Value,
+            query
+        );
+
+        return Ok(usersNotifications);
     }
 
     [HttpGet]

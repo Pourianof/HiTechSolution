@@ -1,5 +1,6 @@
 
 
+
 using AutoMapper;
 
 using HiTechStore.Core.Common.Events;
@@ -9,6 +10,7 @@ using HiTechStore.Core.Common.Interfaces.Presentation;
 using HiTechStore.Core.Dto.UserNotification;
 using HiTechStore.Core.Models;
 using HiTechStore.Core.Services.Authorization;
+using HiTechStore.Infrastructure.Data.DTOs;
 
 namespace HiTechStore.Core.Services.Notification;
 
@@ -46,9 +48,9 @@ public class NotificationService : ServiceBase, INotificationService
         return notification;
     }
 
-    public Task<IEnumerable<UserNotificationDto>> GetUnreadNotifications()
+    public Task<PagedResultDto<UserNotificationDto>> GetNotifications(string userId, NotificationQuery query)
     {
-        return _unitOfWork.UserNotificationRepository.GetUnreadNotifications(UserIdOrThrow);
+        return _unitOfWork.UserNotificationRepository.GetUsersNotifications(userId, query);
     }
 
     public Task SyncNotifications()

@@ -1,27 +1,64 @@
 
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 
 using HiTechStore.Core.Common.Interfaces.Infra.Repositories;
 using HiTechStore.Core.Dto.UserNotification;
 using HiTechStore.Core.Models;
+using HiTechStore.Helpers.URLFilterQuery;
+using HiTechStore.Helpers.URLFilterQuery.QueryAppliers;
+using HiTechStore.Infrastructure.Data.DTOs;
 
-using Microsoft.EntityFrameworkCore;
 
 namespace HiTechStore.Infrastructure.Data.Repositories;
 
-public class UserNotificationRepository : Repository<UserNotification, UserNotificationDto, Guid>, IUserNotificationRepository
+public class UserNotificationRepository : Repository<UserNotification, UserNotificationDto, NotificationQuery, Guid>, IUserNotificationRepository
 {
     public UserNotificationRepository(HiTechStoreDbContext context, IMapper mapper) : base(context, mapper)
     {
     }
 
-    public async Task<IEnumerable<UserNotificationDto>> GetUnreadNotifications(string userId)
+    protected override IQueryable<UserNotification> GetAllQueryBuilder(IQueryable<UserNotification> queryBuilder, NotificationQuery? queyParams = null)
     {
-        return await _dbSet.Where(
-            un => un.ReadAt == null && un.OwnerId == userId
-        )
-        .ProjectTo<UserNotificationDto>(_mapper.ConfigurationProvider)
-        .ToListAsync();
+        var createdAtFilters = queyParams?.CreatedAt?.GetFilters(
+            QueryOperator.GreaterThan |
+            QueryOperator.GreaterThanOrEqual |
+            QueryOperator.LessThan |
+            QueryOperator.GreaterThanOrEqual
+        );
+
+        if (createdAtFilters is not null)
+        {
+            queryBuilder = queryBuilder.ApplyFiltersTo<UserNotification, DateTime>(
+                createdAtFilters,
+                new SinglePropertyQueryApplier<UserNotification, DateTime>(
+                    un => un.CreatedAt
+                )
+            );
+        }
+
+        queryBuilder = queryBuilder.OrderBy(un => un.CreatedAt).OrderDescending();
+
+        return queryBuilder;
+    }
+
+    public async Task<PagedResultDto<UserNotificationDto>> GetUsersNotifications(string userId, NotificationQuery query)
+    {
+        var state = query.State?.GetValue<string>(QueryOperator.Equal);
+
+        var efQuery = _dbSet.Where(
+            un => un.OwnerId == userId
+        );
+
+        if (!string.IsNullOrEmpty(state))
+        {
+            efQuery = state.ToLower() switch
+            {
+                "unread" => efQuery.Where(un => un.ReadAt == null),
+                "read" => efQuery.Where(un => un.ReadAt != null),
+                _ => efQuery
+            };
+        }
+
+        return await GetPagedResult<UserNotificationDto>(efQuery, query);
     }
 }
