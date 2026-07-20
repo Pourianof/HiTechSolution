@@ -16,6 +16,8 @@ public class UserNotification : IModel
 
     public DateTime CreatedAt { get; set; }
 
+    public bool IsDeleted { get; set; } = false;
+
     public DateTime? ReadAt { get; set; } = default;
     public bool IsRead => ReadAt is not null;
 }
