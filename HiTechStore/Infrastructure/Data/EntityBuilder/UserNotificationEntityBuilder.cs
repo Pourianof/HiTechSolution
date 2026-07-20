@@ -11,5 +11,6 @@ public class UserNotificationEntityBuilder : IEntityTypeConfiguration<UserNotifi
     {
         builder.Ignore(un => un.IsRead);
         builder.Property(un => un.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+        builder.HasQueryFilter((un) => !un.IsDeleted);
     }
 }
