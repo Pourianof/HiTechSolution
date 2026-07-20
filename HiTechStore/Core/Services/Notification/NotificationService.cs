@@ -48,9 +48,13 @@ public class NotificationService : ServiceBase, INotificationService
         return notification;
     }
 
-    public Task<PagedResultDto<UserNotificationDto>> GetNotifications(string userId, NotificationQuery query)
+    public async Task<PagedResultDto<UserNotificationDto>> GetNotifications(string userId, NotificationQuery query)
     {
-        return _unitOfWork.UserNotificationRepository.GetUsersNotifications(userId, query);
+        await _unitOfWork.UserNotificationRepository.DeleteNotificationsBefore(
+            DateTime.UtcNow.AddDays(-2)
+        );
+
+        return await _unitOfWork.UserNotificationRepository.GetUsersNotifications(userId, query);
     }
 
     public Task SyncNotifications()

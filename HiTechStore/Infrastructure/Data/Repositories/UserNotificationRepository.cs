@@ -8,6 +8,8 @@ using HiTechStore.Helpers.URLFilterQuery;
 using HiTechStore.Helpers.URLFilterQuery.QueryAppliers;
 using HiTechStore.Infrastructure.Data.DTOs;
 
+using Microsoft.EntityFrameworkCore;
+
 
 namespace HiTechStore.Infrastructure.Data.Repositories;
 
@@ -60,5 +62,17 @@ public class UserNotificationRepository : Repository<UserNotification, UserNotif
         }
 
         return await GetPagedResult<UserNotificationDto>(efQuery, query);
+    }
+
+    public Task DeleteNotificationsBefore(DateTime until)
+    {
+        return _dbSet.Where(
+            un => un.CreatedAt <= until
+        ).ExecuteUpdateAsync(setter =>
+            setter.SetProperty(
+                un => un.IsDeleted,
+                true
+            )
+        );
     }
 }
