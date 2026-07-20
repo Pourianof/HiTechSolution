@@ -165,6 +165,22 @@ static class QueryFilterItemHelper
     }
     public static object? Convert(StringValues value, Type targetType)
     {
+        object? ChangeType(object? value, Type targetType)
+        {
+            var finalValue = System.Convert.ChangeType(value, targetType);
+
+            // TODO: It is only a temporary modification to fix Entity Framework
+            // UTC(Time-Zone) compability. 
+            // I know this code don't belong to this method so i must change it
+            if (finalValue is DateTime fv)
+            {
+                return fv.ToUniversalTime();
+            }
+
+            return finalValue;
+        }
+        ;
+
         var currentValueType = value.GetType();
 
         if (targetType == currentValueType)
@@ -188,7 +204,7 @@ static class QueryFilterItemHelper
                 }
 
                 var converted = value
-                    .Select(v => System.Convert.ChangeType(v, actualType))
+                    .Select(v => ChangeType(v, actualType))
                     .ToList();
 
                 if (targetType.IsArray)
@@ -221,7 +237,7 @@ static class QueryFilterItemHelper
                 return default;
             }
 
-            return System.Convert.ChangeType(actualValue, targetType);
+            return ChangeType(actualValue, targetType);
         }
         catch (Exception)
         {
