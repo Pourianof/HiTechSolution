@@ -28,6 +28,13 @@ public class UsersController(
 {
     private UserManager<User> _userManager = userManager;
 
+    [HttpGet("me")]
+    [Authorize]
+    public async Task<ActionResult<UserDto>> GetMyData()
+    {
+        return await userService.GetMyData();
+    }
+
     [HttpPatch("me")]
     [Authorize]
     public async Task<ActionResult<UserDto>> UpdateUser(UpdateUserDto updateUserDto)

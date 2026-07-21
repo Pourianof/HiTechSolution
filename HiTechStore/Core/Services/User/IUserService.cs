@@ -11,5 +11,6 @@ public interface IUserService
     Task<string> UpdateProfileAvatar(AppFile avatar);
     Task<Result<PagedResultDto<UserDto>>> GetUsers(UserQuery query);
     Task<UserDto?> GetUserById(string userId);
+    Task<UserDto> GetMyData();
 }
 

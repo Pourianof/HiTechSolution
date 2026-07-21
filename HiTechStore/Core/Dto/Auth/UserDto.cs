@@ -15,4 +15,5 @@ public class UserDto
     public string? AvatarUrl { get; set; }
     public IEnumerable<string>? Roles { get; set; }
     public IEnumerable<UserPermissionDto>? Permissions { get; set; }
+    public DateTime DataAt { get; set; } = DateTime.UtcNow;
 }
