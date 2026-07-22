@@ -99,4 +99,11 @@ public class UserService : ServiceBase, IUserService
 
         throw new NotAllowedException("Un-Authorized", "You are not allowed to list users");
     }
+
+    public async Task<UserDto> GetMyData()
+    {
+        return (await _unitOfWork.UserRepository.GetUserDtoByIdAsync(
+            UserIdOrThrow
+        ))!;
+    }
 }
