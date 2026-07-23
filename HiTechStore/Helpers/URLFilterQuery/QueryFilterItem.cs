@@ -76,6 +76,7 @@ public class QueryFilterItem
             {
                 QueryOperator.Equal => new EqualityOperatorPair(value),
                 QueryOperator.In => new InOperatorPair(value),
+                QueryOperator.Nin => new NotInOperatorPair(value),
                 QueryOperator.GreaterThan => new GreaterThanOperatorPair(value),
                 QueryOperator.GreaterThanOrEqual => new GreaterThanOrEqualOperatorPair(value),
                 QueryOperator.LessThan => new LessThanOperatorPair(value),

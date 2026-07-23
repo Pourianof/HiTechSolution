@@ -135,12 +135,10 @@ public class EqualityOperatorPair
     }
 }
 
-public class InOperatorPair :
-    OperatorValuePair
+public class CollectionBaseOperatorPair : OperatorValuePair
 {
-
-    public InOperatorPair(StringValues value) :
-        base(QueryOperator.In, value)
+    public CollectionBaseOperatorPair(StringValues value, QueryOperator op) :
+        base(op, value)
     {
         HandleValue(value, replace: true);
     }
@@ -164,5 +162,21 @@ public class InOperatorPair :
     public override void HandleNewValue(StringValues value)
     {
         HandleValue(value);
+    }
+}
+
+public class InOperatorPair :
+    CollectionBaseOperatorPair
+{
+    public InOperatorPair(StringValues value) : base(value, QueryOperator.In)
+    {
+    }
+}
+
+public class NotInOperatorPair :
+    CollectionBaseOperatorPair
+{
+    public NotInOperatorPair(StringValues value) : base(value, QueryOperator.Nin)
+    {
     }
 }

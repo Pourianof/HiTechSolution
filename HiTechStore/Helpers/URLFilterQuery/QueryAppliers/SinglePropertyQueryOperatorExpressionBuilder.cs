@@ -56,7 +56,7 @@ public static class SinglePropertyQueryOperatorExpressionBuilder
         return ExpresionScaffoldBuilder(selectorExpression, value, Expression.GreaterThanOrEqual);
     }
 
-    public static Expression In(LambdaExpression selectorExpression, object value)
+    private static Expression CollectionExpressionEval(LambdaExpression selectorExpression, object value, bool negate = false)
     {
         return ExpresionScaffoldBuilder(selectorExpression, value, (left, right) =>
         {
@@ -84,8 +84,26 @@ public static class SinglePropertyQueryOperatorExpressionBuilder
                    .GetMethods()
                    .First(m => m.Name == nameof(Enumerable.Contains) && m.GetParameters().Length == 2)
                    .MakeGenericMethod(valueType);
-            return Expression.Call(containsMethod, Expression.Constant(value), left);
+
+            var containsInvokation = Expression.Call(containsMethod, Expression.Constant(value), left);
+
+            if (negate)
+            {
+                return Expression.Not(containsInvokation);
+            }
+
+            return containsInvokation;
         });
+    }
+
+    public static Expression In(LambdaExpression selectorExpression, object value)
+    {
+        return CollectionExpressionEval(selectorExpression, value);
+    }
+
+    public static Expression Nin(LambdaExpression selectorExpression, object value)
+    {
+        return CollectionExpressionEval(selectorExpression, value, negate: true);
     }
 
     public static Expression LessThan(LambdaExpression selectorExpression, object value)

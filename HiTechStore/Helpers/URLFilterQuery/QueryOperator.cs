@@ -9,4 +9,5 @@ public enum QueryOperator
     LessThan = 1 << 2,
     LessThanOrEqual = 1 << 3,
     In = 1 << 4,
+    Nin = 1 << 5
 }

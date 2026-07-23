@@ -35,6 +35,7 @@ public class QueryParser : IQueryParser
         "lt" => QueryOperator.LessThan,
         "lte" => QueryOperator.LessThanOrEqual,
         "in" => QueryOperator.In,
+        "nin" => QueryOperator.Nin,
         _ => QueryOperator.Equal
     };
 }

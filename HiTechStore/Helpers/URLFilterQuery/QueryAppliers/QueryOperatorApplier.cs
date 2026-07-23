@@ -17,6 +17,7 @@ public abstract class QueryOperatorApplier<TModel> : IQueryOperatorApplier<TMode
             QueryOperator.GreaterThanOrEqual => GreaterThanOrEqual(value),
             QueryOperator.LessThanOrEqual => LessThanOrEqual(value),
             QueryOperator.In => In(value),
+            QueryOperator.Nin => Nin(value),
             _ => throw new NotSupportedException()
         });
 
@@ -30,6 +31,7 @@ public abstract class QueryOperatorApplier<TModel> : IQueryOperatorApplier<TMode
     protected virtual Expression GreaterThanOrEqual(object value) => Expression.Constant(true);
 
     protected virtual Expression In(object value) => Expression.Constant(true);
+    protected virtual Expression Nin(object value) => Expression.Constant(true);
 
     protected virtual Expression LessThan(object value) => Expression.Constant(true);
 

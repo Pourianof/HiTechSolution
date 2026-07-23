@@ -18,7 +18,7 @@ public static class FilterApplierHelper
     {
         foreach (var (op, filter) in filters)
         {
-            var value = op == QueryOperator.In ?
+            var value = op == QueryOperator.In || op == QueryOperator.Nin ?
                                 filter.GetValue<IEnumerable<TReturn>>() :
                                 (object?)filter.GetValue<TReturn>();
             if (value is null)

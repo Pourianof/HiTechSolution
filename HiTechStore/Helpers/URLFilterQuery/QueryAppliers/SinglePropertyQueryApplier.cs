@@ -37,6 +37,11 @@ class SinglePropertyQueryApplier<TModel, TReturn> : QueryOperatorApplier<TModel>
         return SinglePropertyQueryOperatorExpressionBuilder.In(_target, value);
     }
 
+    protected override Expression Nin(object value)
+    {
+        return SinglePropertyQueryOperatorExpressionBuilder.Nin(_target, value);
+    }
+
     protected override Expression LessThan(object value)
     {
         return SinglePropertyQueryOperatorExpressionBuilder.LessThan(_target, value);

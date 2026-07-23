@@ -50,7 +50,7 @@ public static class ProductFilterApplier
             }
 
             if (type == PropertyType.String &&
-                    (op != QueryOperator.In || op != QueryOperator.Equal)
+                    (op != QueryOperator.In || op != QueryOperator.Nin || op != QueryOperator.Equal)
                 )
             {
                 continue;
@@ -230,7 +230,7 @@ static class FilterMapper
     }
     internal static PropertyPossibleValues ProvidePropertyValues(FilterItem filter)
     {
-        var isInOp = filter.Operator == QueryOperator.In;
+        var isInOp = filter.Operator == QueryOperator.In || filter.Operator == QueryOperator.Nin;
         // All types defined as Nullable because all PropertyValue.Value*** has defined as nullable,
         // and when we trying to using them in expression tree we not encounter different data type
         object? stringValue = isInOp ? filter.GetValue<IEnumerable<string>>() : filter.Value;

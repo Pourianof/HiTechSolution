@@ -178,6 +178,7 @@ public class ProductRepositoryHelper
 
             var brandFilters = productQueryParams.Brand?.GetFilters(
                      QueryOperator.In |
+                     QueryOperator.Nin |
                      QueryOperator.Equal
              );
             if (brandFilters is not null && brandFilters.Count() > 0)
