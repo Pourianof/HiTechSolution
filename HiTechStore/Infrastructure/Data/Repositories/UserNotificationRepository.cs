@@ -38,6 +38,22 @@ public class UserNotificationRepository : Repository<UserNotification, UserNotif
             );
         }
 
+        var typeFilters = queyParams?.Type?.GetFilters(
+            QueryOperator.In |
+            QueryOperator.Nin |
+            QueryOperator.Equal
+        );
+
+        if (typeFilters is not null)
+        {
+            queryBuilder = queryBuilder.ApplyFiltersTo<UserNotification, string>(
+                typeFilters,
+                new SinglePropertyQueryApplier<UserNotification, string>(
+                    un => un.Type!
+                )
+            );
+        }
+
         queryBuilder = queryBuilder.OrderBy(un => un.CreatedAt).OrderDescending();
 
         return queryBuilder;

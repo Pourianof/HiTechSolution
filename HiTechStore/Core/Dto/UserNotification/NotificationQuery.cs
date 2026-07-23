@@ -7,4 +7,5 @@ public class NotificationQuery : BaseQuery
 {
     public QueryFilterItem? CreatedAt { get; set; }
     public QueryFilterItem? State { get; set; } // read, unread, all
+    public QueryFilterItem? Type { get; set; }
 }
