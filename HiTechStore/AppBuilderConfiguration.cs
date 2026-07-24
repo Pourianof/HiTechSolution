@@ -1,6 +1,4 @@
-using HiTechStore.Presentation.Controllers.ExceptionFilters;
 using HiTechStore.Core.BackgroundJobs;
-using HiTechStore.Core.ExceptionHandlers;
 using HiTechStore.Core.Services;
 using HiTechStore.Infrastructure.Data;
 using HiTechStore.Infrastructure.Data.Mapping;
@@ -42,10 +40,6 @@ public static class DependencyRegistration
         builder.UsePresentation();
 
         builder.Services.AddProblemDetails();
-
-        builder.Services.AddExceptionHandler<ApplicationExceptionHandler>();
-        builder.Services.AddExceptionHandler<PgDbExceptionHandler>();
-        builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
         builder.Services.AddInfrastructure(builder.Configuration);
 

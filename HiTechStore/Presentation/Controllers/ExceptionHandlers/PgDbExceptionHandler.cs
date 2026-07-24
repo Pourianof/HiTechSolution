@@ -1,5 +1,3 @@
-using System.Text.RegularExpressions;
-
 using HiTechStore.Helpers.Types;
 
 using Microsoft.AspNetCore.Diagnostics;
@@ -8,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Npgsql;
 
 
-namespace HiTechStore.Core.ExceptionHandlers;
+namespace HiTechStore.Presentation.Controllers.ExceptionHandlers;
 
 public class PgDbExceptionHandler : IExceptionHandler
 {

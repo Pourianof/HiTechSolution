@@ -2,6 +2,7 @@ using HiTechStore.ApiTokenHandler;
 using HiTechStore.Core.Common.Interfaces.Presentation;
 using HiTechStore.Helpers.Types;
 using HiTechStore.Presentation.Auth;
+using HiTechStore.Presentation.Controllers.ExceptionHandlers;
 using HiTechStore.Presentation.RealTime;
 
 namespace HiTechStore.Presentation;
@@ -33,6 +34,10 @@ public static class DependencyRegistration
         builder.Services.WithRateLimiter();
 
         builder.Services.AddScoped<NotificationHub>();
+
+        builder.Services.AddExceptionHandler<ApplicationExceptionHandler>();
+        builder.Services.AddExceptionHandler<PgDbExceptionHandler>();
+        builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
         return builder;
     }

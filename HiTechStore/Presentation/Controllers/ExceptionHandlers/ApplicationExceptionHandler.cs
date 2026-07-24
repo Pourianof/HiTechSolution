@@ -1,11 +1,7 @@
-using System;
-
-using HiTechStore.Core.Exceptions;
-
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace HiTechStore.Core.ExceptionHandlers;
+namespace HiTechStore.Presentation.Controllers.ExceptionHandlers;
 
 public class ApplicationExceptionHandler : IExceptionHandler
 {
@@ -15,7 +11,7 @@ public class ApplicationExceptionHandler : IExceptionHandler
 
         switch (exception)
         {
-            case Exceptions.ApplicationException ex:
+            case Core.Exceptions.ApplicationException ex:
                 {
                     problemDetails = ex.ProvideProblemDetails();
 
