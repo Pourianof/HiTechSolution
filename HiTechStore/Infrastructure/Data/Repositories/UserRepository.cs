@@ -157,8 +157,27 @@ public class UserRepository(
             var normalizedUserName = Normalize(username);
             query = query.Where(
                 user => EF.Functions.Like(
-                    user.NormalizedEmail!, $"%{normalizedUserName}%"
+                    user.NormalizedUserName!, $"%{normalizedUserName}%"
                 )
+            );
+        }
+
+        var email = userQuery.Email?.GetValue<string>(QueryOperator.Equal)?.Trim();
+        if (!string.IsNullOrEmpty(email))
+        {
+            var normalizedEmail = Normalize(email);
+            query = query.Where(
+                user => EF.Functions.Like(
+                    user.NormalizedEmail!, $"%{normalizedEmail}%"
+                )
+            );
+        }
+
+        var id = userQuery.Id?.GetValue<string>(QueryOperator.Equal)?.Trim();
+        if (!string.IsNullOrEmpty(id))
+        {
+            query = query.Where(
+                user => user.Id == id
             );
         }
 
