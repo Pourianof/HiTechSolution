@@ -14,6 +14,7 @@ using HiTechStore.Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using HiTechStore.Core.Dto.Discount;
+using HiTechStore.Core.Common.Interfaces.Infra;
 
 namespace HiTechStore.Presentation.Controllers;
 
@@ -256,10 +257,32 @@ public class OrdersController(IHiTechPaySdkFacade hiTechPaySdkFacade, IUnitOfWor
     }
 
     [HttpGet]
-    public async Task<ActionResult> GetOrders()
+    public async Task<ActionResult> GetOrders(IPublicAssetRegisterer publicAssetRegisterer)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var orders = await _unitOfWork.OrderRepository.GetUserOrders(userId);
+
+        if (orders is null)
+        {
+            return Ok(Enumerable.Empty<OrderWithProductsDto>());
+        }
+
+        foreach (var order in orders)
+        {
+            foreach (var item in order.Items ?? [])
+            {
+                var pv = item.ProductVariation;
+
+                if (pv?.Media is null) continue;
+
+                foreach (var media in pv.Media)
+                {
+                    if (media.Url is null) continue;
+
+                    media.Url = publicAssetRegisterer.GetPublicUrl(media.Url);
+                }
+            }
+        }
 
         return Ok(orders);
     }
