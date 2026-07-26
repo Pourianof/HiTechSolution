@@ -8,7 +8,6 @@ using HiTechStore.Infrastructure.Data.DTOs.Product;
 using HiTechStore.Infrastructure.Data.DTOs.Component;
 using HiTechStore.DTOs.Category;
 using HiTechStore.Infrastructure.Data.DTOs.Brand;
-using HiTechStore.Infrastructure.Data.DTOs.Order;
 using HiTechStore.Infrastructure.Data.DTOs.DiscountEntity;
 using HiTechStore.Core.Dto.Product;
 using HiTechStore.Core.Dto.Auth;
@@ -25,17 +24,11 @@ public class MappingProfile : Profile
         ComponentMap();
         BrandMap();
         CartMap();
-        OrderMap();
         DiscountMap();
     }
 
     private void CartMap()
     {
-    }
-    private void OrderMap()
-    {
-        CreateMap<Order, OrderWithProductsDto>();
-        CreateMap<OrderItem, OrderItemWithProductDto>();
     }
 
     private void ProductVariationMap()

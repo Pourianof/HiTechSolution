@@ -4,8 +4,9 @@ using HiTechStore.Infrastructure.Data.DTOs.Product;
 using HiTechStore.Helpers.AutoMapper;
 using HiTechStore.Core.Models;
 
-namespace HiTechStore.Infrastructure.Data.DTOs.Order;
+namespace HiTechStore.Core.Dto.Order;
 
+[MapFrom<Models.Order>]
 public class OrderWithProductsDto
 {
     public int OrderId { get; set; }
@@ -15,6 +16,7 @@ public class OrderWithProductsDto
     public List<OrderItemWithProductDto>? Items { get; set; }
 }
 
+[MapFrom<OrderItem>]
 public class OrderItemWithProductDto
 {
     public int Id { get; set; }
@@ -24,7 +26,7 @@ public class OrderItemWithProductDto
     public double? Discount { get; set; }
 }
 
-[MapFrom<ProductVariation>]
+[MapFrom<Models.ProductVariation>]
 public class OrderItemProductVariationDto
 {
     public int ProductVariationId { get; set; }
@@ -34,7 +36,7 @@ public class OrderItemProductVariationDto
     public ProductSummaryDto? Product { get; set; }
 }
 
-[MapFrom<Core.Models.Product>]
+[MapFrom<Models.Product>]
 public class ProductSummaryDto
 {
     public int ProductId { get; set; }

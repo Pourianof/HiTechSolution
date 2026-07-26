@@ -4,6 +4,7 @@ using HiTechStore.Infrastructure.Dispatcher;
 using HiTechStore.Infrastructure.Email;
 using HiTechStore.Infrastructure.Event;
 using HiTechStore.Infrastructure.Helpers;
+using HiTechStore.Infrastructure.Payment;
 using HiTechStore.Infrastructure.ThumbnailGenerator;
 using HiTechStore.Infrastructure.Utils;
 using HiTechStore.Infrastructure.Workers;
@@ -32,6 +33,8 @@ public static class IngrastructureDependencyRegistration
         services.AddWorkers();
 
         services.UseStorage(configuration);
+
+        services.AddScoped<IPaymentConfirmationVerifier, HiTechPayPaymentConfirmationVerifier>();
 
         return services;
     }

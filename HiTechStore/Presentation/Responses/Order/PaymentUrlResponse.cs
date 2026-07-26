@@ -6,7 +6,7 @@ using HiTechStore.Core.Models;
 namespace HiTechStore.Infrastructure.Data.DTOs;
 
 
-public class PaymentUrl
+public class PaymentUrlResponse
 {
     public string? Url { get; set; }
     [JsonConverter(typeof(JsonStringEnumConverter))]

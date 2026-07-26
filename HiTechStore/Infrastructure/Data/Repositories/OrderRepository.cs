@@ -1,16 +1,20 @@
 
 
+
 using AutoMapper;
 
 using HiTechStore.Core.Common.Interfaces.Infra.Repositories;
-using HiTechStore.Infrastructure.Data.DTOs.Order;
 using HiTechStore.Core.Models;
 
 using Microsoft.EntityFrameworkCore;
+using HiTechStore.Infrastructure.Data.Queries;
+using HiTechStore.Infrastructure.Data.DTOs;
+using HiTechStore.Core.Dto.Order;
+using HiTechStore.Helpers.URLFilterQuery;
 
 namespace HiTechStore.Infrastructure.Data.Repositories;
 
-public class OrderRepository : Repository<Order>, IOrderRepository
+public class OrderRepository : RepositoryWithIntegerId<Order, OrderDto>, IOrderRepository
 {
     public OrderRepository(HiTechStoreDbContext context, IMapper mapper) : base(context, mapper)
     { }
@@ -31,11 +35,29 @@ public class OrderRepository : Repository<Order>, IOrderRepository
                 ).ToListAsync();
     }
 
-    public async Task<IEnumerable<OrderWithProductsDto>?> GetUserOrders(string userId)
+    public async Task<PagedResultDto<OrderWithProductsDto>> GetUserOrders(string userId, BaseQuery query)
     {
-        return await Project<OrderWithProductsDto>(_context.Orders.Where(
+        var orderQuery = _context.Orders.Where(
                     order => order.Client!.Id == userId
-                )).ToListAsync();
+                );
+
+        var sortBy = query.SortBy?.GetValue<string>(QueryOperator.Equal);
+
+        if (!string.IsNullOrEmpty(sortBy))
+        {
+            orderQuery = sortBy switch
+            {
+                "placed_on" => orderQuery.OrderBy(o => o.CreatedAt),
+                _ => orderQuery.OrderBy(o => o.CreatedAt),
+            };
+        }
+
+        var sortDir = query.SortDir?.GetValue<string>(QueryOperator.Equal);
+
+        return await GetPagedResult<OrderWithProductsDto>(
+            orderQuery,
+            query
+        );
     }
 
     public async Task<IEnumerable<Order>?> GetPendingOrders(DateTime? before = null)
