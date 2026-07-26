@@ -4,7 +4,8 @@ namespace HiTechPay.Sdk.Keys;
 
 internal class PublicKeyResolver
 {
-    private const string _pubKeyPath = "keys/public_key.pem";
+    private const string _pubKeyPath = "keys";
+    private const string _pubKeyFileName = "public_key.pem";
 
     public async static Task<RSA> Resolve(string serverAddress, string? keyStorageDirectory = _pubKeyPath)
     {
@@ -25,13 +26,13 @@ internal class PublicKeyResolver
             var response = await client.GetAsync("/api/keys/pub-key");
             var pubKey = await response.Content.ReadAsStringAsync();
 
-            var keyDirectory = Path.GetDirectoryName(keyStorageDirectory);
-            if (!string.IsNullOrWhiteSpace(keyDirectory) && !Directory.Exists(keyDirectory))
+            if (!string.IsNullOrWhiteSpace(keyStorageDirectory) && !Directory.Exists(keyStorageDirectory))
             {
-                Directory.CreateDirectory(keyDirectory);
+                Directory.CreateDirectory(keyStorageDirectory);
             }
 
-            await File.WriteAllTextAsync(keyStorageDirectory!, pubKey);
+            var fullPath = Path.Combine(keyStorageDirectory ?? "", _pubKeyFileName);
+            await File.WriteAllTextAsync(fullPath, pubKey);
 
             var rsa = RSA.Create();
             rsa.ImportFromPem(pubKey);
